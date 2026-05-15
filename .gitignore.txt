@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Database (si tu exportes des dumps SQL)
+*.sql
+
+# OS
+.DS_Store
+Thumbs.db
+.idea/
