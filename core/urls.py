@@ -15,8 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from accounts.views import home_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin/', admin.site.get_admin_urls() if hasattr(admin.site, 'get_admin_urls') else admin.site.urls),
+
+    # URL RACINE : http://127.0.0.1:8001/
+    path('', home_view, name='home'),
+
+    # Inclusion des URLs de ton application de gestion de compte
+    path('accounts/', include('accounts.urls')),
 ]

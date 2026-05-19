@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Inscription Freelancer - SMD-Tech{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 my-6">
+    <h2 class="text-2xl font-bold text-gray-900 text-center mb-2">Créer un profil Freelancer</h2>
+    <p class="text-sm text-gray-500 text-center mb-8">Remplissez vos informations pour commencer à proposer vos services.</p>
+    
+    <form method="POST" class="space-y-5">
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-1">
+                    {{ field.label }}
+                </label>
+                <div class="mt-1">
+                    {{ field }}
+                </div>
+                {% if field.errors %}
+                    <p class="text-red-500 text-xs font-medium mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 shadow-sm transition text-sm mt-6">
+            Finaliser mon inscription Freelance
+        </button>
+    </form>
+</div>
+{% endblock %}

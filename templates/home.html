@@ -1,0 +1,98 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block title %}Accueil - SMD-Tech Marketplace{% endblock %}
+
+{% block content %}
+<div class="relative isolate overflow-hidden bg-white">
+    <!-- Section Hero (Présentation principale) -->
+    <div class="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:px-8 lg:py-40 items-center gap-12">
+        <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0">
+            <div class="mt-24 sm:mt-32 lg:mt-16">
+                <span class="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold leading-6 text-indigo-600 ring-1 ring-inset ring-indigo-600/10">
+                    Propulsé par Python & Django
+                </span>
+            </div>
+            <h1 class="mt-10 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl">
+                Trouvez les meilleurs experts Tech en un clic.
+            </h1>
+            <p class="mt-6 text-lg leading-8 text-gray-600">
+                SMD-Tech est la marketplace de référence mettant en relation des freelancers qualifiés et des clients ambitieux pour la réalisation de projets informatiques robustes.
+            </p>
+            <div class="mt-10 flex items-center gap-x-6">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition">
+                        Aller au Tableau de Bord
+                    </a>
+                {% else %}
+                    <a href="{% url 'choice_register' %}" class="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition">
+                        Commencer dès maintenant
+                    </a>
+                    <a href="{% url 'login' %}" class="text-sm font-semibold leading-6 text-gray-900 hover:text-indigo-600 transition">
+                        Se connecter <span aria-hidden="true">→</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section Visuelle / Statistiques à droite -->
+        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-20">
+            <div class="grid grid-cols-2 gap-6 w-full max-w-md">
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center shadow-sm">
+                    <p class="text-4xl font-extrabold text-indigo-600">0%</p>
+                    <p class="text-sm text-gray-500 font-medium mt-1">Frais cachés</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center shadow-sm">
+                    <p class="text-4xl font-extrabold text-gray-900">Securisé</p>
+                    <p class="text-sm text-gray-500 font-medium mt-1">Paiements & Contrats</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center shadow-sm col-span-2">
+                    <p class="text-xl font-bold text-gray-900">Une gestion simplifiée</p>
+                    <p class="text-xs text-gray-500 mt-1">Espace dédié Freelances & Clients</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section des fonctionnalités clés -->
+    <div class="bg-gray-50 py-24 sm:py-32 rounded-3xl border border-gray-100">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-2xl lg:text-center">
+                <h2 class="text-base font-semibold leading-7 text-indigo-600">Fonctionnalités</h2>
+                <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Tout ce dont vous avez besoin pour collaborer</p>
+            </div>
+            <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+                <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+                    <!-- Point 1 -->
+                    <div class="flex flex-col bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+                            <span class="text-indigo-600 font-bold">1.</span> Création de profil
+                        </dt>
+                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                            <p class="flex-auto text-sm">Inscriptions ciblées avec des formulaires sur-mesure pour collecter les compétences des freelances ou les besoins des entreprises.</p>
+                        </dd>
+                    </div>
+                    <!-- Point 2 -->
+                    <div class="flex flex-col bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+                            <span class="text-indigo-600 font-bold">2.</span> Marketplace Agile
+                        </dt>
+                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                            <p class="flex-auto text-sm">Dépôt d'offres de projets transparentes permettant aux profils tech de postuler instantanément.</p>
+                        </dd>
+                    </div>
+                    <!-- Point 3 -->
+                    <div class="flex flex-col bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+                            <span class="text-indigo-600 font-bold">3.</span> Suivi de Commissions
+                        </dt>
+                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                            <p class="flex-auto text-sm">Système d'administration rigoureux pour suivre les livrables et automatiser le calcul des commissions de la plateforme.</p>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
