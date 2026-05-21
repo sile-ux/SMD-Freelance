@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de Bord Client - SMD-Tech{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Espace Client de {{ user.username }}</h1>
+            <p class="text-gray-500 text-sm mt-1">
+                {% if user.client_profile.company_name %}
+                    Entreprise : <strong>{{ user.client_profile.company_name }}</strong>
+                {% else %}
+                    Compte Particulier / Personnel
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% url 'create_contract' %}" class="bg-gray-900 text-white text-sm font-semibold px-5 py-3 rounded-xl hover:bg-black transition shadow-sm">
+            + Créer une nouvelle offre
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-900 mb-6">Vos missions en ligne</h3>
+
+        {% if user.contracts_posted.all %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for contract in user.contracts_posted.all %}
+                    <div class="border border-gray-100 rounded-xl p-5 flex flex-col justify-between hover:border-gray-300 transition">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-0.5 rounded uppercase">
+                                    {{ contract.status }}
+                                </span>
+                                <span class="text-xs text-gray-400">{{ contract.created_at|date:"d M Y" }}</span>
+                            </div>
+                            <h4 class="font-bold text-gray-900 text-base mb-1">{{ contract.title }}</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2 mb-4">{{ contract.description }}</p>
+                        </div>
+                        
+                        <div class="border-t border-gray-50 pt-3 flex justify-between items-center text-xs">
+                            <div>
+                                <span class="text-gray-400 block uppercase font-bold tracking-wider text-[10px]">Budget</span>
+                                <strong class="text-gray-900 text-sm">{{ contract.budget }} CFA</strong>
+                            </div>
+                            <div class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md font-semibold">
+                                {{ contract.applications.count }} candidature(s)
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-16 border border-dashed border-gray-200 rounded-2xl max-w-md mx-auto">
+                <div class="text-3xl mb-3">📢</div>
+                <p class="text-sm text-gray-500">Vous n'avez publié aucun projet pour le moment.</p>
+                <a href="{% url 'create_contract' %}" class="inline-block mt-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-black transition">
+                    Déposer mon premier besoin
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
