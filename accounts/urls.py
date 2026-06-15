@@ -1,4 +1,4 @@
-from django.contrib import admin
+app_name = 'accounts'
 from django.urls import path
 from . import views
 from .views import home_view, choice_register, register_client, freelance_register_view, user_login, user_logout, \
@@ -6,7 +6,6 @@ from .views import home_view, choice_register, register_client, freelance_regist
 
 urlpatterns = [
 
-    path('admin/', admin.site.urls),
 
     # 🏠 LA ROUTE ACCUEIL (Accessible via http://127.0.0.1:8000/home)
     path('home', home_view, name='home'),

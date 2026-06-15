@@ -4,34 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SMD-Tech Marketplace{% endblock %}</title>
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans flex flex-col min-screen justify-between min-h-screen">
 
-    <!-- Barre de Navigation -->
     <nav class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex-shrink-0">
-                    <a href="{% url 'choice_register' %}" class="text-xl font-bold tracking-tight text-gray-900">
+                    <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-gray-900">
                         SMD<span class="text-indigo-600">-Tech</span>
                     </a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'dashboard' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Tableau de bord</a>
-                        <a href="{% url 'logout' %}" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-100 transition">Déconnexion</a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Connexion</a>
-                        <a href="{% url 'choice_register' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition shadow-sm">S'inscrire</a>
-                    {% endif %}
-                </div>
+              <div class="flex items-center space-x-4">
+    {% if user.is_authenticated %}
+        <a href="#" class="text-sm font-medium text-gray-600 hover:text-gray-900">Tableau de bord</a>
+        <a href="#" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-100 transition">Déconnexion</a>
+    {% else %}
+        <a href="#" class="text-sm font-medium text-gray-600 hover:text-gray-900">Connexion</a>
+        <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition shadow-sm">S'inscrire</a>
+    {% endif %}
+</div>
             </div>
         </div>
     </nav>
 
-    <!-- Système de notifications (Messages Flash Django) -->
     {% if messages %}
     <div class="max-w-4xl mx-auto mt-4 px-4 w-full">
         {% for message in messages %}
@@ -42,13 +39,11 @@
     </div>
     {% endif %}
 
-    <!-- Contenu Principal -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Pied de page -->
     <footer class="bg-white border-t border-gray-100 py-6 text-center text-sm text-gray-500">
         &copy; 2026 SMD-Tech Marketplace. Tous droits réservés.
     </footer>
