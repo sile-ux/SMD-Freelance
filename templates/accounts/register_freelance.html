@@ -1,28 +1,144 @@
 {% extends 'base.html' %}
-{% block title %}Inscription Freelancer - SMD-Tech{% endblock %}
+{% block title %}Inscription CLIENT - SMD-Tech{% endblock %}
 {% block content %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+    window.tailwind && (tailwind.config = { theme: { extend: { fontFamily: { sans: ['Rubik', 'sans-serif'] } } } });
+</script>
 <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 my-6">
-    <h2 class="text-2xl font-bold text-gray-900 text-center mb-2">Créer un profil Freelancer</h2>
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-2">Créer un profil CLIENT</h2>
     <p class="text-sm text-gray-500 text-center mb-8">Remplissez vos informations pour commencer à proposer vos services.</p>
-    
-    <form method="POST" class="space-y-5">
+
+    {% if form.non_field_errors %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-r-xl">
+            {% for error in form.non_field_errors %}
+                <p class="text-red-700 text-sm font-medium">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-5" id="registerForm">
         {% csrf_token %}
         {% for field in form %}
             <div>
                 <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-1">
                     {{ field.label }}
                 </label>
-                <div class="mt-1">
+
+                <div class="mt-1 relative field-container" data-field-name="{{ field.name }}">
                     {{ field }}
                 </div>
+
                 {% if field.errors %}
                     <p class="text-red-500 text-xs font-medium mt-1">{{ field.errors.0 }}</p>
                 {% endif %}
             </div>
         {% endfor %}
+
         <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 shadow-sm transition text-sm mt-6">
-            Finaliser mon inscription Freelance
+            Finaliser mon inscription CLIENT
         </button>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Trouver les conteneurs de mot de passe (souvent 'password' ou 'password1' dans Django)
+        const passwordContainers = document.querySelectorAll('.field-container[data-field-name*="password"]');
+
+        passwordContainers.forEach(container => {
+            const input = container.querySelector('input');
+            if (!input) return;
+
+            // Appliquer les classes Tailwind de base pour que l'input prenne toute la place
+            input.className = "w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm";
+
+            // --- ÉTAPE A : AJOUT DE L'ŒIL ---
+            const eyeButton = document.createElement('button');
+            eyeButton.type = 'button';
+            eyeButton.className = "absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none";
+            eyeButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 toggle-eye">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+            `;
+            container.appendChild(eyeButton);
+
+            // Événement Clic sur l'œil
+            eyeButton.addEventListener('click', function () {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eyeButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-indigo-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                        </svg>
+                    `;
+                } else {
+                    input.type = 'password';
+                    eyeButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        </svg>
+                    `;
+                }
+            });
+
+            // --- ÉTAPE B : INDICATEUR DE FORCE (Uniquement sur le mot de passe principal) ---
+            if (container.getAttribute('data-field-name') === 'password' || container.getAttribute('data-field-name') === 'password1') {
+                const indicatorWrapper = document.createElement('div');
+                indicatorWrapper.className = "mt-2 space-y-1";
+                indicatorWrapper.innerHTML = `
+                    <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full w-0 strength-bar transition-all duration-300 rounded-full"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 strength-text">Entrez un mot de passe</span>
+                `;
+                container.parentNode.appendChild(indicatorWrapper);
+
+                const bar = indicatorWrapper.querySelector('.strength-bar');
+                const txt = indicatorWrapper.querySelector('.strength-text');
+
+                // Écouter la saisie clavier
+                input.addEventListener('input', function () {
+                    const val = input.value;
+                    let score = 0;
+
+                    if (val.length >= 8) score++; // Longueur suffisante
+                    if (/[A-Z]/.test(val)) score++; // Majuscule
+                    if (/[0-9]/.test(val)) score++; // Chiffre
+                    if (/[^A-Za-z0-9]/.test(val)) score++; // Caractère spécial
+
+                    // Modification visuelle de la jauge
+                    if (val.length === 0) {
+                        bar.className = "h-full w-0 strength-bar transition-all duration-300 rounded-full";
+                        txt.innerText = "Entrez un mot de passe";
+                        txt.className = "text-xs text-gray-400 strength-text";
+                    } else if (score <= 1) {
+                        bar.className = "h-full w-1/4 bg-red-500 strength-bar transition-all duration-300 rounded-full";
+                        txt.innerText = "Faible ⚠️ (Ajoutez majuscules/chiffres)";
+                        txt.className = "text-xs text-red-500 font-medium strength-text";
+                    } else if (score <= 3) {
+                        bar.className = "h-full w-3/4 bg-amber-500 strength-bar transition-all duration-300 rounded-full";
+                        txt.innerText = "Moyen 🛠️ (Ajoutez un caractère spécial)";
+                        txt.className = "text-xs text-amber-600 font-medium strength-text";
+                    } else {
+                        bar.className = "h-full w-full bg-emerald-500 strength-bar transition-all duration-300 rounded-full";
+                        txt.innerText = "Fort ! 💪 Excellent mot de passe.";
+                        txt.className = "text-xs text-emerald-600 font-semibold strength-text";
+                    }
+                });
+            }
+        });
+
+        // Styliser tous les autres inputs non-password générés par Django
+        const allInputs = document.querySelectorAll('.field-container:not([data-field-name*="password"]) input, textarea, select');
+        allInputs.forEach(inp => {
+            inp.className = "w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm";
+        });
+    });
+</script>
 {% endblock %}

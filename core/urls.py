@@ -19,7 +19,7 @@ from django.urls import path, include
 from accounts.views import home_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+   
     path('admin/', admin.site.get_admin_urls() if hasattr(admin.site, 'get_admin_urls') else admin.site.urls),
 
     # URL RACINE : http://127.0.0.1:8001/
@@ -27,4 +27,6 @@ urlpatterns = [
 
     # Inclusion des URLs de ton application de gestion de compte
     path('accounts/', include('accounts.urls')),
+
+    path('missions/', include('contracts.urls')),
 ]
