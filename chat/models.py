@@ -1,4 +1,6 @@
 # chat/models.py
+from typing import Any
+
 from django.db import models
 from django.conf import settings
 
@@ -10,6 +12,11 @@ class Thread(models.Model):
 
     class Meta:
         unique_together = ('client', 'freelance')
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(args, kwargs)
+        self.id = None
+        self.messages = None
 
     def __str__(self):
         return f"Chat: {self.client.username} & {self.freelance.username}"

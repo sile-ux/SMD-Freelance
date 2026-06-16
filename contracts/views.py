@@ -1,54 +1,101 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+# À rajouter à la fin de contracts/views.py
 from django.contrib import messages
-from .models import Contract, Application
-from .forms import ContractForm, ApplicationForm
-from accounts.decorators import client_required, freelance_required
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import redirect, render, get_object_or_404
+
+from .models import Mission, Application  # Ou Contract selon ton choix de modèle principal
+from .forms import QuickMissionForm
+User = get_user_model()
 
 
+def freelance_list_api(request):
+    """Backend : Récupère la liste des profils Freelance uniquement"""
+    # On filtre les utilisateurs. (Adapte 'is_freelance' selon le nom de ton champ dans ton CustomUser)
+    # Si tu as un champ user_type, ce serait : filter(user_type='FREELANCE')
+    freelances = User.objects.filter(is_freelance=True).values('id', 'username', 'email')
+
+    return JsonResponse({
+        "status": "success",
+        "freelances": list(freelances)
+    })
+
+
+def mission_list_api(request):
+    """Backend : Récupère toutes les missions disponibles en base de données"""
+    # On récupère les missions de la plus récente à la plus ancienne
+    missions = Mission.objects.all().order_by('-created_at').values('id', 'title', 'description', 'budget',
+                                                                    'skills_required')
+
+    return JsonResponse({
+        "status": "success",
+        "total_missions": missions.count(),
+        "missions": list(missions)
+    })
+
+
+def tarifs_api(request):
+    """Backend : Renvoie la grille tarifaire de référence en CFA"""
+    grille_tarifs = {
+        "Développeur Junior": "15,000 - 30,000 CFA/jour",
+        "Développeur Mid-level": "40,000 - 75,000 CFA/jour",
+        "Expert / Senior": "150,000+ CFA/jour",
+        "DevOps / Cloud": "100,000+ CFA/jour"
+    }
+    return JsonResponse({
+        "status": "success",
+        "devise": "CFA",
+        "grille": grille_tarifs
+    })
 @login_required
-def contract_list(request):
-
-    contracts = Contract.objects.filter(status='OPEN').order_by('-created_at')
-    return render(request, 'contracts/contract_list.html', {'contracts': contracts})
-
-
-@login_required
-@client_required
-def create_contract(request):
+def create_contract_view(request):
+    """
+    Vue permettant à un client connecté de publier une nouvelle offre/mission
+    depuis son tableau de bord.
+    """
+    # Optionnel : Sécurité pour s'assurer que seul un client peut publier
+    if hasattr(request.user, 'role') and request.user.role != 'CLIENT':
+        messages.error(request, "Seuls les profils Clients peuvent publier des offres.")
+        return redirect('accounts:dashboard')
 
     if request.method == 'POST':
-        form = ContractForm(request.POST)
+        form = QuickMissionForm(request.POST)
         if form.is_valid():
-            contract = form.save(commit=False)
-            contract.client = request.user
-            contract.save()
-            messages.success(request, "Votre offre de contrat a été publiée avec succès !")
-            return redirect('contract_list')
+            mission = form.save(commit=False)
+            mission.client = request.user  # Associe l'offre au client connecté
+            mission.save()
+            messages.success(request, "🚀 Votre nouvelle offre a été publiée avec succès !")
+            return redirect('accounts:dashboard')
     else:
-        form = ContractForm()
+        form = QuickMissionForm()
+
     return render(request, 'contracts/create_contract.html', {'form': form})
 
-
 @login_required
-@freelance_required
-def apply_to_contract(request, contract_id):
-    contract = get_object_or_404(Contract, id=contract_id, status='OPEN')
+def apply_to_mission_view(request, mission_id):
+    """
+    Permet à un freelance de postuler instantanément à une offre.
+    """
+    mission = get_object_or_404(Mission, id=mission_id)
 
-    # Vérifier si le freelance n'a pas déjà postulé
-    if Application.objects.filter(contract=contract, freelance=request.user).exists():
-        messages.error(request, "Vous avez déjà postulé à ce contrat.")
-        return redirect('contract_list')
+    # Sécurité : Vérifier si l'utilisateur est bien un freelance
+    if hasattr(request.user, 'role') and request.user.role != 'FREELANCE':
+        messages.error(request, "Seuls les profils Freelances peuvent postuler aux offres.")
+        return redirect('accounts:home')
 
-    if request.method == 'POST':
-        form = ApplicationForm(request.POST)
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.contract = contract
-            application.freelance = request.user
-            application.save()
-            messages.success(request, "Votre candidature a été transmise au client !")
-            return redirect('contract_list')
+    # Sécurité : Empêcher le client de postuler sa propre offre
+    if mission.client == request.user:
+        messages.error(request, "Vous ne pouvez pas postuler à votre propre mission.")
+        return redirect('accounts:home')
+
+    # Vérifier si le freelance a déjà postulé
+    already_applied = Application.objects.filter(mission=mission, freelancer=request.user).exists()
+    if already_applied:
+        messages.warning(request, "Vous avez déjà candidaté à cette offre de mission.")
     else:
-        form = ApplicationForm()
-    return render(request, 'contracts/apply_contract.html', {'form': form, 'contract': contract})
+        # Création de la candidature
+        Application.objects.create(mission=mission, freelancer=request.user)
+        messages.success(request, f"🚀 Votre candidature pour '{mission.title}' a été envoyée avec succès !")
+
+    return redirect('accounts:home')

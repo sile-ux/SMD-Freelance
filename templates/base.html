@@ -11,20 +11,29 @@
     <nav class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
+
                 <div class="flex-shrink-0">
-                    <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-gray-900">
+                    <a href="{% url 'accounts:home' %}" class="text-xl font-bold tracking-tight text-gray-900">
                         SMD<span class="text-indigo-600">-Tech</span>
                     </a>
                 </div>
-              <div class="flex items-center space-x-4">
-    {% if user.is_authenticated %}
-        <a href="#" class="text-sm font-medium text-gray-600 hover:text-gray-900">Tableau de bord</a>
-        <a href="#" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-100 transition">Déconnexion</a>
-    {% else %}
-        <a href="#" class="text-sm font-medium text-gray-600 hover:text-gray-900">Connexion</a>
-        <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition shadow-sm">S'inscrire</a>
-    {% endif %}
-</div>
+
+                <div class="hidden md:flex space-x-6">
+                    <a href="{% url 'contracts:freelance_list' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Contacter un Freelancer</a>
+                    <a href="{% url 'contracts:mission_list' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Missions Disponibles</a>
+                    <a href="{% url 'contracts:tarifs' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Tarifs</a>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'accounts:dashboard' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Tableau de bord</a>
+                        <a href="{% url 'accounts:logout' %}" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-100 transition">Déconnexion</a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="text-sm font-medium text-gray-600 hover:text-gray-900">Connexion</a>
+                        <a href="{% url 'accounts:choice_register' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition shadow-sm">S'inscrire</a>
+                    {% endif %}
+                </div>
+
             </div>
         </div>
     </nav>

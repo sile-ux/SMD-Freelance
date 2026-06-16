@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Créer une offre - SMD-Tech{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-gray-100 shadow-xl my-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-2 text-center">Publier une nouvelle offre de mission</h3>
+    <p class="text-gray-500 text-sm text-center mb-8">Remplissez les détails pour attirer les meilleurs experts.</p>
+
+    <form method="POST" class="space-y-5">
+        {% csrf_token %}
+        <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Titre de la mission</label>
+            <input type="text" name="title" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="ex: Conception d'une API Django Rest Framework">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Budget total estimé (CFA)</label>
+            <input type="number" name="budget" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="ex: 450000">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Compétences clés requises</label>
+            <input type="text" name="skills_required" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="ex: Python, MySQL, TailwindCSS">
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Cahier des charges / Description détaillée</label>
+            <textarea name="description" rows="6" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="Décrivez les livrables attendus, les délais, les contraintes techniques..."></textarea>
+        </div>
+
+        <div class="flex gap-4 pt-2">
+            <a href="{% url 'accounts:dashboard' %}" class="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-4 rounded-xl font-bold transition text-sm">
+                Annuler
+            </a>
+            <button type="submit" class="w-2/3 bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold transition shadow-md text-sm">
+                🚀 Mettre la mission en ligne
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

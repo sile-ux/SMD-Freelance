@@ -1,9 +1,16 @@
-
+# contracts/urls.py
 from django.urls import path
 from . import views
 
+app_name = 'contracts'
+
 urlpatterns = [
-    path('', views.contract_list, name='contract_list'),
-    path('nouveau/', views.create_contract, name='create_contract'),
-    path('<int:contract_id>/postuler/', views.apply_to_contract, name='apply_contract'),
+    # Les 3 routes backend pour tes pages
+    path('freelances/api/', views.freelance_list_api, name='freelance_list'),
+    path('disponibles/api/', views.mission_list_api, name='mission_list'),
+    path('tarifs/api/', views.tarifs_api, name='tarifs'),
+    path('contract/create/', views.create_contract_view, name='create_contract'),
+    path('publier-offre/', views.create_contract_view, name='create_contract'),
+    path('publier-offre/', views.create_contract_view, name='create_contract'),
+    path('postuler/<int:mission_id>/', views.apply_to_mission_view, name='apply_to_mission'),
 ]

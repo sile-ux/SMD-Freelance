@@ -30,13 +30,13 @@ def home_view(request):
             if not request.user.is_authenticated:
                 request.session['pending_mission'] = form.cleaned_data
                 messages.info(request, "Mission configurée ! Créez votre compte pour la mettre en ligne.")
-                return redirect('register_client')
+                return redirect('accounts:register_client')  # AJOUTÉ : namespace 'accounts:'
             else:
                 mission = form.save(commit=False)
                 mission.client = request.user
                 mission.save()
                 messages.success(request, "Votre mission a été publiée avec succès !")
-                return redirect('home')
+                return redirect('accounts:home')  # AJOUTÉ : namespace 'accounts:'
     else:
         form = QuickMissionForm()
 
@@ -65,7 +65,7 @@ def freelance_register_view(request):
                         bio=form.cleaned_data.get('bio', '')
                     )
                 messages.success(request, "Compte Freelancer créé ! En attente de validation admin.")
-                return redirect('login')
+                return redirect('accounts:login')  # AJOUTÉ : namespace 'accounts:'
             except Exception as e:
                 print(f"❌ ERREUR SCRIPT FREELANCE: {e}")
                 messages.error(request, "Une erreur est survenue lors de la création de votre profil.")
@@ -77,7 +77,7 @@ def freelance_register_view(request):
 @csrf_protect
 def register_client(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')  # AJOUTÉ : namespace 'accounts:'
 
     if request.method == 'POST':
         form = ClientRegisterForm(request.POST)
@@ -109,7 +109,7 @@ def register_client(request):
 
                 login(request, user)
                 messages.success(request, "Votre compte Client a été créé avec succès !")
-                return redirect('dashboard')
+                return redirect('accounts:dashboard')  # AJOUTÉ : namespace 'accounts:'
             except Exception as e:
                 print(f"❌ ERREUR SCRIPT CLIENT : {e}")
                 messages.error(request, "Une erreur est survenue lors de la création de votre profil.")
@@ -121,7 +121,7 @@ def register_client(request):
 @csrf_protect
 def user_login(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')  # AJOUTÉ : namespace 'accounts:'
     if request.method == 'POST':
         username_input = request.POST.get('username')
         password_input = request.POST.get('password')
@@ -129,7 +129,7 @@ def user_login(request):
         if user is not None:
             login(request, user)
             messages.success(request, f"Bon retour, {user.username} !")
-            return redirect('dashboard')
+            return redirect('accounts:dashboard')  # AJOUTÉ : namespace 'accounts:'
         else:
             messages.error(request, "Identifiants invalides.")
     return render(request, 'accounts/login.html')
@@ -137,7 +137,7 @@ def user_login(request):
 
 def user_logout(request):
     logout(request)
-    return redirect('login')
+    return redirect('accounts:login')  # AJOUTÉ : namespace 'accounts:'
 
 
 @login_required
@@ -149,10 +149,10 @@ def dashboard(request):
         return render(request, 'accounts/dashboard_freelance.html', {'profile': user.freelance_profile})
     elif user.role == User.Role.CLIENT.value:
         return render(request, 'accounts/dashboard_client.html', {'profile': user.client_profile})
-    return redirect('choice_register')
+    return redirect('accounts:choice_register')  # AJOUTÉ : namespace 'accounts:'
 
 
 def choice_register(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')  # AJOUTÉ : namespace 'accounts:'
     return render(request, 'accounts/choice_register.html')

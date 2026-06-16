@@ -15,7 +15,7 @@
                 {% endif %}
             </p>
         </div>
-        <a href="{% url 'create_contract' %}" class="bg-gray-900 text-white text-sm font-semibold px-5 py-3 rounded-xl hover:bg-black transition shadow-sm">
+        <a href="{% url 'contracts:create_contract' %}" class="bg-gray-900 text-white text-sm font-semibold px-5 py-3 rounded-xl hover:bg-black transition shadow-sm">
             + Créer une nouvelle offre
         </a>
     </div>
@@ -37,7 +37,7 @@
                             <h4 class="font-bold text-gray-900 text-base mb-1">{{ contract.title }}</h4>
                             <p class="text-xs text-gray-500 line-clamp-2 mb-4">{{ contract.description }}</p>
                         </div>
-                        
+
                         <div class="border-t border-gray-50 pt-3 flex justify-between items-center text-xs">
                             <div>
                                 <span class="text-gray-400 block uppercase font-bold tracking-wider text-[10px]">Budget</span>
@@ -54,7 +54,7 @@
             <div class="text-center py-16 border border-dashed border-gray-200 rounded-2xl max-w-md mx-auto">
                 <div class="text-3xl mb-3">📢</div>
                 <p class="text-sm text-gray-500">Vous n'avez publié aucun projet pour le moment.</p>
-                <a href="{% url 'create_contract' %}" class="inline-block mt-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-black transition">
+                <a href="{% url 'contracts:create_contract' %}" class="inline-block mt-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-black transition">
                     Déposer mon premier besoin
                 </a>
             </div>
