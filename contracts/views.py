@@ -14,7 +14,7 @@ def freelance_list_api(request):
     """Backend : Récupère la liste des profils Freelance uniquement"""
     # On filtre les utilisateurs. (Adapte 'is_freelance' selon le nom de ton champ dans ton CustomUser)
     # Si tu as un champ user_type, ce serait : filter(user_type='FREELANCE')
-    freelances = User.objects.filter(is_freelance=True).values('id', 'username', 'email')
+    freelances = User.objects.filter(role='FREELANCE').values('id', 'username', 'email')
 
     return JsonResponse({
         "status": "success",

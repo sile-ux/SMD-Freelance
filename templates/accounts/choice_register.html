@@ -3,40 +3,42 @@
 {% block title %}Choisir votre type de compte - SMD-Tech{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto text-center my-10">
-    <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-3">Rejoignez SMD-Tech Marketplace</h1>
-    <p class="text-lg text-gray-500 max-w-xl mx-auto mb-12">Sélectionnez le type de compte qui correspond à vos objectifs sur la plateforme.</p>
-
-    <div class="grid md:grid-cols-2 gap-8 items-stretch">
-        
-        <!-- Option Freelance -->
-        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between text-left group">
-            <div>
-                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl mb-6 group-hover:bg-indigo-600 group-hover:text-white transition">
-                    F
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Je suis un Freelancer</h3>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6">Proposez vos compétences en développement Python/Django, postulez à des projets locaux et gérez vos contrats en toute sécurité.</p>
+<div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-sky-50 shadow-2xl shadow-indigo-100/60">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_16%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.1),transparent_18%)]"></div>
+    <div class="relative grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+        <div class="flex items-center justify-center p-10 md:p-14">
+            <div class="max-w-xl text-center lg:text-left">
+                <span class="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-700">Votre parcours</span>
+                <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-slate-900">Choisissez le profil qui vous correspond</h1>
+                <p class="mt-4 text-lg leading-7 text-slate-500">Que vous soyez freelance ou client, nous vous accompagnons pour démarrer votre collaboration en toute confiance.</p>
             </div>
-            <a href="{% url 'register_freelance' %}" class="w-full text-center bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition shadow-sm text-sm block">
-                Créer mon compte Freelance
-            </a>
         </div>
 
-        <!-- Option Client -->
-        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col justify-between text-left group">
-            <div>
-                <div class="w-12 h-12 rounded-xl bg-gray-100 text-gray-900 flex items-center justify-center font-bold text-xl mb-6 group-hover:bg-gray-900 group-hover:text-white transition">
-                    C
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Je suis un Client</h3>
-                <p class="text-gray-500 text-sm leading-relaxed mb-6">Trouvez les meilleurs talents tech, publiez des offres de projets claires et suivez l'avancement des livrables de vos prestataires.</p>
-            </div>
-            <a href="{% url 'register_client' %}" class="w-full text-center bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-black transition shadow-sm text-sm block">
-                Créer mon compte Client
-            </a>
-        </div>
+        <div class="relative overflow-hidden p-8 md:p-10">
+            <div class="absolute inset-0 bg-cover bg-center"
+                 style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80');"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-800/45 to-indigo-900/35"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_12%)]"></div>
+            <div class="relative grid gap-6 md:grid-cols-2">
+                <a href="{% url 'accounts:freelance_register_view' %}" class="group flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/10 p-6 text-left text-white backdrop-blur-sm transition hover:bg-white/15">
+                    <div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-xl font-bold">F</div>
+                        <h3 class="mt-5 text-2xl font-semibold">Je suis un Freelancer</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-100/90">Mettez en valeur vos compétences, trouvez des missions et construisez votre réputation.</p>
+                    </div>
+                    <span class="mt-6 inline-flex items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-semibold text-indigo-700 transition group-hover:bg-indigo-50">Créer mon compte Freelance</span>
+                </a>
 
+                <a href="{% url 'accounts:register_client' %}" class="group flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/10 p-6 text-left text-white backdrop-blur-sm transition hover:bg-white/15">
+                    <div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-xl font-bold">C</div>
+                        <h3 class="mt-5 text-2xl font-semibold">Je suis un Client</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-100/90">Publiez vos besoins, comparez les profils et choisissez la meilleure solution.</p>
+                    </div>
+                    <span class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900/80 px-4 py-3 text-sm font-semibold transition group-hover:bg-slate-800">Créer mon compte Client</span>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

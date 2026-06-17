@@ -9,9 +9,9 @@ User = get_user_model()
 
 
 @login_required
-def start_or_get_thread(request, freelance_id):
+def start_or_get_thread(request, user_id): # 🔄 Changé freelance_id -> user_id
     """API : Initialise ou récupère un salon de discussion avec un freelance"""
-    freelance = get_object_or_404(User, id=freelance_id)
+    freelance = get_object_or_404(User, id=user_id)
 
     if request.user == freelance:
         return JsonResponse({"error": "Vous ne pouvez pas discuter avec vous-même."}, status=400)
@@ -29,6 +29,28 @@ def start_or_get_thread(request, freelance_id):
         "client": thread.client.username,
         "freelance": thread.freelance.username
     })
+
+
+@login_required
+def start_thread(request, user_id): # 🔄 Changé freelance_id -> user_id pour correspondre à l'URL
+    """
+    Crée ou récupère une discussion entre le client connecté et un freelance.
+    """
+    # 1. On récupère le profil du freelance ciblé via l'ID reçu dans l'URL (ex: 15)
+    freelance_user = get_object_or_404(User, id=user_id)
+
+    # Sécurité : On empêche un utilisateur de s'auto-contacter
+    if request.user == freelance_user:
+        return redirect('accounts:dashboard')
+
+    # 2. On passe l'instance de l'utilisateur trouvée (freelance_user)
+    thread, created = Thread.objects.get_or_create(
+        client=request.user,
+        freelance=freelance_user
+    )
+
+    # 3. On redirige vers la chat room dédiée
+    return redirect('chat:chat_room', thread_id=thread.id)
 
 
 @login_required
@@ -99,59 +121,18 @@ def send_message_api(request, thread_id):
     return JsonResponse({"error": "Méthode non autorisée. Utilisez POST."}, status=405)
 
 
-def get_object_or_400_to_list(User, id):
-    pass
-
-
-def start_thread(request, user_id):
-    """
-    Backend : Initialise une discussion entre le client connecté 
-    et le freelance sélectionné.
-    """
-    freelance = get_object_or_400_to_list(User, id=user_id)
-
-    # Évite qu'un utilisateur lance une discussion avec lui-même
-    if request.user == freelance:
-        return redirect('accounts:dashboard')
-
-    # Récupère une discussion existante ou en crée une nouvelle
-    # (Adapte les champs 'client' et 'freelance' selon tes modèles de Thread)
-    thread, created = Thread.objects.get_or_create(
-        client=request.user,
-        freelance=freelance
-    )
-
-    # Redirige vers la vue de la messagerie (ex: room de chat)
-    # Si ta vue de chat s'appelle 'room', change 'chat_room' par 'room'
-    return redirect('chat:chat_room', thread_id=thread.id)
-
-
 @login_required
 def chat_room(request, thread_id):
-    # Récupère la discussion si l'utilisateur en fait partie
+    """Affiche une salle de discussion spécifique et ses messages."""
     thread = get_object_or_404(Thread, id=thread_id)
+
     if request.user != thread.client and request.user != thread.freelance:
         return redirect('accounts:dashboard')
 
-    # Traitement de l'envoi d'un message
-    if request.method == 'POST':
-        content = request.POST.get('content', '').strip()
-        if content:
-            Message.objects.create(
-                thread=thread,
-                sender=request.user,
-                content=content
-            )
-            return redirect('chat:chat_room', thread_id=thread.id)
+    chat_messages = thread.messages.all().order_by('created_at')
 
-    # Récupère tous les messages de cette discussion
-    messages_list = thread.messages.all().order_by('created_at')
-
-    # Détermine qui est l'interlocuteur en face
-    interlocuteur = thread.freelance if request.user == thread.client else thread.client
-
-    return render(request, 'chat/room.html', {
+    context = {
         'thread': thread,
-        'messages_list': messages_list,
-        'interlocuteur': interlocuteur
-    })
+        'chat_messages': chat_messages,
+    }
+    return render(request, 'chat/room.html', context)

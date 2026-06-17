@@ -26,4 +26,6 @@ urlpatterns = [
     path('connexion/', views.user_login, name='login'),
     path('deconnexion/', views.user_logout, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('inscription-freelance/', views.freelance_register_view, name='freelance_register_view'),
 ]
+

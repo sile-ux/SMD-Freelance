@@ -3,6 +3,7 @@
 {% block title %}Tableau de Bord Client - SMD-Tech{% endblock %}
 
 {% block content %}
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
 <div class="space-y-8">
     <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -52,7 +53,15 @@
             </div>
         {% else %}
             <div class="text-center py-16 border border-dashed border-gray-200 rounded-2xl max-w-md mx-auto">
-                <div class="text-3xl mb-3">📢</div>
+
+                <lord-icon
+    src="https://cdn.lordicon.com/fttvwdlw.json"
+    trigger="loop"
+    stroke="bold"
+    state="loop-roll"
+    colors="primary:#242424,secondary:#c71f16"
+    style="width:150px;height:150px">
+</lord-icon>
                 <p class="text-sm text-gray-500">Vous n'avez publié aucun projet pour le moment.</p>
                 <a href="{% url 'contracts:create_contract' %}" class="inline-block mt-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-black transition">
                     Déposer mon premier besoin
