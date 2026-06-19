@@ -137,7 +137,7 @@ def user_login(request):
 
 def user_logout(request):
     logout(request)
-    return redirect('accounts:login')  # AJOUTÉ : namespace 'accounts:'
+    return redirect('accounts:login')
 
 
 @login_required

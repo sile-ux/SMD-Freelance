@@ -1,220 +1,1974 @@
-{% extends 'base.html' %}
-{% block title %}Accueil - SMD-Tech Marketplace{% endblock %}
-
-{% block content %}
-<!-- Google Fonts: Importation de la police Rubik -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<script>
-    // Force Tailwind à étendre son thème avec la police Rubik pour tout le contenu
-    window.tailwind && (tailwind.config = {
-        theme: {
-            extend: {
-                fontFamily: {
-                    sans: ['Rubik', 'sans-serif'],
-                }
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMD-Tech — Votre Partenaire Freelance d'Excellence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { rubik: ['Rubik', 'sans-serif'] },
+          colors: {
+            sky: {
+              50:  '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            brand: {
+              light: '#38bdf8',
+              DEFAULT: '#0ea5e9',
+              dark: '#0369a1',
+              accent: '#06b6d4',
             }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s ease forwards',
+            'fade-in': 'fadeIn 0.5s ease forwards',
+            'slide-left': 'slideLeft 0.5s ease forwards',
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s ease-in-out infinite',
+            'spin-slow': 'spin 8s linear infinite',
+          },
+          keyframes: {
+            fadeInUp: { '0%': { opacity: 0, transform: 'translateY(30px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+            fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+            slideLeft: { '0%': { opacity: 0, transform: 'translateX(-30px)' }, '100%': { opacity: 1, transform: 'translateX(0)' } },
+            float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+          }
         }
-    });
-</script>
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Rubik', sans-serif; }
+    :root {
+      --sky-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #0284c7 100%);
+      --glass: rgba(255,255,255,0.08);
+      --glass-border: rgba(255,255,255,0.15);
+    }
 
-<div class="font-sans antialiased bg-slate-50 min-h-screen">
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f0f9ff; }
+    ::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 3px; }
+    .dark ::-webkit-scrollbar-track { background: #0c1929; }
 
-    <!-- ================= HERO SECTION ================= -->
-    <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white py-20 px-4 text-center relative overflow-hidden">
-        <div class="max-w-4xl mx-auto relative z-10">
-            <span class="bg-indigo-500/20 text-indigo-300 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
-                Plateforme Nouvelle Génération
-            </span>
-            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-4 mb-6">
-                Trouvez les meilleurs experts Tech <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">sans barrières.</span>
-            </h1>
-            <p class="text-lg text-slate-300 max-w-2xl mx-auto mb-10">
-                Publiez vos projets anonymement, recrutez des talents vérifiés et collaborez en toute sécurité.
-            </p>
+    /* Glass card */
+    .glass-card {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(14,165,233,0.15);
+      transition: all 0.3s ease;
+    }
+    .dark .glass-card {
+      background: rgba(7,89,133,0.2);
+      border-color: rgba(56,189,248,0.2);
+    }
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(14,165,233,0.15);
+      border-color: rgba(14,165,233,0.4);
+    }
 
-            <!-- Onglets de Navigation Principaux -->
-            <div class="flex justify-center space-x-4 mb-4">
-                <button onclick="switchTab('client-space')" id="btn-client" class="tab-btn px-6 py-3 rounded-xl font-semibold bg-indigo-600 text-white shadow-lg transition duration-200">
-                    Je suis Client (Publier / Recruter)
-                </button>
-                <button onclick="switchTab('freelance-space')" id="btn-freelance" class="tab-btn px-6 py-3 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition duration-200">
-                    Je suis Freelance (Trouver des missions)
-                </button>
-            </div>
+    /* Hero video */
+    #hero-video { object-fit: cover; width: 100%; height: 100%; position: absolute; top:0; left:0; z-index:0; }
+    .hero-overlay {
+      background: linear-gradient(135deg, rgba(3,105,161,0.85) 0%, rgba(6,182,212,0.7) 50%, rgba(12,74,110,0.9) 100%);
+      position: absolute; inset: 0; z-index: 1;
+    }
+
+    /* Navbar blur */
+    .navbar-glass {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(14,165,233,0.1);
+    }
+    .dark .navbar-glass {
+      background: rgba(7,24,40,0.92);
+      border-bottom-color: rgba(56,189,248,0.1);
+    }
+
+    /* Search bar slide */
+    #search-bar {
+      max-width: 0; overflow: hidden; opacity: 0;
+      transition: max-width 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+    #search-bar.visible { max-width: 220px; opacity: 1; }
+
+    /* Stat counter animation */
+    .counter { transition: all 0.3s; }
+
+    /* Partner logos marquee */
+    .marquee-track { animation: marquee 28s linear infinite; display:flex; gap:3rem; align-items:center; }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .dark .gradient-text {
+      background: linear-gradient(135deg, #38bdf8, #22d3ee);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    /* Service card icon ring */
+    .icon-ring {
+      background: linear-gradient(135deg, #bae6fd, #e0f2fe);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+    }
+    .dark .icon-ring { background: linear-gradient(135deg, #075985, #0c4a6e); }
+    .glass-card:hover .icon-ring { background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+    .glass-card:hover .icon-ring i { color: white !important; }
+
+    /* Mission form */
+    .mission-input {
+      border: 1.5px solid #bae6fd;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-family: 'Rubik', sans-serif;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      background: white;
+      width: 100%;
+      outline: none;
+    }
+    .dark .mission-input {
+      background: rgba(7,89,133,0.15);
+      border-color: rgba(56,189,248,0.25);
+      color: #e0f2fe;
+    }
+    .mission-input:focus {
+      border-color: #0ea5e9;
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+    }
+
+    /* Testimonial card */
+    .testimonial-card { transition: all 0.4s; }
+    .testimonial-card.active { opacity: 1; transform: scale(1); }
+    .testimonial-card.inactive { opacity: 0.4; transform: scale(0.92); }
+
+    /* Mobile menu */
+    #mobile-menu { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); max-height: 0; overflow: hidden; }
+    #mobile-menu.open { max-height: 600px; }
+
+    /* Scroll reveal */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* Process step */
+    .step-line::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 100%;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, #0ea5e9, transparent);
+    }
+
+    /* Portfolio hover */
+    .portfolio-card .overlay { opacity: 0; transition: opacity 0.3s; }
+    .portfolio-card:hover .overlay { opacity: 1; }
+    .portfolio-card:hover img { transform: scale(1.05); }
+    .portfolio-card img { transition: transform 0.4s ease; }
+
+    /* Tag */
+    .tech-tag {
+      background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+      color: #0369a1;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .dark .tech-tag { background: rgba(7,89,133,0.3); color: #7dd3fc; }
+
+    /* CTA gradient button */
+    .btn-sky {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: all 0.3s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-sky:hover { background: linear-gradient(135deg, #0284c7, #075985); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(14,165,233,0.35); }
+
+    .btn-outline-sky {
+      border: 2px solid rgba(255,255,255,0.6);
+      color: white;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-outline-sky:hover { background: rgba(255,255,255,0.15); border-color: white; }
+
+    /* Star rating */
+    .stars span { color: #f59e0b; font-size: 0.85rem; }
+
+    /* Section header accent */
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+      color: #0284c7;
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .dark .section-eyebrow { background: rgba(7,89,133,0.3); color: #38bdf8; }
+
+    /* Dark mode backgrounds */
+    .dark body { background: #071828; color: #e0f2fe; }
+    .dark .bg-white { background: #0c2236; }
+    .dark .bg-gray-50 { background: #071828; }
+    .dark .bg-sky-50 { background: #071828; }
+
+    /* Particle canvas */
+    #particles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
+    /* Lang dropdown */
+    .lang-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 130px; z-index: 100; }
+
+    /* FAQ accordion */
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .faq-answer.open { max-height: 500px; }
+    .faq-chevron { transition: transform 0.3s; }
+    .faq-chevron.open { transform: rotate(180deg); }
+
+    /* Freelancer card */
+    .freelancer-slide { transition: all 0.5s ease; }
+
+    /* Custom range */
+    input[type=range] { accent-color: #0ea5e9; }
+  </style>
+</head>
+<body class="bg-white text-gray-800 font-rubik transition-colors duration-300">
+
+<!-- ═══════════════════════════════════════ NAVBAR ═══════════════════════════════════════ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 navbar-glass transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-16 lg:h-18 gap-3">
+
+      <!-- Logo + Search -->
+      <div class="flex items-center gap-3 shrink-0">
+        <a href="#" class="flex items-center gap-2 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shadow-md group-hover:shadow-sky-300/40 transition-all">
+            <i class="fa-solid fa-bolt text-white text-sm"></i>
+          </div>
+          <span class="text-lg font-800 font-black tracking-tight text-sky-700 dark:text-sky-300">SMD<span class="text-gray-800 dark:text-white">-Tech</span></span>
+        </a>
+        <!-- Search bar (appears on scroll) -->
+        <div id="search-bar" class="px-0">
+          <div class="flex items-center bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-700 rounded-xl px-3 py-1.5 gap-2 w-52">
+            <i class="fa-solid fa-magnifying-glass text-sky-400 text-sm"></i>
+            <input type="text" placeholder="Rechercher..." class="bg-transparent outline-none text-sm text-gray-700 dark:text-sky-200 placeholder-sky-400 w-full font-rubik" />
+          </div>
         </div>
+      </div>
+
+      <!-- Desktop Nav -->
+      <div class="hidden lg:flex items-center gap-1">
+        <a href="#hero" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-house mr-1.5 text-xs"></i>Accueil
+        </a>
+        <a href="#services" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-grid-2 mr-1.5 text-xs"></i>Services
+          <i class="fa-solid fa-chevron-down text-xs ml-1 opacity-60"></i>
+        </a>
+        <a href="#freelancers" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-users mr-1.5 text-xs"></i>Freelancers
+        </a>
+        <a href="#clients" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-briefcase mr-1.5 text-xs"></i>Clients
+        </a>
+        <a href="#portfolio" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-layer-group mr-1.5 text-xs"></i>Portfolio
+        </a>
+        <a href="#faq" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-regular fa-circle-question mr-1.5 text-xs"></i>FAQ
+        </a>
+        <a href="#contact" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:text-sky-600 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-envelope mr-1.5 text-xs"></i>Contact
+        </a>
+      </div>
+
+      <!-- Right actions -->
+      <div class="hidden lg:flex items-center gap-2">
+        <!-- Language -->
+        <div class="relative" id="lang-wrapper">
+          <button id="lang-btn" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+            <i class="fa-solid fa-globe text-sky-500"></i>
+            <span id="lang-label">FR</span>
+            <i class="fa-solid fa-chevron-down text-xs opacity-60"></i>
+          </button>
+          <div id="lang-dropdown" class="lang-dropdown hidden navbar-glass rounded-xl shadow-xl border border-sky-100 dark:border-sky-800 overflow-hidden">
+            <button data-lang="FR" class="lang-opt flex items-center gap-2 w-full px-4 py-2.5 text-sm hover:bg-sky-50 dark:hover:bg-sky-900/40 text-gray-700 dark:text-sky-300 transition-all">
+              <span class="text-base">🇫🇷</span> Français
+            </button>
+            <button data-lang="EN" class="lang-opt flex items-center gap-2 w-full px-4 py-2.5 text-sm hover:bg-sky-50 dark:hover:bg-sky-900/40 text-gray-700 dark:text-sky-300 transition-all">
+              <span class="text-base">🇬🇧</span> English
+            </button>
+          </div>
+        </div>
+
+        <!-- Dark mode -->
+        <button id="theme-toggle" class="w-9 h-9 rounded-xl flex items-center justify-center text-gray-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all" title="Mode sombre">
+          <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+
+        <!-- Auth buttons -->
+        <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-xl text-sm font-semibold text-sky-600 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          Connexion
+        </a>
+        <a href="{% url 'accounts:choice_register' %}" class="btn-sky px-4 py-2 text-sm shadow-md shadow-sky-200/50 dark:shadow-sky-900/50">
+          <i class="fa-solid fa-user-plus text-xs"></i>S'inscrire
+        </a>
+      </div>
+
+      <!-- Mobile toggle -->
+      <button id="mobile-toggle" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all text-gray-600 dark:text-sky-300">
+        <i class="fa-solid fa-bars text-lg" id="burger-icon"></i>
+      </button>
     </div>
 
-    <!-- ================= CONTENU PRINCIPAL DYNAMIQUE ================= -->
-    <div class="max-w-7xl mx-auto px-4 py-12">
+    <!-- Mobile Menu -->
+    <div id="mobile-menu">
+      <div class="pb-4 pt-1 flex flex-col gap-1 border-t border-sky-100 dark:border-sky-800 mt-1">
+        <a href="#hero" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-house w-4 text-sky-500"></i>Accueil
+        </a>
+        <a href="#services" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-grid-2 w-4 text-sky-500"></i>Services
+        </a>
+        <a href="#freelancers" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-users w-4 text-sky-500"></i>Freelancers
+        </a>
+        <a href="#clients" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-briefcase w-4 text-sky-500"></i>Clients
+        </a>
+        <a href="#portfolio" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-layer-group w-4 text-sky-500"></i>Portfolio
+        </a>
+        <a href="#faq" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-regular fa-circle-question w-4 text-sky-500"></i>FAQ
+        </a>
+        <a href="#contact" class="mobile-link flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-envelope w-4 text-sky-500"></i>Contact
+        </a>
+        <div class="flex gap-2 mt-3 px-2">
+          <button id="theme-toggle-mob" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-sky-200 dark:border-sky-700 text-sm font-semibold text-gray-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+            <i class="fa-solid fa-moon" id="mob-theme-icon"></i>Thème
+          </button>
+          <a href="{% url 'accounts:login' %}" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-sky-200 dark:border-sky-700 text-sm font-semibold text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+            Connexion
+          </a>
+          <a href="{% url 'accounts:choice_register' %}" class="flex-1 btn-sky py-2.5 justify-center text-sm shadow-md">
+            Inscription
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
 
-        <!-- ================= ESPACE CLIENT ================= -->
-        <div id="client-space" class="tab-content space-y-16">
+<section id="hero" class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+  
+  <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover -z-20">
+    <source src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-4174-large.mp4" type="video/mp4">
+  </video>
 
-            <!-- Formulaire de dépôt de mission rapide (Lazy Registration) -->
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl max-w-3xl mx-auto">
-                <h3 class="text-2xl font-bold text-gray-800 mb-2 text-center">Formuler votre besoin en 60 secondes</h3>
-                <p class="text-gray-500 text-sm text-center mb-6">Aucun compte requis pour commencer.</p>
+  <div class="absolute inset-0 bg-slate-900/70 -z-10 mix-blend-multiply"></div>
+  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent -z-10"></div>
 
-                <form method="POST" class="space-y-4">
-                    {% csrf_token %}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Titre du projet</label>
-                            <input type="text" name="title" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="ex: Rénovation Application Mobile Django">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Budget indicatif (CFA)</label>
-                            <input type="number" name="budget" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="ex: 350000">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Compétences recherchées</label>
-                        <input type="text" name="skills_required" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="ex: Python, Django, Tailwind">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Description du besoin</label>
-                        <textarea name="description" rows="4" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition" placeholder="Décrivez précisément les livrables attendus..."></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold transition shadow-md text-sm mt-2">
-                        🚀 Lancer l'appel d'offres immédiatement
-                    </button>
-                </form>
+  <div class="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
+    <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6 animate-fade-in-up">
+      Votre Partenaire <span class="text-[#0EA5E9]">Freelance</span> d'Excellence
+    </h1>
+    <p class="text-lg md:text-xl text-sky-100 mb-10 max-w-2xl mx-auto">
+      Propulsez vos projets avec les meilleurs talents tech du Cameroun. Développement, Design, et Cloud à portée de clic.
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <a href="#mission-form" class="bg-[#0EA5E9] hover:bg-sky-400 text-white font-bold py-4 px-8 rounded-full transition-transform hover:scale-105 shadow-lg shadow-sky-500/30">
+        Déposer un projet
+      </a>
+      <a href="{% url 'contracts:freelance_list' %}" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold py-4 px-8 rounded-full transition-colors">
+        Trouver un talent
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ COMMENT ÇA MARCHE ═══════════════════════════════════════ -->
+<section id="how" class="py-20 lg:py-28 bg-sky-50 dark:bg-slate-900">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-solid fa-map-signs"></i>Comment ça marche</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        3 étapes vers le <span class="gradient-text">succès</span>
+      </h2>
+      <p class="text-gray-500 dark:text-sky-300 text-lg max-w-xl mx-auto">Un processus simple, transparent et efficace pour chaque mission.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+      <!-- Connector line -->
+      <div class="hidden md:block absolute top-14 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-transparent via-sky-300 to-transparent" style="left:20%;right:20%"></div>
+
+      <!-- Step 1 -->
+      <div class="glass-card rounded-3xl p-8 text-center reveal group" style="transition-delay:0.1s">
+        <div class="relative inline-block mb-6">
+          <div class="icon-ring w-20 h-20 mx-auto">
+            <i class="fa-solid fa-pen-to-square text-3xl text-sky-600 dark:text-sky-300"></i>
+          </div>
+          <span class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-sky-500 text-white text-xs font-black flex items-center justify-center shadow-lg">1</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Publiez votre projet</h3>
+        <p class="text-gray-500 dark:text-sky-300 text-sm leading-relaxed">Décrivez votre mission en quelques minutes — budget, délais, compétences requises.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="glass-card rounded-3xl p-8 text-center reveal group" style="transition-delay:0.2s">
+        <div class="relative inline-block mb-6">
+          <div class="icon-ring w-20 h-20 mx-auto">
+            <i class="fa-solid fa-user-magnifying-glass text-3xl text-sky-600 dark:text-sky-300"></i>
+          </div>
+          <span class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-sky-500 text-white text-xs font-black flex items-center justify-center shadow-lg">2</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Choisissez votre talent</h3>
+        <p class="text-gray-500 dark:text-sky-300 text-sm leading-relaxed">Recevez des propositions qualifiées et sélectionnez le freelancer idéal selon les avis.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="glass-card rounded-3xl p-8 text-center reveal group" style="transition-delay:0.3s">
+        <div class="relative inline-block mb-6">
+          <div class="icon-ring w-20 h-20 mx-auto">
+            <i class="fa-solid fa-circle-check text-3xl text-sky-600 dark:text-sky-300"></i>
+          </div>
+          <span class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-sky-500 text-white text-xs font-black flex items-center justify-center shadow-lg">3</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Recevez et payez</h3>
+        <p class="text-gray-500 dark:text-sky-300 text-sm leading-relaxed">Validez la livraison et payez via Mobile Money en toute sécurité. Garanti ou remboursé.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SERVICES ═══════════════════════════════════════ -->
+<section id="services" class="py-20 lg:py-28 bg-white dark:bg-slate-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-solid fa-stars"></i>Nos Expertises</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        Des services <span class="gradient-text">sur mesure</span>
+      </h2>
+      <p class="text-gray-500 dark:text-sky-300 text-lg max-w-xl mx-auto">Technologies modernes, exécution professionnelle, résultats mesurables.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Card 1 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.05s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-brands fa-python text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Développement Web</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Applications web robustes avec Django, React et les dernières technologies.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">Python</span>
+          <span class="tech-tag">Django</span>
+          <span class="tech-tag">React</span>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.1s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-mobile-screen-button text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Développement Mobile</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Apps iOS et Android performantes avec intégration Mobile Money.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">Flutter</span>
+          <span class="tech-tag">React Native</span>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.15s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-palette text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Design UI/UX</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Interfaces élégantes centrées sur l'expérience utilisateur et la conversion.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">Figma</span>
+          <span class="tech-tag">Prototypage</span>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.2s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-cloud text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">DevOps & Cloud</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">CI/CD, déploiement AWS/Azure, infrastructure scalable et sécurisée.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">AWS</span>
+          <span class="tech-tag">Docker</span>
+          <span class="tech-tag">CI/CD</span>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.25s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-shield-halved text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Cybersécurité</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Audits, pentesting et solutions de sécurité pour protéger vos actifs digitaux.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">Pentest</span>
+          <span class="tech-tag">Audit</span>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.3s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-robot text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Intégration IA</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Chatbots, automatisation et APIs d'intelligence artificielle dans vos produits.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">GPT API</span>
+          <span class="tech-tag">LangChain</span>
+        </div>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.35s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-network-wired text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Réseaux & Infra</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Administration réseau, VPN, firewall et infrastructure d'entreprise.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">Cisco</span>
+          <span class="tech-tag">Linux</span>
+        </div>
+      </div>
+
+      <!-- Card 8 -->
+      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.4s">
+        <div class="icon-ring w-14 h-14 mb-5">
+          <i class="fa-solid fa-chart-line text-2xl text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Marketing Digital</h3>
+        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">SEO, publicité ciblée et stratégie de croissance digitale pour votre entreprise.</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="tech-tag">SEO</span>
+          <span class="tech-tag">Ads</span>
+          <span class="tech-tag">Analytics</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FREELANCERS ═══════════════════════════════════════ -->
+<section id="freelancers" class="py-20 lg:py-28 bg-sky-50 dark:bg-slate-900">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-solid fa-user-tie"></i>Nos Talents</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        Des experts <span class="gradient-text">vérifiés</span>
+      </h2>
+      <p class="text-gray-500 dark:text-sky-300 text-lg max-w-xl mx-auto">Chaque freelancer est évalué sur ses compétences, sa ponctualité et la qualité de ses livrables.</p>
+        <a href="{% url 'contracts:freelance_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-accent hover:text-accent">Explore profiles</a>
+    </div>
+
+    <!-- Freelancer slider -->
+    <div class="relative">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="freelancer-grid">
+        <!-- Card 1 -->
+        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.05s">
+          <div class="relative inline-block mb-4">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg shadow-sky-200 dark:shadow-sky-900">KN</div>
+            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>
+          </div>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">{{ freelance.user.username }}</h4>
+          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">{{ freelance.title }}</p>
+          <div class="stars mb-3 flex justify-center gap-0.5">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="tech-tag">Django</span>
+            <span class="tech-tag">React</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
+            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>47 missions</span>
+            <span class="font-semibold text-sky-600 dark:text-sky-300">15 000 XAF/h</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.1s">
+          <div class="relative inline-block mb-4">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg">AM</div>
+            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>
+          </div>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">Amina Mbaye</h4>
+          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">Designer UI/UX Senior</p>
+          <div class="stars mb-3 flex justify-center gap-0.5">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="tech-tag">Figma</span>
+            <span class="tech-tag">Prototypage</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
+            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>63 missions</span>
+            <span class="font-semibold text-sky-600 dark:text-sky-300">18 000 XAF/h</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.15s">
+          <div class="relative inline-block mb-4">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg">JT</div>
+            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full border-2 border-white"></span>
+          </div>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">Jean-Paul Tamba</h4>
+          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">Expert DevOps & Cloud</p>
+          <div class="stars mb-3 flex justify-center gap-0.5">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span style="color:#d1d5db">★</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="tech-tag">AWS</span>
+            <span class="tech-tag">Docker</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
+            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>29 missions</span>
+            <span class="font-semibold text-sky-600 dark:text-sky-300">20 000 XAF/h</span>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.2s">
+          <div class="relative inline-block mb-4">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg">FR</div>
+            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>
+          </div>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">Fatou Rostand</h4>
+          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">Développeuse Mobile</p>
+          <div class="stars mb-3 flex justify-center gap-0.5">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
+            <span class="tech-tag">Flutter</span>
+            <span class="tech-tag">Firebase</span>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
+            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>38 missions</span>
+            <span class="font-semibold text-sky-600 dark:text-sky-300">16 000 XAF/h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-10 reveal">
+      <a href="#" class="btn-sky px-8 py-3.5 text-sm shadow-lg shadow-sky-200/50 dark:shadow-sky-900/50">
+        <i class="fa-solid fa-users"></i>Voir tous les freelancers
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SUCCESS STORIES ═══════════════════════════════════════ -->
+<section id="clients" class="py-20 lg:py-28 bg-white dark:bg-slate-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-solid fa-trophy"></i>Succès Stories</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        Ils ont fait confiance à <span class="gradient-text">SMD-Tech</span>
+      </h2>
+    </div>
+
+    <!-- Featured story -->
+    <div class="glass-card rounded-3xl overflow-hidden mb-8 reveal">
+      <div class="grid grid-cols-1 lg:grid-cols-2">
+        <div class="p-10 lg:p-14 flex flex-col justify-center">
+          <span class="section-eyebrow mb-6 text-xs">Cas Client Phare</span>
+          <h3 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-4">Plateforme E-commerce Camerounaise</h3>
+          <p class="text-gray-500 dark:text-sky-300 text-sm leading-relaxed mb-6">
+            Une PME de Douala cherchait à digitaliser ses ventes. En 6 semaines, notre équipe a livré une boutique Django + Mobile Money avec tableau de bord analytique.
+          </p>
+          <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="text-center p-3 bg-sky-50 dark:bg-sky-900/20 rounded-2xl">
+              <div class="text-2xl font-black text-sky-600 dark:text-sky-300">+340%</div>
+              <div class="text-xs text-gray-500 dark:text-sky-400 mt-1">Ventes en ligne</div>
             </div>
-
-            <!-- Moteur de Recherche & Filtrage des Freelances -->
+            <div class="text-center p-3 bg-sky-50 dark:bg-sky-900/20 rounded-2xl">
+              <div class="text-2xl font-black text-sky-600 dark:text-sky-300">6 sem.</div>
+              <div class="text-xs text-gray-500 dark:text-sky-400 mt-1">Délai de livraison</div>
+            </div>
+            <div class="text-center p-3 bg-sky-50 dark:bg-sky-900/20 rounded-2xl">
+              <div class="text-2xl font-black text-sky-600 dark:text-sky-300">5/5</div>
+              <div class="text-xs text-gray-500 dark:text-sky-400 mt-1">Satisfaction client</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-white font-black text-sm">PM</div>
             <div>
-                <h3 class="text-3xl font-extrabold text-gray-900 text-center mb-8">Parcourir nos Talents Disponibles</h3>
-
-                <form method="GET" class="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto mb-12">
-                    <input type="text" name="search" value="{{ query }}" class="flex-1 px-5 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition" placeholder="Rechercher un métier (ex: Développeur Python)...">
-                    <input type="text" name="skills" value="{{ skills_query }}" class="md:w-1/3 px-5 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition" placeholder="Compétence (ex: Django)...">
-                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-2xl font-bold text-sm transition">Filtrer</button>
-                </form>
-
-                <!-- Liste des Cartes Profils Freelances -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {% for freelance in freelances %}
-                        <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center space-x-3 mb-4">
-                                    <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center uppercase">
-                                        {{ freelance.user.username|slice:":2" }}
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-gray-800 flex items-center">
-                                            {{ freelance.user.username }}
-                                            <span class="ml-1.5 text-blue-500" title="Profil vérifié par l'administrateur">✔</span>
-                                        </h4>
-                                        <p class="text-xs text-gray-400">{{ freelance.title }}</p>
-                                    </div>
-                                </div>
-                                <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ freelance.bio }}</p>
-                                <div class="flex flex-wrap gap-1 mb-4">
-                                    {% for skill in freelance.skills.split %}
-                                        <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">{{ skill }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <div class="border-t border-gray-100 pt-4 flex items-center justify-between">
-                                <span class="text-sm font-bold text-gray-900">{{ freelance.hourly_rate }} CFA/h</span>
-
-                                <!-- CORRIGÉ : Syntaxe HTML de fermeture nettoyée ici -->
-                                {% if user.is_authenticated %}
-                                    <a href="{% url 'chat:start_thread' freelance.user.id %}" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-4 py-2 rounded-xl transition">
-                                        Contacter
-                                    </a>
-                                {% else %}
-                                    <button onclick="openLoginModal()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold px-4 py-2 rounded-xl transition">
-                                        Contacter
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% empty %}
-                        <p class="text-gray-400 text-center col-span-3 py-6">Aucun freelance ne correspond à vos critères.</p>
-                    {% endfor %}
-                </div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Paul Moutongo</p>
+              <p class="text-xs text-gray-500 dark:text-sky-400">CEO, BonneCarte Cameroun</p>
             </div>
+          </div>
         </div>
+        <div class="bg-gradient-to-br from-sky-500 to-cyan-600 p-10 flex items-center justify-center min-h-64">
+          <div class="text-center text-white">
+            <i class="fa-solid fa-laptop-code text-7xl mb-4 opacity-80"></i>
+            <p class="text-lg font-bold opacity-90">Application E-commerce</p>
+            <p class="text-sm opacity-70">Django + Mobile Money + Analytics</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <!-- ================= ESPACE FREELANCE ================= -->
-        <div id="freelance-space" class="tab-content hidden space-y-8">
-            <h3 class="text-3xl font-extrabold text-gray-900 text-center mb-8">Missions ouvertes aux candidatures</h3>
+    <!-- Grid stories -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="glass-card rounded-3xl p-7 reveal group" style="transition-delay:0.1s">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center mb-5 shadow-md">
+          <i class="fa-solid fa-mobile-screen text-white text-xl"></i>
+        </div>
+        <h4 class="font-bold text-gray-900 dark:text-white mb-2">App de livraison Swift</h4>
+        <p class="text-gray-500 dark:text-sky-400 text-sm leading-relaxed mb-4">Application mobile de livraison pour Douala avec tracking temps réel et Mobile Money.</p>
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          <span class="tech-tag">Flutter</span><span class="tech-tag">Firebase</span><span class="tech-tag">MoMo</span>
+        </div>
+        <div class="stars flex gap-0.5"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      </div>
 
-            <div class="max-w-4xl mx-auto space-y-4">
-                {% for mission in missions %}
-                    <div class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm hover:border-indigo-300 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div class="flex-1">
-                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md mb-2 inline-block">
-                                Budget : {{ mission.budget }} CFA
-                            </span>
-                            <h4 class="text-lg font-bold text-gray-800">{{ mission.title }}</h4>
-                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ mission.description }}</p>
-                            <p class="text-xs text-gray-400 mt-2">Requis : <span class="text-gray-600 font-medium">{{ mission.skills_required }}</span></p>
-                        </div>
-                        <div>
-                            <!-- CORRIGÉ : Intégration de l'action de candidature dynamique -->
-                            <a href="{% url 'contracts:apply_to_mission' mission.id %}" class="block w-full text-center text-xs bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-3 rounded-xl transition whitespace-nowrap">
-                                Postuler à l'offre
-                            </a>
-                        </div>
-                    </div>
-                {% empty %}
-                    <p class="text-gray-400 text-center py-12">Aucune offre de mission n'est disponible en ce moment.</p>
-                {% endfor %}
+      <div class="glass-card rounded-3xl p-7 reveal group" style="transition-delay:0.15s">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center mb-5 shadow-md">
+          <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+        </div>
+        <h4 class="font-bold text-gray-900 dark:text-white mb-2">CampusCam — Orientation</h4>
+        <p class="text-gray-500 dark:text-sky-400 text-sm leading-relaxed mb-4">Plateforme d'orientation universitaire pour les bacheliers camerounais. 10 000+ utilisateurs.</p>
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          <span class="tech-tag">Django</span><span class="tech-tag">React</span><span class="tech-tag">AWS</span>
+        </div>
+        <div class="stars flex gap-0.5"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-7 reveal group" style="transition-delay:0.2s">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center mb-5 shadow-md">
+          <i class="fa-solid fa-utensils text-white text-xl"></i>
+        </div>
+        <h4 class="font-bold text-gray-900 dark:text-white mb-2">Hemeley — Food Ordering</h4>
+        <p class="text-gray-500 dark:text-sky-400 text-sm leading-relaxed mb-4">Application de commande de repas avec paiement Mobile Money intégré pour le marché CMR.</p>
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          <span class="tech-tag">Flutter</span><span class="tech-tag">MTN MoMo</span>
+        </div>
+        <div class="stars flex gap-0.5"><span>★</span><span>★</span><span>★</span><span>★</span><span style="color:#d1d5db">★</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ TESTIMONIALS ═══════════════════════════════════════ -->
+<section class="py-20 lg:py-28 bg-sky-50 dark:bg-slate-900 overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-solid fa-comments"></i>Témoignages</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        Ce qu'ils disent <span class="gradient-text">de nous</span>
+      </h2>
+    </div>
+
+    <div class="relative">
+      <div id="testimonial-track" class="flex gap-6 transition-transform duration-500">
+        <!-- Testimonial 1 -->
+        <div class="glass-card rounded-3xl p-8 shrink-0 w-full sm:w-80 lg:w-96">
+          <div class="flex gap-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i>
+          </div>
+          <p class="text-gray-700 dark:text-sky-200 text-sm leading-relaxed mb-6">
+            "SMD-Tech a transformé notre vision en application en moins de 2 mois. L'équipe est professionnelle, réactive et le résultat dépasse nos attentes. Je recommande vivement !"
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-white font-black text-sm">NB</div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Nomo Bomon</p>
+              <p class="text-xs text-gray-500 dark:text-sky-400">CEO, TechStart Cameroun</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Cameroon.svg/20px-Flag_of_Cameroon.svg.png" class="w-4 rounded-sm" alt="">
+                <span class="text-xs text-gray-400 dark:text-sky-500">Douala, Cameroun</span>
+              </div>
             </div>
+          </div>
         </div>
 
-    </div>
-</div>
-
-<!-- ================= MODALE INTERDICTION VISITEUR ANONYME ================= -->
-<div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
-    <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl border border-gray-100 transition-all">
-        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🔒</div>
-        <h4 class="text-xl font-bold text-gray-800 mb-2">Connexion requise</h4>
-        <p class="text-gray-500 text-sm mb-6">Pour échanger et envoyer des messages à nos freelances, vous devez posséder un compte client vérifié.</p>
-        <div class="space-y-2">
-            <a href="{% url 'accounts:login' %}" class="block w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">Se connecter</a>
-            <a href="{% url 'accounts:register_client' %}" class="block w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold text-sm hover:bg-gray-200 transition">Créer un compte</a>
-            <button onclick="closeLoginModal()" class="block w-full text-xs text-gray-400 pt-2 hover:text-gray-600 focus:outline-none">Plus tard</button>
+        <!-- Testimonial 2 -->
+        <div class="glass-card rounded-3xl p-8 shrink-0 w-full sm:w-80 lg:w-96">
+          <div class="flex gap-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i>
+          </div>
+          <p class="text-gray-700 dark:text-sky-200 text-sm leading-relaxed mb-6">
+            "Le meilleur investissement tech de notre entreprise. Livraison dans les délais, communication parfaite et un produit qui convertit vraiment. Merci SMD-Tech !"
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white font-black text-sm">ND</div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Nadia Djoukam</p>
+              <p class="text-xs text-gray-500 dark:text-sky-400">Directrice Marketing, EcoShop</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Cameroon.svg/20px-Flag_of_Cameroon.svg.png" class="w-4 rounded-sm" alt="">
+                <span class="text-xs text-gray-400 dark:text-sky-500">Yaoundé, Cameroun</span>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-</div>
 
-<!-- ================= LOGIQUE JAVASCRIPT ================= -->
+        <!-- Testimonial 3 -->
+        <div class="glass-card rounded-3xl p-8 shrink-0 w-full sm:w-80 lg:w-96">
+          <div class="flex gap-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i>
+          </div>
+          <p class="text-gray-700 dark:text-sky-200 text-sm leading-relaxed mb-6">
+            "Notre application mobile est passée de concept à produit fini en 7 semaines. L'intégration Mobile Money était notre plus grande crainte — SMD-Tech l'a gérée parfaitement."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white font-black text-sm">RC</div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Roberti Chanson</p>
+              <p class="text-xs text-gray-500 dark:text-sky-400">Fondateur, DeliverCam</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Cameroon.svg/20px-Flag_of_Cameroon.svg.png" class="w-4 rounded-sm" alt="">
+                <span class="text-xs text-gray-400 dark:text-sky-500">Bafoussam, Cameroun</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 4 -->
+        <div class="glass-card rounded-3xl p-8 shrink-0 w-full sm:w-80 lg:w-96">
+          <div class="flex gap-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i><i class="fa-solid fa-star text-amber-400"></i>
+            <i class="fa-solid fa-star text-amber-400"></i>
+          </div>
+          <p class="text-gray-700 dark:text-sky-200 text-sm leading-relaxed mb-6">
+            "SMD-Tech a sécurisé notre infrastructure en moins d'une semaine. Audit complet, rapport détaillé, corrections immédiates. Un niveau professionnel rarement vu à Douala."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-black text-sm">SP</div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Sébastien Poda</p>
+              <p class="text-xs text-gray-500 dark:text-sky-400">DSI, BanqueCam</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Cameroon.svg/20px-Flag_of_Cameroon.svg.png" class="w-4 rounded-sm" alt="">
+                <span class="text-xs text-gray-400 dark:text-sky-500">Douala, Cameroun</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center justify-center gap-4 mt-10">
+        <button id="testi-prev" class="w-11 h-11 rounded-xl bg-white dark:bg-sky-900/40 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-800/60 transition-all shadow-sm hover:shadow-md">
+          <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+        <div class="flex gap-2" id="testi-dots">
+          <button class="dot w-2.5 h-2.5 rounded-full bg-sky-500"></button>
+          <button class="dot w-2.5 h-2.5 rounded-full bg-sky-200 dark:bg-sky-700"></button>
+          <button class="dot w-2.5 h-2.5 rounded-full bg-sky-200 dark:bg-sky-700"></button>
+          <button class="dot w-2.5 h-2.5 rounded-full bg-sky-200 dark:bg-sky-700"></button>
+        </div>
+        <button id="testi-next" class="w-11 h-11 rounded-xl bg-white dark:bg-sky-900/40 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-800/60 transition-all shadow-sm hover:shadow-md">
+          <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ PORTFOLIO ═══════════════════════════════════════ -->
+<section id="portfolio" class="py-20 lg:py-28 bg-white dark:bg-slate-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-16">
+      <div class="reveal">
+        <div class="section-eyebrow mb-4"><i class="fa-solid fa-images"></i>Portfolio</div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-2">
+          Nos <span class="gradient-text">réalisations</span>
+        </h2>
+        <p class="text-gray-500 dark:text-sky-300">Projets livrés avec excellence au Cameroun et en Afrique.</p>
+      </div>
+      <!-- Filter tabs -->
+      <div class="flex gap-2 flex-wrap reveal">
+        <button class="filter-btn active px-4 py-2 rounded-xl text-sm font-semibold transition-all btn-sky">Tous</button>
+        <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-gray-600 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-400">Web</button>
+        <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-gray-600 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-400">Mobile</button>
+        <button class="filter-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all text-gray-600 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-400">Design</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Project 1 -->
+      <div class="portfolio-card glass-card rounded-3xl overflow-hidden group cursor-pointer reveal col-span-1 sm:col-span-2" style="transition-delay:0.05s" data-category="web">
+        <div class="relative overflow-hidden h-48 sm:h-56 bg-gradient-to-br from-sky-500 to-cyan-600 flex items-center justify-center">
+          <i class="fa-solid fa-store text-white text-6xl opacity-70 group-hover:scale-110 transition-transform duration-500"></i>
+          <div class="overlay absolute inset-0 bg-sky-900/80 flex items-center justify-center gap-3">
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-solid fa-eye text-white"></i>
+            </a>
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-brands fa-github text-white"></i>
+            </a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white">BonneCarte E-commerce</h4>
+            <span class="tech-tag text-xs">Web</span>
+          </div>
+          <p class="text-gray-500 dark:text-sky-400 text-xs mb-3">Boutique en ligne Django + Mobile Money pour PME camerounaise.</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <span class="tech-tag">Django</span><span class="tech-tag">Tailwind</span><span class="tech-tag">MoMo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="portfolio-card glass-card rounded-3xl overflow-hidden group cursor-pointer reveal" style="transition-delay:0.1s" data-category="mobile">
+        <div class="relative overflow-hidden h-48 bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+          <i class="fa-solid fa-mobile-screen-button text-white text-6xl opacity-70 group-hover:scale-110 transition-transform duration-500"></i>
+          <div class="overlay absolute inset-0 bg-purple-900/80 flex items-center justify-center gap-3">
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-solid fa-eye text-white"></i>
+            </a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white text-sm">CampusCam App</h4>
+            <span class="tech-tag text-xs">Mobile</span>
+          </div>
+          <p class="text-gray-500 dark:text-sky-400 text-xs mb-3">Orientation universitaire au Cameroun.</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <span class="tech-tag">Flutter</span><span class="tech-tag">Firebase</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="portfolio-card glass-card rounded-3xl overflow-hidden group cursor-pointer reveal" style="transition-delay:0.15s" data-category="mobile">
+        <div class="relative overflow-hidden h-48 bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center">
+          <i class="fa-solid fa-utensils text-white text-6xl opacity-70 group-hover:scale-110 transition-transform duration-500"></i>
+          <div class="overlay absolute inset-0 bg-rose-900/80 flex items-center justify-center gap-3">
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-solid fa-eye text-white"></i>
+            </a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white text-sm">Hemeley Food</h4>
+            <span class="tech-tag text-xs">Mobile</span>
+          </div>
+          <p class="text-gray-500 dark:text-sky-400 text-xs mb-3">Commande de repas avec livraison.</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <span class="tech-tag">Flutter</span><span class="tech-tag">MTN MoMo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 4 -->
+      <div class="portfolio-card glass-card rounded-3xl overflow-hidden group cursor-pointer reveal" style="transition-delay:0.2s" data-category="design">
+        <div class="relative overflow-hidden h-48 bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center">
+          <i class="fa-solid fa-palette text-white text-6xl opacity-70 group-hover:scale-110 transition-transform duration-500"></i>
+          <div class="overlay absolute inset-0 bg-emerald-900/80 flex items-center justify-center gap-3">
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-solid fa-eye text-white"></i>
+            </a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white text-sm">Ny-Freelance UI</h4>
+            <span class="tech-tag text-xs">Design</span>
+          </div>
+          <p class="text-gray-500 dark:text-sky-400 text-xs mb-3">Interface complète marketplace freelance.</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <span class="tech-tag">Figma</span><span class="tech-tag">Prototypage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 5 -->
+      <div class="portfolio-card glass-card rounded-3xl overflow-hidden group cursor-pointer reveal" style="transition-delay:0.25s" data-category="web">
+        <div class="relative overflow-hidden h-48 bg-gradient-to-br from-sky-600 to-blue-700 flex items-center justify-center">
+          <i class="fa-solid fa-hotel text-white text-6xl opacity-70 group-hover:scale-110 transition-transform duration-500"></i>
+          <div class="overlay absolute inset-0 bg-blue-900/80 flex items-center justify-center gap-3">
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-solid fa-eye text-white"></i>
+            </a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white text-sm">Hôtel Domotique SaaS</h4>
+            <span class="tech-tag text-xs">Web</span>
+          </div>
+          <p class="text-gray-500 dark:text-sky-400 text-xs mb-3">Automatisation hôtelière avec Tuya Cloud.</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <span class="tech-tag">Django</span><span class="tech-tag">Tuya API</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project 6 -->
+      <div class="portfolio-card glass-card rounded-3xl overflow-hidden group cursor-pointer reveal col-span-1 sm:col-span-2" style="transition-delay:0.3s" data-category="web">
+        <div class="relative overflow-hidden h-48 bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center">
+          <i class="fa-solid fa-chart-network text-white text-6xl opacity-70 group-hover:scale-110 transition-transform duration-500"></i>
+          <div class="overlay absolute inset-0 bg-violet-900/80 flex items-center justify-center gap-3">
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-solid fa-eye text-white"></i>
+            </a>
+            <a href="#" class="w-10 h-10 bg-white/20 border border-white/40 rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+              <i class="fa-brands fa-github text-white"></i>
+            </a>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="font-bold text-gray-900 dark:text-white">Dashboard SCADA Forage</h4>
+            <span class="tech-tag text-xs">Web</span>
+          </div>
+          <p class="text-gray-500 dark:text-sky-400 text-xs mb-3">Tableau de bord SCADA interactif pour la réhabilitation d'un forage en Bessengue, Douala.</p>
+          <div class="flex gap-1.5 flex-wrap">
+            <span class="tech-tag">React</span><span class="tech-tag">Chart.js</span><span class="tech-tag">SCADA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ PARTENAIRES ═══════════════════════════════════════ -->
+<section class="py-16 bg-sky-50 dark:bg-slate-900 overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 mb-10 text-center reveal">
+    <div class="section-eyebrow mb-4"><i class="fa-solid fa-handshake"></i>Partenaires</div>
+    <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2">
+      Ils nous font <span class="gradient-text">confiance</span>
+    </h2>
+    <p class="text-gray-500 dark:text-sky-300 text-sm">Entreprises et institutions partenaires de SMD-Tech.</p>
+  </div>
+
+  <!-- Marquee logos -->
+  <div class="overflow-hidden py-4">
+    <div class="marquee-track select-none" id="marquee">
+      <!-- Set 1 -->
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-microsoft text-2xl text-sky-600"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Microsoft</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-aws text-2xl text-orange-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Amazon AWS</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-google text-2xl text-blue-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Google Cloud</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-github text-2xl text-gray-800 dark:text-white"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">GitHub</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-solid fa-m text-2xl text-yellow-500 font-black"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">MTN MoMo</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-solid fa-o text-2xl text-orange-600 font-black"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Orange Money</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-stripe text-2xl text-purple-600"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Stripe</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-digital-ocean text-2xl text-blue-400"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">DigitalOcean</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-docker text-2xl text-blue-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Docker</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-slack text-2xl text-purple-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Slack</span>
+      </div>
+      <!-- Set 2 (duplicate for infinite loop) -->
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-microsoft text-2xl text-sky-600"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Microsoft</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-aws text-2xl text-orange-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Amazon AWS</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-google text-2xl text-blue-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Google Cloud</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-github text-2xl text-gray-800 dark:text-white"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">GitHub</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-solid fa-m text-2xl text-yellow-500 font-black"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">MTN MoMo</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-solid fa-o text-2xl text-orange-600 font-black"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Orange Money</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-stripe text-2xl text-purple-600"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Stripe</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-digital-ocean text-2xl text-blue-400"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">DigitalOcean</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-docker text-2xl text-blue-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Docker</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-sky-100 dark:border-sky-800">
+        <i class="fa-brands fa-slack text-2xl text-purple-500"></i>
+        <span class="font-bold text-gray-700 dark:text-sky-300 text-sm whitespace-nowrap">Slack</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FAQ ═══════════════════════════════════════ -->
+<section id="faq" class="py-20 lg:py-28 bg-white dark:bg-slate-800">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-regular fa-circle-question"></i>FAQ</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        Questions <span class="gradient-text">fréquentes</span>
+      </h2>
+      <p class="text-gray-500 dark:text-sky-300 text-lg">Tout ce que vous devez savoir avant de démarrer.</p>
+    </div>
+
+    <div class="space-y-4" id="faq-list">
+      <!-- FAQ 1 -->
+      <div class="glass-card rounded-2xl overflow-hidden reveal faq-item" style="transition-delay:0.05s">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left">
+          <span class="font-semibold text-gray-900 dark:text-white pr-4">Comment fonctionne le paiement sur SMD-Tech ?</span>
+          <i class="fa-solid fa-chevron-down faq-chevron shrink-0 text-sky-500"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-6 pb-6 text-gray-600 dark:text-sky-300 text-sm leading-relaxed">
+            Nous acceptons les paiements via MTN Mobile Money, Orange Money, et les virements bancaires. Un système de dépôt de garantie sécurise chaque mission : les fonds sont libérés uniquement à la validation de la livraison.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="glass-card rounded-2xl overflow-hidden reveal faq-item" style="transition-delay:0.1s">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left">
+          <span class="font-semibold text-gray-900 dark:text-white pr-4">Comment les freelancers sont-ils vérifiés ?</span>
+          <i class="fa-solid fa-chevron-down faq-chevron shrink-0 text-sky-500"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-6 pb-6 text-gray-600 dark:text-sky-300 text-sm leading-relaxed">
+            Chaque freelancer passe un processus de vérification : test technique, validation d'identité et examen de portfolio. Seuls 30% des candidats sont acceptés sur la plateforme.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="glass-card rounded-2xl overflow-hidden reveal faq-item" style="transition-delay:0.15s">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left">
+          <span class="font-semibold text-gray-900 dark:text-white pr-4">Quels sont les délais typiques de livraison ?</span>
+          <i class="fa-solid fa-chevron-down faq-chevron shrink-0 text-sky-500"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-6 pb-6 text-gray-600 dark:text-sky-300 text-sm leading-relaxed">
+            Les délais dépendent de la complexité du projet. Une landing page : 3-5 jours. Une application web complète : 4-8 semaines. Une application mobile : 6-12 semaines. Ces délais sont définis contractuellement.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="glass-card rounded-2xl overflow-hidden reveal faq-item" style="transition-delay:0.2s">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left">
+          <span class="font-semibold text-gray-900 dark:text-white pr-4">Que se passe-t-il si je ne suis pas satisfait du livrable ?</span>
+          <i class="fa-solid fa-chevron-down faq-chevron shrink-0 text-sky-500"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-6 pb-6 text-gray-600 dark:text-sky-300 text-sm leading-relaxed">
+            Nous offrons une garantie satisfaction. Si le livrable ne correspond pas aux spécifications validées, nous ouvrons une procédure de litige avec médiation. Le remboursement total est possible dans les cas prévus par nos conditions générales.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="glass-card rounded-2xl overflow-hidden reveal faq-item" style="transition-delay:0.25s">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left">
+          <span class="font-semibold text-gray-900 dark:text-white pr-4">SMD-Tech opère-t-il en dehors du Cameroun ?</span>
+          <i class="fa-solid fa-chevron-down faq-chevron shrink-0 text-sky-500"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-6 pb-6 text-gray-600 dark:text-sky-300 text-sm leading-relaxed">
+            Oui ! Bien que basés à Douala, Cameroun, nous servons des clients au Tchad, en République Centrafricaine, au Mali, et nous avons un plan d'expansion vers Dubaï. Nos freelancers travaillent à distance sur tout le continent.
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ 6 -->
+      <div class="glass-card rounded-2xl overflow-hidden reveal faq-item" style="transition-delay:0.3s">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left">
+          <span class="font-semibold text-gray-900 dark:text-white pr-4">Combien coûte la publication d'une mission ?</span>
+          <i class="fa-solid fa-chevron-down faq-chevron shrink-0 text-sky-500"></i>
+        </button>
+        <div class="faq-answer">
+          <div class="px-6 pb-6 text-gray-600 dark:text-sky-300 text-sm leading-relaxed">
+            La publication est entièrement gratuite pour les clients. SMD-Tech prélève une commission de 10% sur le freelancer uniquement à la complétion de la mission. Aucun frais caché.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MISSION FORM ═══════════════════════════════════════ -->
+<section id="mission-form" class="py-20 lg:py-28 bg-sky-50 dark:bg-slate-900">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-12 reveal">
+      <div class="section-eyebrow mb-4"><i class="fa-solid fa-paper-plane"></i>Publier une Mission</div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-4">
+        Décrivez votre <span class="gradient-text">projet</span>
+      </h2>
+      <p class="text-gray-500 dark:text-sky-300 text-lg">Publiez gratuitement. Recevez des propositions en moins de 24h.</p>
+    </div>
+
+    <div class="glass-card rounded-3xl p-8 sm:p-10 reveal">
+      <form id="mission-post-form" class="space-y-6" novalidate>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Nom -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+              <i class="fa-solid fa-user text-sky-500 mr-1.5"></i>Votre nom complet
+            </label>
+            <input type="text" name="name" placeholder="Ex: Paul Moutongo" class="mission-input" required/>
+          </div>
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+              <i class="fa-solid fa-envelope text-sky-500 mr-1.5"></i>Adresse email
+            </label>
+            <input type="email" name="email" placeholder="paul@entreprise.cm" class="mission-input" required/>
+          </div>
+        </div>
+
+        <!-- Titre -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+            <i class="fa-solid fa-heading text-sky-500 mr-1.5"></i>Titre de la mission
+          </label>
+          <input type="text" name="title" placeholder="Ex: Développer une application mobile de livraison" class="mission-input" required/>
+        </div>
+
+        <!-- Catégorie + Budget -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+              <i class="fa-solid fa-grid-2 text-sky-500 mr-1.5"></i>Catégorie
+            </label>
+            <select name="category" class="mission-input appearance-none cursor-pointer">
+              <option value="">— Choisir —</option>
+              <option>Développement Web</option>
+              <option>Développement Mobile</option>
+              <option>Design UI/UX</option>
+              <option>DevOps & Cloud</option>
+              <option>Cybersécurité</option>
+              <option>Intégration IA</option>
+              <option>Marketing Digital</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+              <i class="fa-solid fa-coins text-sky-500 mr-1.5"></i>Budget estimé (XAF)
+            </label>
+            <input type="text" name="budget" placeholder="Ex: 150 000 – 300 000" class="mission-input"/>
+          </div>
+        </div>
+
+        <!-- Délai -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+            <i class="fa-regular fa-calendar text-sky-500 mr-1.5"></i>Délai souhaité
+          </label>
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="deadline" value="urgent" class="accent-sky-500"/>
+              <span class="text-sm text-gray-700 dark:text-sky-300">Urgent (&lt; 1 sem.)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="deadline" value="2semaines" class="accent-sky-500"/>
+              <span class="text-sm text-gray-700 dark:text-sky-300">1–2 semaines</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="deadline" value="1mois" class="accent-sky-500"/>
+              <span class="text-sm text-gray-700 dark:text-sky-300">1 mois</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="deadline" value="flexible" checked class="accent-sky-500"/>
+              <span class="text-sm text-gray-700 dark:text-sky-300">Flexible</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+            <i class="fa-solid fa-align-left text-sky-500 mr-1.5"></i>Description détaillée
+          </label>
+          <textarea name="description" rows="5" placeholder="Décrivez votre projet en détail : fonctionnalités, technologies souhaitées, contexte..." class="mission-input resize-none" required></textarea>
+          <div class="text-right mt-1">
+            <span id="char-count" class="text-xs text-gray-400 dark:text-sky-600">0 / 1000</span>
+          </div>
+        </div>
+
+        <!-- Fichier -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
+            <i class="fa-solid fa-paperclip text-sky-500 mr-1.5"></i>Pièce jointe (optionnel)
+          </label>
+          <div id="dropzone" class="border-2 border-dashed border-sky-200 dark:border-sky-700 rounded-2xl p-8 text-center cursor-pointer hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-sky-900/20 transition-all">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-sky-400 mb-3 block"></i>
+            <p class="text-sm text-gray-500 dark:text-sky-400">Glissez-déposez un fichier ou <span class="text-sky-600 dark:text-sky-300 font-semibold underline underline-offset-2">parcourir</span></p>
+            <p class="text-xs text-gray-400 dark:text-sky-600 mt-1">PDF, Word, Image (max 10 MB)</p>
+            <input type="file" id="file-input" class="hidden" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"/>
+          </div>
+          <div id="file-name" class="hidden mt-2 flex items-center gap-2 text-sm text-sky-600 dark:text-sky-300">
+            <i class="fa-solid fa-file-check"></i>
+            <span id="file-label"></span>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-2">
+          <button type="submit" class="btn-sky w-full py-4 text-base shadow-lg shadow-sky-200/50 dark:shadow-sky-900/50 justify-center">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span id="submit-text">Publier ma mission gratuitement</span>
+          </button>
+          <p class="text-center text-xs text-gray-400 dark:text-sky-600 mt-3">
+            <i class="fa-solid fa-lock mr-1 text-sky-400"></i>Vos données sont protégées. Aucun frais à la publication.
+          </p>
+        </div>
+      </form>
+
+      <!-- Success message -->
+      <div id="form-success" class="hidden text-center py-10">
+        <div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-6">
+          <i class="fa-solid fa-check-circle text-4xl text-green-500"></i>
+        </div>
+        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Mission publiée !</h3>
+        <p class="text-gray-500 dark:text-sky-300 mb-6">Vous recevrez des propositions de freelancers dans les prochaines 24 heures.</p>
+        <button id="new-mission-btn" class="btn-sky px-8 py-3 text-sm">
+          <i class="fa-solid fa-plus"></i>Publier une autre mission
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ CONTACT ═══════════════════════════════════════ -->
+<section id="contact" class="py-20 lg:py-28 bg-white dark:bg-slate-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div class="reveal">
+        <div class="section-eyebrow mb-6"><i class="fa-solid fa-headset"></i>Contact</div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6">
+          Parlons de votre <span class="gradient-text">projet</span>
+        </h2>
+        <p class="text-gray-500 dark:text-sky-300 mb-10 text-lg">Notre équipe est disponible du lundi au samedi, de 8h à 20h (WAT).</p>
+
+        <div class="space-y-5">
+          <div class="flex items-center gap-4">
+            <div class="icon-ring w-12 h-12 shrink-0">
+              <i class="fa-solid fa-location-dot text-sky-600 dark:text-sky-300"></i>
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Adresse</p>
+              <p class="text-gray-500 dark:text-sky-400 text-sm">Bonamoussadi, Douala, Cameroun</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="icon-ring w-12 h-12 shrink-0">
+              <i class="fa-brands fa-whatsapp text-green-500"></i>
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">WhatsApp Business</p>
+              <p class="text-gray-500 dark:text-sky-400 text-sm">+237 6XX XXX XXX</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="icon-ring w-12 h-12 shrink-0">
+              <i class="fa-solid fa-envelope text-sky-600 dark:text-sky-300"></i>
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">Email</p>
+              <p class="text-gray-500 dark:text-sky-400 text-sm">contact@smd-tech.cm</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-10">
+          <a href="#" class="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-800/60 transition-all">
+            <i class="fa-brands fa-linkedin-in"></i>
+          </a>
+          <a href="#" class="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-800/60 transition-all">
+            <i class="fa-brands fa-x-twitter"></i>
+          </a>
+          <a href="#" class="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-800/60 transition-all">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a href="#" class="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-700 flex items-center justify-center text-sky-600 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-800/60 transition-all">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Contact form -->
+      <div class="glass-card rounded-3xl p-8 reveal">
+        <form id="contact-form" class="space-y-5" novalidate>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">Nom</label>
+              <input type="text" placeholder="Votre nom" class="mission-input" required/>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">Email</label>
+              <input type="email" placeholder="votre@email.cm" class="mission-input" required/>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">Sujet</label>
+            <input type="text" placeholder="Comment pouvons-nous vous aider ?" class="mission-input"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">Message</label>
+            <textarea rows="5" placeholder="Décrivez votre besoin..." class="mission-input resize-none"></textarea>
+          </div>
+          <button type="submit" class="btn-sky w-full py-3.5 justify-center text-sm shadow-md shadow-sky-200/50 dark:shadow-sky-900/50">
+            <i class="fa-solid fa-paper-plane"></i>Envoyer le message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FOOTER ═══════════════════════════════════════ -->
+<footer class="bg-slate-900 dark:bg-slate-950 text-sky-100 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">
+      <!-- Brand -->
+      <div class="col-span-2 sm:col-span-3 lg:col-span-2">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-bolt text-white text-sm"></i>
+          </div>
+          <span class="text-lg font-black tracking-tight text-white">SMD<span class="text-sky-400">-Tech</span></span>
+        </div>
+        <p class="text-sky-400 text-sm leading-relaxed mb-6 max-w-xs">La plateforme freelance tech de référence au Cameroun. Connectez talents et entreprises depuis 2023.</p>
+        <div class="flex gap-3">
+          <a href="#" class="w-9 h-9 rounded-lg bg-sky-900/50 border border-sky-800 flex items-center justify-center text-sky-400 hover:text-white hover:border-sky-500 transition-all text-sm"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#" class="w-9 h-9 rounded-lg bg-sky-900/50 border border-sky-800 flex items-center justify-center text-sky-400 hover:text-white hover:border-sky-500 transition-all text-sm"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" class="w-9 h-9 rounded-lg bg-sky-900/50 border border-sky-800 flex items-center justify-center text-sky-400 hover:text-white hover:border-sky-500 transition-all text-sm"><i class="fa-brands fa-github"></i></a>
+          <a href="#" class="w-9 h-9 rounded-lg bg-sky-900/50 border border-sky-800 flex items-center justify-center text-sky-400 hover:text-white hover:border-sky-500 transition-all text-sm"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+      </div>
+
+      <!-- Services -->
+      <div>
+        <h4 class="font-bold text-white mb-4 text-sm uppercase tracking-wider">Services</h4>
+        <ul class="space-y-2.5 text-sm text-sky-400">
+          <li><a href="#" class="hover:text-white transition-colors">Développement Web</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Développement Mobile</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Design UI/UX</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">DevOps & Cloud</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Cybersécurité</a></li>
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div>
+        <h4 class="font-bold text-white mb-4 text-sm uppercase tracking-wider">Entreprise</h4>
+        <ul class="space-y-2.5 text-sm text-sky-400">
+          <li><a href="#" class="hover:text-white transition-colors">À propos</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Clients</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Portfolio</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Carrières</a></li>
+        </ul>
+      </div>
+
+      <!-- Legal + Newsletter -->
+      <div>
+        <h4 class="font-bold text-white mb-4 text-sm uppercase tracking-wider">Légal</h4>
+        <ul class="space-y-2.5 text-sm text-sky-400 mb-6">
+          <li><a href="#" class="hover:text-white transition-colors">CGU</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Confidentialité</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Cookies</a></li>
+        </ul>
+        <h4 class="font-bold text-white mb-3 text-sm uppercase tracking-wider">Newsletter</h4>
+        <div class="flex gap-2">
+          <input type="email" placeholder="Email..." class="flex-1 bg-sky-900/50 border border-sky-800 rounded-lg px-3 py-2 text-sm text-sky-100 placeholder-sky-600 outline-none focus:border-sky-500 transition-all font-rubik min-w-0"/>
+          <button class="w-9 h-9 rounded-lg btn-sky shrink-0 justify-center p-0">
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-sky-900 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-sky-600 text-xs">© 2025 SMD-Tech — Douala, Cameroun. Tous droits réservés.</p>
+      <div class="flex items-center gap-2 text-xs text-sky-600">
+        <i class="fa-solid fa-map-marker-alt text-sky-500"></i>
+        <span>Bonamoussadi, Douala, Cameroun</span>
+        <span class="text-sky-800">•</span>
+        <span>Made with <i class="fa-solid fa-heart text-rose-500 text-xs"></i> by Boris & team</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════ SCROLL TO TOP ═══════════════════════════════════════ -->
+<button id="scroll-top" class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-xl btn-sky justify-center shadow-lg shadow-sky-300/40 dark:shadow-sky-900/60 opacity-0 pointer-events-none transition-all duration-300">
+  <i class="fa-solid fa-arrow-up text-sm"></i>
+</button>
+
+<!-- ══════════════════ JAVASCRIPT ══════════════════ -->
 <script>
-    // Gestion du basculement d'onglets (Client / Freelance)
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.getElementById(tabId).classList.remove('hidden');
+// ── Particles Canvas ──────────────────────────────────
+(function() {
+  const canvas = document.getElementById('particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize() {
+    W = canvas.width = canvas.parentElement.offsetWidth;
+    H = canvas.height = canvas.parentElement.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
-            btn.classList.add('bg-slate-800', 'text-slate-300');
-        });
+  for (let i = 0; i < 55; i++) {
+    particles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      alpha: Math.random() * 0.5 + 0.15
+    });
+  }
 
-        const activeBtn = tabId === 'client-space' ? 'btn-client' : 'btn-freelance';
-        const currentBtn = document.getElementById(activeBtn);
-        currentBtn.classList.remove('bg-slate-800', 'text-slate-300');
-        currentBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+      ctx.fill();
+    });
+    // Lines between close particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 110) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255,255,255,${0.12 * (1 - dist/110)})`;
+          ctx.lineWidth = 0.8;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
     }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 
-    // Gestion de la modale d'authentification
-    function openLoginModal() {
-        const modal = document.getElementById('loginModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+// ── Theme Toggle ───────────────────────────────────────
+const html = document.documentElement;
+const themeToggle = document.getElementById('theme-toggle');
+const themeToggleMob = document.getElementById('theme-toggle-mob');
+const themeIcon = document.getElementById('theme-icon');
+const mobThemeIcon = document.getElementById('mob-theme-icon');
 
-    function closeLoginModal() {
-        const modal = document.getElementById('loginModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+function applyTheme(dark) {
+  html.classList.toggle('dark', dark);
+  const iconClass = dark ? 'fa-sun' : 'fa-moon';
+  if (themeIcon) { themeIcon.className = `fa-solid ${iconClass} text-sm`; }
+  if (mobThemeIcon) { mobThemeIcon.className = `fa-solid ${iconClass}`; }
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
+}
+
+const savedTheme = localStorage.getItem('theme');
+applyTheme(savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches));
+
+[themeToggle, themeToggleMob].forEach(btn => {
+  if (btn) btn.addEventListener('click', () => applyTheme(!html.classList.contains('dark')));
+});
+
+// ── Language Switcher ────────────────────────────────
+const langBtn = document.getElementById('lang-btn');
+const langDropdown = document.getElementById('lang-dropdown');
+const langLabel = document.getElementById('lang-label');
+
+if (langBtn) {
+  langBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langDropdown.classList.toggle('hidden');
+  });
+}
+document.querySelectorAll('.lang-opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    langLabel.textContent = opt.dataset.lang;
+    langDropdown.classList.add('hidden');
+  });
+});
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('lang-wrapper')?.contains(e.target)) {
+    langDropdown?.classList.add('hidden');
+  }
+});
+
+// ── Mobile Menu ──────────────────────────────────────
+const mobileToggle = document.getElementById('mobile-toggle');
+const mobileMenu = document.getElementById('mobile-menu');
+const burgerIcon = document.getElementById('burger-icon');
+
+if (mobileToggle) {
+  mobileToggle.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('open');
+    burgerIcon.className = open ? 'fa-solid fa-xmark text-lg' : 'fa-solid fa-bars text-lg';
+  });
+}
+document.querySelectorAll('.mobile-link').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    burgerIcon.className = 'fa-solid fa-bars text-lg';
+  });
+});
+
+// ── Navbar scroll + Search ────────────────────────────
+const navbar = document.getElementById('navbar');
+const searchBar = document.getElementById('search-bar');
+const scrollTopBtn = document.getElementById('scroll-top');
+
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY > 80;
+  // Search bar appears
+  if (scrolled) searchBar.classList.add('visible');
+  else searchBar.classList.remove('visible');
+  // Scroll-top button
+  if (window.scrollY > 400) {
+    scrollTopBtn.style.opacity = '1';
+    scrollTopBtn.style.pointerEvents = 'auto';
+  } else {
+    scrollTopBtn.style.opacity = '0';
+    scrollTopBtn.style.pointerEvents = 'none';
+  }
+  // Active nav highlight
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const sectionId = link.getAttribute('href')?.replace('#','');
+    const section = document.getElementById(sectionId);
+    if (section) {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 100 && rect.bottom > 100) {
+        link.classList.add('text-sky-600', 'bg-sky-50');
+      } else {
+        link.classList.remove('text-sky-600', 'bg-sky-50');
+      }
     }
+  });
+});
+
+scrollTopBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// ── Counter Animation ────────────────────────────────
+function animateCounters() {
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    const dur = 2000;
+    const step = target / (dur / 16);
+    let current = 0;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { current = target; clearInterval(timer); }
+      el.textContent = Math.floor(current).toLocaleString('fr-FR') + (el.dataset.target === '98' ? '%' : '+');
+    }, 16);
+  });
+}
+
+// ── Scroll Reveal ────────────────────────────────────
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// Counter observer
+const counterObserver = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    animateCounters();
+    counterObserver.disconnect();
+  }
+}, { threshold: 0.3 });
+const heroCounters = document.querySelector('[data-target]');
+if (heroCounters) counterObserver.observe(heroCounters);
+
+// ── Testimonial Carousel ─────────────────────────────
+let testiIdx = 0;
+const track = document.getElementById('testimonial-track');
+const dots = document.querySelectorAll('.dot');
+const cards = track?.querySelectorAll('.glass-card');
+const total = cards?.length || 0;
+
+function getVisibleCount() {
+  if (window.innerWidth >= 1024) return 3;
+  if (window.innerWidth >= 640) return 2;
+  return 1;
+}
+
+function getCardWidth() {
+  const card = cards?.[0];
+  if (!card) return 0;
+  return card.offsetWidth + 24; // gap-6 = 24px
+}
+
+function updateCarousel() {
+  const maxIdx = Math.max(0, total - getVisibleCount());
+  if (testiIdx > maxIdx) testiIdx = maxIdx;
+  const offset = testiIdx * getCardWidth();
+  track.style.transform = `translateX(-${offset}px)`;
+  dots.forEach((d, i) => {
+    d.classList.toggle('bg-sky-500', i === testiIdx);
+    d.classList.toggle('w-6', i === testiIdx);
+    d.classList.toggle('bg-sky-200', i !== testiIdx);
+    d.classList.remove(i === testiIdx ? 'bg-sky-200' : 'bg-sky-500');
+  });
+}
+
+document.getElementById('testi-next')?.addEventListener('click', () => {
+  testiIdx = (testiIdx + 1) % total;
+  updateCarousel();
+});
+document.getElementById('testi-prev')?.addEventListener('click', () => {
+  testiIdx = (testiIdx - 1 + total) % total;
+  updateCarousel();
+});
+dots.forEach((d, i) => d.addEventListener('click', () => { testiIdx = i; updateCarousel(); }));
+
+// Auto-rotate
+setInterval(() => {
+  testiIdx = (testiIdx + 1) % total;
+  updateCarousel();
+}, 5000);
+window.addEventListener('resize', updateCarousel);
+updateCarousel();
+
+// ── Portfolio Filter ─────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const filter = this.textContent.trim().toLowerCase();
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.remove('btn-sky', 'text-white', 'border-transparent');
+      b.classList.add('text-gray-600', 'border-sky-200');
+    });
+    this.classList.add('btn-sky');
+    this.classList.remove('text-gray-600', 'border-sky-200');
+
+    document.querySelectorAll('.portfolio-card').forEach(card => {
+      const cat = card.dataset.category?.toLowerCase() || '';
+      if (filter === 'tous' || cat === filter) {
+        card.style.display = '';
+        setTimeout(() => card.style.opacity = '1', 10);
+      } else {
+        card.style.opacity = '0';
+        setTimeout(() => card.style.display = 'none', 300);
+      }
+    });
+  });
+});
+
+// ── FAQ Accordion ────────────────────────────────────
+document.querySelectorAll('.faq-trigger').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const item = this.closest('.faq-item');
+    const answer = item.querySelector('.faq-answer');
+    const chevron = item.querySelector('.faq-chevron');
+    const isOpen = answer.classList.contains('open');
+
+    // Close all
+    document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-chevron').forEach(c => c.classList.remove('open'));
+    document.querySelectorAll('.faq-item').forEach(i => i.querySelector('.glass-card, .faq-item')?.classList.remove('border-sky-400'));
+
+    if (!isOpen) {
+      answer.classList.add('open');
+      chevron.classList.add('open');
+    }
+  });
+});
+
+// ── Mission Form ─────────────────────────────────────
+const missionForm = document.getElementById('mission-post-form');
+const formSuccess = document.getElementById('form-success');
+const newMissionBtn = document.getElementById('new-mission-btn');
+const charCount = document.getElementById('char-count');
+const textarea = missionForm?.querySelector('textarea[name="description"]');
+
+textarea?.addEventListener('input', function() {
+  const len = this.value.length;
+  charCount.textContent = `${len} / 1000`;
+  if (len > 900) charCount.classList.add('text-rose-500');
+  else charCount.classList.remove('text-rose-500');
+  if (len > 1000) this.value = this.value.slice(0, 1000);
+});
+
+// Dropzone
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const fileName = document.getElementById('file-name');
+const fileLabel = document.getElementById('file-label');
+
+dropzone?.addEventListener('click', () => fileInput?.click());
+dropzone?.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-sky-500', 'bg-sky-50'); });
+dropzone?.addEventListener('dragleave', () => dropzone.classList.remove('border-sky-500', 'bg-sky-50'));
+dropzone?.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('border-sky-500', 'bg-sky-50');
+  const file = e.dataTransfer.files[0];
+  if (file) showFile(file);
+});
+fileInput?.addEventListener('change', function() {
+  if (this.files[0]) showFile(this.files[0]);
+});
+function showFile(file) {
+  fileName.classList.remove('hidden');
+  fileName.classList.add('flex');
+  fileLabel.textContent = `${file.name} (${(file.size/1024).toFixed(0)} KB)`;
+}
+
+missionForm?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('[type="submit"]');
+  const submitText = document.getElementById('submit-text');
+  btn.disabled = true;
+  submitText.textContent = 'Publication en cours...';
+  btn.querySelector('i').className = 'fa-solid fa-spinner fa-spin';
+
+  setTimeout(() => {
+    missionForm.classList.add('hidden');
+    formSuccess.classList.remove('hidden');
+  }, 1800);
+});
+
+newMissionBtn?.addEventListener('click', () => {
+  missionForm.classList.remove('hidden');
+  formSuccess.classList.add('hidden');
+  missionForm.reset();
+  charCount.textContent = '0 / 1000';
+  fileName.classList.add('hidden');
+  const btn = missionForm.querySelector('[type="submit"]');
+  btn.disabled = false;
+  document.getElementById('submit-text').textContent = 'Publier ma mission gratuitement';
+  btn.querySelector('i').className = 'fa-solid fa-paper-plane';
+});
+
+// ── Contact Form ──────────────────────────────────────
+document.getElementById('contact-form')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('[type="submit"]');
+  btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Message envoyé !';
+  btn.classList.add('bg-green-500');
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Envoyer le message';
+    btn.classList.remove('bg-green-500');
+    btn.disabled = false;
+    this.reset();
+  }, 3000);
+});
+
+// ── Smooth scroll for anchor links ───────────────────
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
 </script>
-{% endblock %}
+</body>
+</html>
