@@ -191,28 +191,34 @@ def dashboard(request):
         return redirect('/admin/')
     elif user.role == User.Role.FREELANCE.value:
         from contracts.models import Mission, Application
-        missions = Mission.objects.filter(status='active').order_by('-created_at')
+        from django.db.models import Count
+        missions = Mission.objects.filter(status='open').select_related('client').order_by('-created_at')
         mission_count = missions.count()
-        application_count = Application.objects.filter(freelance=user).count()
-        urgent_count = missions.filter(urgency='urgent').count()
+        applications = Application.objects.filter(freelance=user).select_related('mission').order_by('-created_at')
+        application_count = applications.count()
+        urgent_count = missions.filter(urgency='high').count()
         return render(request, 'accounts/dashboard_freelance.html', {
             'profile': user.freelance_profile,
             'missions': missions,
+            'applications': applications,
             'mission_count': mission_count,
             'application_count': application_count,
             'urgent_count': urgent_count,
         })
     elif user.role == User.Role.CLIENT.value:
+        from contracts.models import Mission as ClientMission
         freelance_count = FreelanceProfile.objects.filter(is_verified=True).count()
         contract_count = Contract.objects.filter(client=user).count()
         recent_contracts = Contract.objects.filter(client=user).order_by('-created_at')[:5]
         freelancers = FreelanceProfile.objects.filter(is_verified=True).select_related('user').order_by('-rating')[:20]
+        client_missions = ClientMission.objects.filter(client=user).order_by('-created_at')
         return render(request, 'accounts/dashboard_client.html', {
             'profile': user.client_profile,
             'freelance_count': freelance_count,
             'contract_count': contract_count,
             'recent_contracts': recent_contracts,
             'freelancers': freelancers,
+            'client_missions': client_missions,
         })
     return redirect('accounts:choice_register')  # AJOUTÉ : namespace 'accounts:'
 
@@ -418,5 +424,55 @@ def parametre_view(request):
 
 def choice_register(request):
     if request.user.is_authenticated:
-        return redirect('accounts:dashboard')  # AJOUTÉ : namespace 'accounts:'
+        return redirect('accounts:dashboard')
     return render(request, 'accounts/choice_register.html')
+
+
+import json
+
+def freelance_list_view(request):
+    freelances = FreelanceProfile.objects.filter(is_verified=True).select_related('user').order_by('-rating')
+
+    freelances_data = []
+    for f in freelances:
+        avatar_name = f.user.username[:2].upper() if len(f.user.username) >= 2 else (f.user.username[0].upper() if f.user.username else '?')
+        category_map = {
+            'web': 'Developpement Web', 'design': 'Design', 'marketing': 'Marketing Digital',
+            'writing': 'Redaction', 'video': 'Video', 'translation': 'Traduction',
+        }
+        specialty = (f.specialty or f.skill_list[0] if f.skill_list else 'general').lower()
+        category = 'Developpement Web'
+        for key, val in category_map.items():
+            if key in specialty:
+                category = val
+                break
+
+        avatar_class_map = {
+            'Developpement Web': 'dev', 'Design': 'designer',
+            'Marketing Digital': 'marketing', 'Redaction': 'writer',
+            'Video': 'designer', 'Traduction': 'writer',
+        }
+        avatar_class = avatar_class_map.get(category, 'freelance')
+
+        status = 'available' if f.is_verified else 'unavailable'
+
+        freelances_data.append({
+            'id': f.id,
+            'name': f.user.username,
+            'title': f.title,
+            'category': category,
+            'languages': ['Français', 'Anglais'],
+            'domain': 'Tech',
+            'rating': float(f.rating),
+            'reviews': 0,
+            'rate': float(f.hourly_rate),
+            'status': status,
+            'skills': f.skill_list,
+            'avatar': avatar_name,
+            'avatarClass': avatar_class,
+            'description': f.bio or f"Freelance {f.title} disponible sur FreelanceHub",
+        })
+
+    return render(request, 'accounts/liste_freelanceur.html', {
+        'freelances_json': json.dumps(freelances_data),
+    })

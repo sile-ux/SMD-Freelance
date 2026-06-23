@@ -1,10 +1,9 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Missions - FreelanceHub</title>
+    <title>Liste des Freelances - FreelanceHub</title>
     
     <!-- Police Rubik -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +30,7 @@
         }
 
         /* ===== CONTENEUR PRINCIPAL ===== */
-        .missions-wrap {
+        .freelances-wrap {
             width: 100vw;
             height: 100vh;
             display: flex;
@@ -41,7 +40,7 @@
         }
 
         /* ===== HEADER ===== */
-        .missions-header {
+        .freelances-header {
             background: #ffffff;
             padding: 16px 40px;
             display: flex;
@@ -51,34 +50,34 @@
             flex-shrink: 0;
         }
 
-        .missions-header .logo {
+        .freelances-header .logo {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .missions-header .logo h1 {
+        .freelances-header .logo h1 {
             font-size: 1.3rem;
             font-weight: 800;
             color: #1a365d;
         }
 
-        .missions-header .logo h1 span {
+        .freelances-header .logo h1 span {
             color: #4299e1;
         }
 
-        .missions-header .right {
+        .freelances-header .right {
             display: flex;
             align-items: center;
             gap: 16px;
         }
 
-        .missions-header .right .date {
+        .freelances-header .right .date {
             font-size: 0.82rem;
             color: #718096;
         }
 
-        .missions-header .right .profile {
+        .freelances-header .right a.profile {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -88,14 +87,16 @@
             border: 1px solid #dce7f5;
             cursor: pointer;
             transition: 0.15s;
+            text-decoration: none;
+            color: inherit;
         }
 
-        .missions-header .right .profile:hover {
+        .freelances-header .right .profile:hover {
             background: #ebf8ff;
             border-color: #bee3f8;
         }
 
-        .missions-header .right .profile .avatar {
+        .freelances-header .right .profile .avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -108,19 +109,14 @@
             font-size: 0.8rem;
         }
 
-        .missions-header .right a.profile {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .missions-header .right .profile .name {
+        .freelances-header .right .profile .name {
             font-weight: 500;
             font-size: 0.85rem;
             color: #1a365d;
         }
 
         /* ===== CONTENU ===== */
-        .missions-content {
+        .freelances-content {
             flex: 1;
             overflow: hidden;
             padding: 24px 40px 30px 40px;
@@ -157,14 +153,12 @@
         }
 
         .search-bar {
-            display: flex;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
             gap: 12px;
-            flex-wrap: wrap;
         }
 
         .search-bar .input-wrap {
-            flex: 1;
-            min-width: 200px;
             position: relative;
         }
 
@@ -198,13 +192,7 @@
             height: 20px;
         }
 
-        .search-bar .filter-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .search-bar .filter-group select {
+        .search-bar select {
             padding: 12px 16px;
             border: 1.5px solid #dce7f5;
             border-radius: 10px;
@@ -221,13 +209,13 @@
             background-position: right 12px center;
         }
 
-        .search-bar .filter-group select:focus {
+        .search-bar select:focus {
             border-color: #4299e1;
             outline: none;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08);
         }
 
-        .search-bar .filter-group .clear-btn {
+        .search-bar .clear-btn {
             padding: 12px 20px;
             border: 1.5px solid #dce7f5;
             border-radius: 10px;
@@ -237,34 +225,31 @@
             font-size: 0.85rem;
             cursor: pointer;
             transition: 0.15s;
+            white-space: nowrap;
         }
 
-        .search-bar .filter-group .clear-btn:hover {
+        .search-bar .clear-btn:hover {
             background: #f7fafc;
             border-color: #bee3f8;
         }
 
-        /* ===== LISTE DES MISSIONS ===== */
-        .missions-list {
+        /* ===== LISTE DES FREELANCES ===== */
+        .freelances-list {
             flex: 1;
             overflow-y: auto;
             padding-right: 4px;
         }
 
-        .missions-list::-webkit-scrollbar {
+        .freelances-list::-webkit-scrollbar {
             width: 6px;
         }
 
-        .missions-list::-webkit-scrollbar-thumb {
+        .freelances-list::-webkit-scrollbar-thumb {
             background: #bee3f8;
             border-radius: 8px;
         }
 
-        .missions-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .mission-card {
+        .freelance-card {
             background: #ffffff;
             border-radius: 14px;
             border: 1px solid #dce7f5;
@@ -272,24 +257,58 @@
             margin-bottom: 14px;
             transition: all 0.15s;
             display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 16px;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
             align-items: start;
         }
 
-        .mission-card:hover {
+        .freelance-card:hover {
             border-color: #bee3f8;
             box-shadow: 0 4px 16px rgba(66, 153, 225, 0.08);
             transform: translateY(-2px);
         }
 
-        .mission-card .info {
+        .freelance-card .avatar-large {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
-            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #fff;
+            flex-shrink: 0;
+            margin-top: 4px;
         }
 
-        .mission-card .info .title {
+        .freelance-card .avatar-large.freelance {
+            background: #7c6cf0;
+        }
+
+        .freelance-card .avatar-large.designer {
+            background: #4fd1c5;
+        }
+
+        .freelance-card .avatar-large.dev {
+            background: #4299e1;
+        }
+
+        .freelance-card .avatar-large.marketing {
+            background: #ed64a6;
+        }
+
+        .freelance-card .avatar-large.writer {
+            background: #f6ad55;
+        }
+
+        .freelance-card .info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .freelance-card .info .name {
             font-size: 1.05rem;
             font-weight: 700;
             color: #1a365d;
@@ -297,38 +316,68 @@
             transition: 0.15s;
         }
 
-        .mission-card .info .title:hover {
+        .freelance-card .info .name:hover {
             color: #4299e1;
         }
 
-        .mission-card .info .meta {
+        .freelance-card .info .title {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 400;
+        }
+
+        .freelance-card .info .meta {
             display: flex;
             flex-wrap: wrap;
             gap: 12px 20px;
             font-size: 0.82rem;
             color: #718096;
+            margin-top: 2px;
         }
 
-        .mission-card .info .meta .item {
+        .freelance-card .info .meta .item {
             display: flex;
             align-items: center;
             gap: 5px;
         }
 
-        .mission-card .info .meta .item lord-icon {
+        .freelance-card .info .meta .item lord-icon {
             width: 16px;
             height: 16px;
         }
 
-        .mission-card .info .tags {
+        .freelance-card .info .rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .freelance-card .info .rating .stars {
+            display: flex;
+            gap: 2px;
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+
+        .freelance-card .info .rating .stars .empty {
+            color: #dce7f5;
+        }
+
+        .freelance-card .info .rating .count {
+            font-size: 0.78rem;
+            color: #718096;
+        }
+
+        .freelance-card .info .tags {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        .mission-card .info .tags .tag {
-            padding: 2px 12px;
+        .freelance-card .info .tags .tag {
+            padding: 3px 14px;
             border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 500;
@@ -336,33 +385,22 @@
             color: #2b6cb0;
         }
 
-        .mission-card .info .tags .tag.high {
-            background: #fed7d7;
-            color: #e53e3e;
-        }
-
-        .mission-card .info .tags .tag.medium {
-            background: #fefcbf;
+        .freelance-card .info .tags .tag.language {
+            background: #fef3c7;
             color: #975a16;
         }
 
-        .mission-card .info .tags .tag.low {
+        .freelance-card .info .tags .tag.domain {
             background: #c6f6d5;
             color: #276749;
         }
 
-        .mission-card .info .desc {
-            font-size: 0.88rem;
-            color: #4a5568;
-            line-height: 1.5;
-            margin-top: 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .freelance-card .info .tags .tag.category {
+            background: #fed7d7;
+            color: #e53e3e;
         }
 
-        .mission-card .right {
+        .freelance-card .right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -370,40 +408,35 @@
             flex-shrink: 0;
         }
 
-        .mission-card .right .budget {
-            font-size: 1.2rem;
+        .freelance-card .right .rate {
+            font-size: 1.1rem;
             font-weight: 700;
             color: #4299e1;
         }
 
-        .mission-card .right .status {
+        .freelance-card .right .status {
             padding: 3px 14px;
             border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 600;
         }
 
-        .mission-card .right .status.open {
+        .freelance-card .right .status.available {
             background: #c6f6d5;
             color: #276749;
         }
 
-        .mission-card .right .status.in-progress {
+        .freelance-card .right .status.busy {
             background: #fefcbf;
             color: #975a16;
         }
 
-        .mission-card .right .status.closed {
-            background: #edf2f7;
-            color: #718096;
-        }
-
-        .mission-card .right .status.cancelled {
+        .freelance-card .right .status.unavailable {
             background: #fed7d7;
             color: #e53e3e;
         }
 
-        .mission-card .right .btn-apply {
+        .freelance-card .right .btn-contact {
             padding: 6px 20px;
             border: none;
             border-radius: 8px;
@@ -415,23 +448,21 @@
             cursor: pointer;
             transition: 0.15s;
             margin-top: 4px;
+            width: 100%;
         }
 
-        .mission-card .right .btn-apply:hover {
+        .freelance-card .right .btn-contact:hover {
             background: #3182ce;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
         }
 
-        .mission-card .right .btn-apply.applied {
+        .freelance-card .right .btn-contact.bookmarked {
             background: #48bb78;
-            cursor: default;
         }
 
-        .mission-card .right .btn-apply.applied:hover {
-            background: #48bb78;
-            transform: none;
-            box-shadow: none;
+        .freelance-card .right .btn-contact.bookmarked:hover {
+            background: #38a169;
         }
 
         /* ===== PAS DE RÉSULTATS ===== */
@@ -469,49 +500,59 @@
         }
 
         /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .search-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         @media (max-width: 1024px) {
-            .missions-header {
+            .freelances-header {
                 padding: 14px 24px;
             }
 
-            .missions-content {
+            .freelances-content {
                 padding: 20px 24px 24px 24px;
             }
 
-            .mission-card {
+            .freelance-card {
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
 
-            .mission-card .right {
+            .freelance-card .right {
                 flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
                 width: 100%;
                 flex-wrap: wrap;
             }
+
+            .freelance-card .right .btn-contact {
+                width: auto;
+            }
         }
 
         @media (max-width: 768px) {
-            .missions-header {
+            .freelances-header {
                 padding: 12px 16px;
                 flex-wrap: wrap;
                 gap: 8px;
             }
 
-            .missions-header .logo h1 {
+            .freelances-header .logo h1 {
                 font-size: 1.1rem;
             }
 
-            .missions-header .right .date {
+            .freelances-header .right .date {
                 display: none;
             }
 
-            .missions-header .right .profile .name {
+            .freelances-header .right .profile .name {
                 font-size: 0.75rem;
             }
 
-            .missions-content {
+            .freelances-content {
                 padding: 14px 16px 20px 16px;
             }
 
@@ -526,92 +567,105 @@
             }
 
             .search-bar {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
 
-            .search-bar .input-wrap {
-                min-width: 100%;
-            }
-
-            .search-bar .filter-group {
+            .search-bar .clear-btn {
                 width: 100%;
+                text-align: center;
             }
 
-            .search-bar .filter-group select {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .search-bar .filter-group .clear-btn {
-                flex-shrink: 0;
-            }
-
-            .mission-card {
+            .freelance-card {
                 padding: 16px 18px;
             }
 
-            .mission-card .info .title {
+            .freelance-card .avatar-large {
+                width: 48px;
+                height: 48px;
+                font-size: 1rem;
+            }
+
+            .freelance-card .info .name {
                 font-size: 0.95rem;
             }
 
-            .mission-card .info .meta {
+            .freelance-card .info .meta {
                 font-size: 0.75rem;
                 gap: 8px 14px;
             }
 
-            .mission-card .right .budget {
+            .freelance-card .right .rate {
                 font-size: 1rem;
             }
 
-            .mission-card .right .btn-apply {
-                padding: 5px 16px;
+            .freelance-card .right .btn-contact {
                 font-size: 0.75rem;
+                padding: 5px 16px;
+            }
+
+            .freelance-card {
+                grid-template-columns: auto 1fr;
+            }
+
+            .freelance-card .right {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
             }
         }
 
         @media (max-width: 480px) {
-            .missions-header .right .profile {
+            .freelances-header .right .profile {
                 padding: 3px 8px 3px 3px;
             }
 
-            .missions-header .right .profile .avatar {
+            .freelances-header .right .profile .avatar {
                 width: 28px;
                 height: 28px;
                 font-size: 0.7rem;
             }
 
-            .missions-header .right .profile .name {
+            .freelances-header .right .profile .name {
                 font-size: 0.7rem;
             }
 
-            .search-bar .filter-group {
-                flex-direction: column;
+            .freelance-card {
+                grid-template-columns: 1fr;
+                text-align: center;
             }
 
-            .search-bar .filter-group select {
-                width: 100%;
+            .freelance-card .avatar-large {
+                margin: 0 auto;
             }
 
-            .mission-card {
-                padding: 14px 14px;
+            .freelance-card .info .meta {
+                justify-content: center;
             }
 
-            .mission-card .right {
+            .freelance-card .info .tags {
+                justify-content: center;
+            }
+
+            .freelance-card .info .rating {
+                justify-content: center;
+            }
+
+            .freelance-card .right {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 6px;
             }
 
-            .mission-card .right .budget {
-                text-align: center;
-            }
-
-            .mission-card .right .status {
-                text-align: center;
-            }
-
-            .mission-card .right .btn-apply {
+            .freelance-card .right .btn-contact {
                 width: 100%;
+                text-align: center;
+            }
+
+            .freelance-card .right .status {
+                text-align: center;
+            }
+
+            .freelance-card .right .rate {
                 text-align: center;
             }
         }
@@ -628,23 +682,23 @@
             }
         }
 
-        .mission-card {
+        .freelance-card {
             animation: fadeInUp 0.3s ease forwards;
         }
 
-        .mission-card:nth-child(2) { animation-delay: 0.05s; }
-        .mission-card:nth-child(3) { animation-delay: 0.1s; }
-        .mission-card:nth-child(4) { animation-delay: 0.15s; }
-        .mission-card:nth-child(5) { animation-delay: 0.2s; }
-        .mission-card:nth-child(6) { animation-delay: 0.25s; }
+        .freelance-card:nth-child(2) { animation-delay: 0.05s; }
+        .freelance-card:nth-child(3) { animation-delay: 0.1s; }
+        .freelance-card:nth-child(4) { animation-delay: 0.15s; }
+        .freelance-card:nth-child(5) { animation-delay: 0.2s; }
+        .freelance-card:nth-child(6) { animation-delay: 0.25s; }
     </style>
 </head>
 <body>
 
-    <div class="missions-wrap">
+    <div class="freelances-wrap">
 
         <!-- ===== HEADER ===== -->
-        <header class="missions-header">
+        <header class="freelances-header">
             <div class="logo">
                 <lord-icon
                     src="https://cdn.lordicon.com/ktheyllq.json"
@@ -657,8 +711,8 @@
             <div class="right">
                 <span class="date" id="currentDate"></span>
                 <nav style="display:flex;gap:12px;align-items:center;font-size:0.85rem;font-weight:500;">
-                    <a href="{% url 'contracts:contract_list' %}" style="color:#4299e1;text-decoration:none;padding:6px 14px;border-radius:8px;background:#ebf8ff;">Missions</a>
-                    <a href="{% url 'accounts:freelance_list' %}" style="color:#4a5568;text-decoration:none;padding:6px 14px;border-radius:8px;transition:0.15s;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='transparent'">Freelancers</a>
+                    <a href="{% url 'contracts:contract_list' %}" style="color:#4a5568;text-decoration:none;padding:6px 14px;border-radius:8px;transition:0.15s;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='transparent'">Missions</a>
+                    <a href="{% url 'accounts:freelance_list' %}" style="color:#4299e1;text-decoration:none;padding:6px 14px;border-radius:8px;background:#ebf8ff;">Freelancers</a>
                 </nav>
                 {% if user.is_authenticated %}
                 <a href="{% url 'accounts:dashboard' %}" class="profile">
@@ -675,142 +729,140 @@
         </header>
 
         <!-- ===== CONTENU ===== -->
-        <div class="missions-content">
+        <div class="freelances-content">
 
             <!-- Recherche -->
             <div class="search-section">
                 <div class="top">
-                    <h2>📋 Toutes les missions</h2>
-                    <span class="count" id="missionCount">12 missions</span>
+                    <h2>👥 Freelances disponibles</h2>
+                    <span class="count" id="freelanceCount">18 freelances</span>
                 </div>
                 <div class="search-bar">
                     <div class="input-wrap">
                         <span class="icon">
                             <lord-icon src="https://cdn.lordicon.com/npwmqdcn.json" trigger="hover" colors="primary:#718096" style="width:20px;height:20px;"></lord-icon>
                         </span>
-                        <input type="text" id="searchInput" placeholder="Rechercher une mission..." oninput="filterMissions()">
+                        <input type="text" id="searchInput" placeholder="Rechercher par nom, compétence..." oninput="filterFreelances()">
                     </div>
-                    <div class="filter-group">
-                        <select id="filterStatus" onchange="filterMissions()">
-                            <option value="all">Tous les statuts</option>
-                            <option value="open">Ouvertes</option>
-                            <option value="in-progress">En cours</option>
-                            <option value="closed">Terminées</option>
-                            <option value="cancelled">Annulées</option>
-                        </select>
-                        <select id="filterBudget" onchange="filterMissions()">
-                            <option value="all">Tous les budgets</option>
-                            <option value="0-500">Moins de 500€</option>
-                            <option value="500-1000">500€ - 1000€</option>
-                            <option value="1000-2000">1000€ - 2000€</option>
-                            <option value="2000+">Plus de 2000€</option>
-                        </select>
-                        <button class="clear-btn" onclick="clearFilters()">Réinitialiser</button>
-                        {% if user.is_authenticated and user.role == 'CLIENT' %}
-                        <a href="{% url 'contracts:create_contract' %}" class="clear-btn" style="background:#4299e1;color:#fff;border-color:#4299e1;text-decoration:none;">+ Nouvelle mission</a>
-                        {% endif %}
-                    </div>
+                    <select id="filterCategory" onchange="filterFreelances()">
+                        <option value="all">📂 Toutes catégories</option>
+                        <option value="Developpement Web">💻 Développement Web</option>
+                        <option value="Design">🎨 Design</option>
+                        <option value="Marketing Digital">📊 Marketing Digital</option>
+                        <option value="Redaction">✍️ Rédaction</option>
+                        <option value="Video">🎬 Vidéo</option>
+                        <option value="Traduction">🌍 Traduction</option>
+                    </select>
+                    <select id="filterLanguage" onchange="filterFreelances()">
+                        <option value="all">🗣️ Tous langages</option>
+                        <option value="Français">Français</option>
+                        <option value="Anglais">Anglais</option>
+                        <option value="Espagnol">Espagnol</option>
+                        <option value="Arabe">Arabe</option>
+                        <option value="Allemand">Allemand</option>
+                        <option value="Italien">Italien</option>
+                    </select>
+                    <select id="filterDomain" onchange="filterFreelances()">
+                        <option value="all">🏷️ Tous domaines</option>
+                        <option value="Tech">💻 Tech</option>
+                        <option value="Créatif">🎨 Créatif</option>
+                        <option value="Business">📈 Business</option>
+                        <option value="Communication">📢 Communication</option>
+                        <option value="Formation">📚 Formation</option>
+                    </select>
+                    <button class="clear-btn" onclick="clearFilters()">✕ Réinitialiser</button>
                 </div>
             </div>
 
             <!-- Liste -->
-            <div class="missions-list" id="missionsList">
-                <!-- Les missions sont générées par JS -->
+            <div class="freelances-list" id="freelancesList">
+                <!-- Les freelances sont générés par JS -->
             </div>
 
             <!-- État vide -->
             <div class="empty-state" id="emptyState">
                 <lord-icon src="https://cdn.lordicon.com/hcifhzzs.json" trigger="loop" colors="primary:#4299e1"></lord-icon>
-                <h3>Aucune mission trouvée</h3>
+                <h3>Aucun freelance trouvé</h3>
                 <p>Essayez de modifier vos filtres de recherche</p>
             </div>
 
         </div>
     </div>
 
-    {{ missions_json|json_script:"missionsData" }}
+    {{ freelances_json|json_script:"freelancesData" }}
 
     <script>
-        // ===== DONNÉES DES MISSIONS (depuis le backend) =====
-        const missions = JSON.parse(document.getElementById('missionsData').textContent);
+        // ===== DONNÉES DES FREELANCES (depuis le backend) =====
+        const freelances = JSON.parse(document.getElementById('freelancesData').textContent);
 
         // ===== RENDERING =====
-        let filteredMissions = [...missions];
+        let filteredFreelances = [...freelances];
 
-        function renderMissions(list) {
-            const container = document.getElementById('missionsList');
+        function renderFreelances(list) {
+            const container = document.getElementById('freelancesList');
             const empty = document.getElementById('emptyState');
-            const count = document.getElementById('missionCount');
+            const count = document.getElementById('freelanceCount');
 
             if (list.length === 0) {
                 container.innerHTML = '';
                 empty.classList.add('show');
-                count.textContent = '0 mission';
+                count.textContent = '0 freelance';
                 return;
             }
 
             empty.classList.remove('show');
-            count.textContent = list.length + ' mission' + (list.length > 1 ? 's' : '');
+            count.textContent = list.length + ' freelance' + (list.length > 1 ? 's' : '');
 
             container.innerHTML = '';
-            list.forEach((m, index) => {
+            list.forEach((f, index) => {
                 const statusMap = {
-                    open: '🟢 Ouverte',
-                    'in-progress': '🟡 En cours',
-                    closed: '🔵 Terminée',
-                    cancelled: '🔴 Annulée'
+                    available: '🟢 Disponible',
+                    busy: '🟡 En mission',
+                    unavailable: '🔴 Indisponible'
                 };
-                const statusClass = m.status;
+                const statusClass = f.status;
 
-                const urgencyMap = {
-                    high: 'high',
-                    medium: 'medium',
-                    low: 'low'
-                };
-                const urgencyLabel = {
-                    high: '🔥 Urgent',
-                    medium: '⚠️ Moyen',
-                    low: '✅ Normal'
-                };
+                const stars = '★'.repeat(Math.floor(f.rating)) + '☆'.repeat(5 - Math.floor(f.rating));
 
                 const card = document.createElement('div');
-                card.className = 'mission-card';
+                card.className = 'freelance-card';
                 card.style.animationDelay = (index * 0.04) + 's';
 
+                const languagesDisplay = f.languages.join(', ');
+                const skillsDisplay = f.skills.map(s => `<span class="tag">#${s}</span>`).join('');
+
                 card.innerHTML = `
+                    <div class="avatar-large ${f.avatarClass}">${f.avatar}</div>
                     <div class="info">
-                        <div class="title" onclick="viewMission(${m.id})">${m.title}</div>
+                        <div class="name" onclick="viewFreelance(${f.id})">${f.name}</div>
+                        <div class="title">${f.title}</div>
                         <div class="meta">
                             <span class="item">
                                 <lord-icon src="https://cdn.lordicon.com/dmoahkky.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
-                                ${m.client}
+                                ${f.category}
                             </span>
                             <span class="item">
-                                <lord-icon src="https://cdn.lordicon.com/gjvyxyec.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
-                                ${m.category}
+                                <lord-icon src="https://cdn.lordicon.com/hfiwfwiw.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
+                                ${languagesDisplay}
                             </span>
                             <span class="item">
-                                <lord-icon src="https://cdn.lordicon.com/ihcskfym.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
-                                ${m.location}
+                                <lord-icon src="https://cdn.lordicon.com/mgmnoojh.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
+                                ${f.domain}
                             </span>
-                            <span class="item">
-                                <lord-icon src="https://cdn.lordicon.com/rmwqoigr.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
-                                ${m.date}
-                            </span>
+                        </div>
+                        <div class="rating">
+                            <span class="stars">${stars}</span>
+                            <span class="count">(${f.reviews} avis)</span>
                         </div>
                         <div class="tags">
-                            ${m.skills.map(s => `<span class="tag">#${s}</span>`).join('')}
-                            <span class="tag ${urgencyMap[m.urgency]}">${urgencyLabel[m.urgency]}</span>
+                            ${skillsDisplay}
                         </div>
-                        <div class="desc">${m.description}</div>
                     </div>
                     <div class="right">
-                        <div class="budget">${m.budget}€</div>
-                        <span class="status ${statusClass}">${statusMap[m.status]}</span>
-                        <button class="btn-apply ${m.status !== 'open' ? 'applied' : ''}" 
-                                onclick="${m.status === 'open' ? `applyMission(${m.id})` : 'event.stopPropagation();'}"
-                                ${m.status !== 'open' ? 'disabled' : ''}>
-                            ${m.status === 'open' ? '📩 Postuler' : m.status === 'in-progress' ? '⏳ En cours' : '✅ Fini'}
+                        <div class="rate">${f.rate}€ <span style="font-size:0.7rem;font-weight:400;color:#718096;">/h</span></div>
+                        <span class="status ${statusClass}">${statusMap[f.status]}</span>
+                        <button class="btn-contact" onclick="contactFreelance(${f.id})">
+                            💬 Contacter
                         </button>
                     </div>
                 `;
@@ -820,104 +872,81 @@
         }
 
         // ===== FILTRES =====
-        function filterMissions() {
+        function filterFreelances() {
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            const status = document.getElementById('filterStatus').value;
-            const budget = document.getElementById('filterBudget').value;
+            const category = document.getElementById('filterCategory').value;
+            const language = document.getElementById('filterLanguage').value;
+            const domain = document.getElementById('filterDomain').value;
 
-            filteredMissions = missions.filter(m => {
-                // Recherche
+            filteredFreelances = freelances.filter(f => {
                 let match = true;
+
+                // Recherche par nom, compétences, titre
                 if (search) {
-                    match = m.title.toLowerCase().includes(search) ||
-                            m.description.toLowerCase().includes(search) ||
-                            m.client.toLowerCase().includes(search) ||
-                            m.skills.some(s => s.toLowerCase().includes(search)) ||
-                            m.category.toLowerCase().includes(search);
+                    match = f.name.toLowerCase().includes(search) ||
+                            f.title.toLowerCase().includes(search) ||
+                            f.skills.some(s => s.toLowerCase().includes(search)) ||
+                            f.description.toLowerCase().includes(search) ||
+                            f.languages.some(l => l.toLowerCase().includes(search));
                 }
 
-                // Statut
-                if (match && status !== 'all') {
-                    match = m.status === status;
+                // Catégorie
+                if (match && category !== 'all') {
+                    match = f.category === category;
                 }
 
-                // Budget
-                if (match && budget !== 'all') {
-                    const parts = budget.split('-');
-                    if (parts.length === 2) {
-                        const min = parseInt(parts[0]);
-                        const max = parseInt(parts[1]);
-                        match = m.budget >= min && m.budget <= max;
-                    } else if (budget === '2000+') {
-                        match = m.budget >= 2000;
-                    }
+                // Langage
+                if (match && language !== 'all') {
+                    match = f.languages.includes(language);
+                }
+
+                // Domaine
+                if (match && domain !== 'all') {
+                    match = f.domain === domain;
                 }
 
                 return match;
             });
 
-            renderMissions(filteredMissions);
+            renderFreelances(filteredFreelances);
         }
 
         function clearFilters() {
             document.getElementById('searchInput').value = '';
-            document.getElementById('filterStatus').value = 'all';
-            document.getElementById('filterBudget').value = 'all';
-            filterMissions();
-        }
-
-        // ===== CSRF TOKEN =====
-        function getCSRFToken() {
-            const name = 'csrftoken';
-            const cookies = document.cookie.split(';');
-            for (let c of cookies) {
-                c = c.trim();
-                if (c.startsWith(name + '=')) return decodeURIComponent(c.substring(name.length + 1));
-            }
-            return '';
+            document.getElementById('filterCategory').value = 'all';
+            document.getElementById('filterLanguage').value = 'all';
+            document.getElementById('filterDomain').value = 'all';
+            filterFreelances();
         }
 
         // ===== ACTIONS =====
-        function applyMission(id) {
-            const mission = missions.find(m => m.id === id);
-            if (!mission) return;
+        function contactFreelance(id) {
+            const freelance = freelances.find(f => f.id === id);
+            if (!freelance) return;
 
-            if (!confirm(`Postuler à la mission :\n\n"${mission.title}"\n\nClient : ${mission.client}\nBudget : ${mission.budget}€\n\nSouhaitez-vous envoyer votre candidature ?`)) return;
-
-            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0', '/' + id + '/'), {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCSRFToken(),
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            })
-            .then(r => r.json())
-            .then(data => {
-                const cards = document.querySelectorAll('.mission-card');
-                cards.forEach(card => {
-                    const titleEl = card.querySelector('.title');
-                    if (titleEl && titleEl.textContent === mission.title) {
-                        const btn = card.querySelector('.btn-apply');
-                        if (btn) {
-                            if (data.status === 'success') {
-                                btn.textContent = '✅ Candidature envoyée';
-                                btn.classList.add('applied');
-                                btn.disabled = true;
-                            }
-                        }
-                    }
-                });
-                alert(data.message || '✅ Candidature envoyée !');
-            })
-            .catch(() => alert('❌ Erreur lors de l\'envoi de la candidature.'));
+            {% if user.is_authenticated %}
+            window.location.href = '{% url "chat:start_thread" 0 %}'.replace('/0', '/' + id + '/');
+            {% else %}
+            window.location.href = '{% url "accounts:login" %}';
+            {% endif %}
         }
 
-        function viewMission(id) {
-            const mission = missions.find(m => m.id === id);
-            if (!mission) return;
+        function viewFreelance(id) {
+            const freelance = freelances.find(f => f.id === id);
+            if (!freelance) return;
 
-            const skills = mission.skills && mission.skills.length ? mission.skills.join(', ') : 'Non spécifiées';
-            alert(`Détails de la mission :\n\n${mission.title}\n\n${mission.description}\n\nClient : ${mission.client}\nBudget : ${mission.budget}€\nDate : ${mission.date}\nLieu : ${mission.location}\nStatut : ${mission.status}\nCompétences : ${skills}`);
+            const stars = '★'.repeat(Math.floor(freelance.rating)) + '☆'.repeat(5 - Math.floor(freelance.rating));
+            const skills = freelance.skills && freelance.skills.length ? freelance.skills.join(', ') : 'Non spécifiées';
+
+            alert(`Détails du freelance :\n\n` +
+                  `${freelance.name}\n` +
+                  `${freelance.title}\n` +
+                  `Catégorie : ${freelance.category}\n` +
+                  `Tarif : ${freelance.rate}€/h\n` +
+                  `Note : ${stars} (${freelance.reviews} avis)\n` +
+                  `Statut : ${freelance.status === 'available' ? 'Disponible' : freelance.status === 'busy' ? 'En mission' : 'Indisponible'}\n` +
+                  `Compétences : ${skills}\n\n` +
+                  `${freelance.description}`);
         }
 
         // ===== DATE =====
@@ -930,7 +959,7 @@
                 year: 'numeric'
             });
 
-            renderMissions(missions);
+            renderFreelances(freelances);
         });
     </script>
 

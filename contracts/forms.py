@@ -2,11 +2,20 @@ from django import forms
 from django.utils.html import strip_tags
 from .models import Contract, Application, Mission
 
-# Formulaire pour la publication rapide depuis la page d'accueil
+
 class QuickMissionForm(forms.ModelForm):
     class Meta:
         model = Mission
-        fields = ['title', 'budget', 'skills_required', 'description']
+        fields = [
+            'title', 'description', 'category', 'location', 'duration',
+            'budget', 'payment_type', 'currency', 'skills_required',
+            'deadline', 'urgency', 'extra_info',
+        ]
+        widgets = {
+            'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 5}),
+            'extra_info': forms.Textarea(attrs={'rows': 3}),
+        }
 
 # Classe parente de sécurité pour nettoyer les failles XSS (balises HTML)
 class BaseSecureForm(forms.ModelForm):

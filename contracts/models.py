@@ -22,24 +22,72 @@ class Contract(models.Model):
 
 
 class Mission(models.Model):
+    CATEGORY_CHOICES = (
+        ('Developpement Web', 'Développement Web'),
+        ('Design', 'Design'),
+        ('Marketing Digital', 'Marketing Digital'),
+        ('Redaction', 'Rédaction'),
+        ('Video', 'Vidéo'),
+        ('Traduction', 'Traduction'),
+        ('Cybersecurite', 'Cybersécurité'),
+        ('IA', 'Intelligence Artificielle'),
+    )
+    LOCATION_CHOICES = (
+        ('Teletravail', 'Télétravail'),
+        ('Paris', 'Paris'),
+        ('Lyon', 'Lyon'),
+        ('Marseille', 'Marseille'),
+        ('Bordeaux', 'Bordeaux'),
+        ('Lille', 'Lille'),
+        ('Toulouse', 'Toulouse'),
+        ('Nantes', 'Nantes'),
+        ('Nice', 'Nice'),
+        ('Strasbourg', 'Strasbourg'),
+    )
+    DURATION_CHOICES = (
+        ('1-7 jours', '1-7 jours'),
+        ('1-2 semaines', '1-2 semaines'),
+        ('1 mois', '1 mois'),
+        ('1-3 mois', '1-3 mois'),
+        ('3-6 mois', '3-6 mois'),
+        ('6+ mois', '6+ mois'),
+    )
+    PAYMENT_CHOICES = (
+        ('fixed', 'Forfait'),
+        ('hourly', 'À l\'heure'),
+        ('daily', 'À la journée'),
+    )
+    CURRENCY_CHOICES = (
+        ('EUR', '€ EUR'),
+        ('USD', '$ USD'),
+        ('GBP', '£ GBP'),
+        ('XOF', 'FCFA XOF'),
+    )
     URGENCY_CHOICES = (
-        ('normal', 'Normal'),
-        ('urgent', 'Urgent'),
-        ('long', 'Long terme'),
+        ('low', 'Normal'),
+        ('medium', 'Moyen'),
+        ('high', 'Urgent'),
     )
     STATUS_CHOICES = (
-        ('active', 'Active'),
-        ('filled', 'Pourvue'),
+        ('open', 'Ouverte'),
+        ('in-progress', 'En cours'),
+        ('closed', 'Terminée'),
         ('cancelled', 'Annulée'),
     )
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='missions_posted', null=True, blank=True)
     title = models.CharField(max_length=200, verbose_name="Titre de la mission")
     description = models.TextField(verbose_name="Description du besoin")
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Developpement Web')
+    location = models.CharField(max_length=50, choices=LOCATION_CHOICES, default='Teletravail')
+    duration = models.CharField(max_length=20, choices=DURATION_CHOICES, default='1 mois')
     budget = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Budget estimé")
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='fixed')
+    currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES, default='EUR')
     skills_required = models.CharField(max_length=255, help_text="Séparez par des virgules")
     deadline = models.DateField(verbose_name="Date limite", null=True, blank=True)
-    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='normal')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='low')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    extra_info = models.TextField(verbose_name="Infos supplémentaires", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property

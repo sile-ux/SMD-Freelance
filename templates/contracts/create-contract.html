@@ -1,0 +1,1029 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer une mission - FreelanceHub</title>
+    
+    <!-- Police Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Lordicon -->
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+    <style>
+        /* ===== RESET ET PLEIN ÉCRAN ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Rubik', sans-serif;
+            background: #f0f4f8;
+        }
+
+        /* ===== CONTENEUR PRINCIPAL ===== */
+        .create-wrap {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f0f4f8;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .create-header {
+            background: #ffffff;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dce7f5;
+            flex-shrink: 0;
+        }
+
+        .create-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .create-header .logo h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1a365d;
+        }
+
+        .create-header .logo h1 span {
+            color: #4299e1;
+        }
+
+        .create-header .right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .create-header .right .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 12px 4px 4px;
+            border-radius: 30px;
+            background: #f7fafc;
+            border: 1px solid #dce7f5;
+            cursor: pointer;
+            transition: 0.15s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .create-header .right .profile:hover {
+            background: #ebf8ff;
+            border-color: #bee3f8;
+        }
+
+        .create-header .right .profile .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4299e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .create-header .right .profile .name {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a365d;
+        }
+
+        .create-header .right .back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 6px 16px;
+            border-radius: 8px;
+            background: #f7fafc;
+            border: 1px solid #dce7f5;
+            transition: 0.15s;
+        }
+
+        .create-header .right .back:hover {
+            background: #ebf8ff;
+            border-color: #4299e1;
+            color: #2b6cb0;
+        }
+
+        /* ===== CONTENU ===== */
+        .create-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px 40px 40px;
+        }
+
+        .create-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .create-content::-webkit-scrollbar-thumb {
+            background: #bee3f8;
+            border-radius: 8px;
+        }
+
+        /* ===== FORMULAIRE ===== */
+        .form-container {
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .form-container .page-title {
+            margin-bottom: 6px;
+        }
+
+        .form-container .page-title h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #1a365d;
+        }
+
+        .form-container .page-title p {
+            color: #718096;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #dce7f5;
+            padding: 36px 44px;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(66, 153, 225, 0.06);
+        }
+
+        .form-card .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .form-card .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 30px;
+            right: 30px;
+            height: 2px;
+            background: #dce7f5;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .form-card .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            z-index: 2;
+            background: #fff;
+            padding: 0 10px;
+        }
+
+        .form-card .step .num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            background: #dce7f5;
+            color: #718096;
+            transition: 0.3s;
+        }
+
+        .form-card .step.active .num {
+            background: #4299e1;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        .form-card .step .label {
+            font-size: 0.65rem;
+            color: #718096;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-card .step.active .label {
+            color: #2b6cb0;
+        }
+
+        /* ===== CHAMPS ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: #1a365d;
+            margin-bottom: 5px;
+        }
+
+        .form-group label .required {
+            color: #e53e3e;
+            margin-left: 2px;
+        }
+
+        .form-group .helper {
+            font-size: 0.78rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 10px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.95rem;
+            transition: 0.15s;
+            background: #fafbfc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #4299e1;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group select {
+            appearance: none;
+            padding-right: 36px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* ===== COMPÉTENCES ===== */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px 16px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 10px;
+            background: #fafbfc;
+            min-height: 52px;
+            transition: 0.15s;
+        }
+
+        .skills-container:focus-within {
+            border-color: #4299e1;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08);
+        }
+
+        .skills-container .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ebf8ff;
+            padding: 4px 12px 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2b6cb0;
+        }
+
+        .skills-container .skill-tag .remove {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #718096;
+            transition: 0.15s;
+        }
+
+        .skills-container .skill-tag .remove:hover {
+            color: #e53e3e;
+        }
+
+        .skills-container input {
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 80px;
+            outline: none;
+        }
+
+        .skills-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .skills-suggestions .suggestion {
+            padding: 3px 14px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #edf2f7;
+            color: #4a5568;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .skills-suggestions .suggestion:hover {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        /* ===== BOUTONS ===== */
+        .form-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid #dce7f5;
+        }
+
+        .form-actions .btn-primary {
+            padding: 14px 36px;
+            border: none;
+            border-radius: 12px;
+            background: #4299e1;
+            color: #fff;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-actions .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(66, 153, 225, 0.35);
+        }
+
+        .form-actions .btn-secondary {
+            padding: 14px 28px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 12px;
+            background: #fff;
+            color: #4a5568;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .form-actions .btn-secondary:hover {
+            background: #f7fafc;
+            border-color: #bee3f8;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .create-header {
+                padding: 14px 24px;
+            }
+
+            .create-content {
+                padding: 24px 24px 30px 24px;
+            }
+
+            .form-card {
+                padding: 28px 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .create-header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .create-header .logo h1 {
+                font-size: 1.1rem;
+            }
+
+            .create-header .right .profile .name {
+                font-size: 0.75rem;
+            }
+
+            .create-header .right .back span {
+                display: none;
+            }
+
+            .create-content {
+                padding: 16px 16px 24px 16px;
+            }
+
+            .form-container .page-title h2 {
+                font-size: 1.3rem;
+            }
+
+            .form-card {
+                padding: 20px 18px;
+                border-radius: 16px;
+            }
+
+            .form-card .step-indicator {
+                margin-bottom: 24px;
+            }
+
+            .form-card .step .label {
+                display: none;
+            }
+
+            .form-card .step .num {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-row-3 {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn-primary,
+            .form-actions .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 0.9rem;
+                padding: 10px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .create-header .right .profile {
+                padding: 3px 8px 3px 3px;
+            }
+
+            .create-header .right .profile .avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .create-header .right .profile .name {
+                font-size: 0.7rem;
+            }
+
+            .form-card {
+                padding: 16px 14px;
+            }
+
+            .form-container .page-title h2 {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a365d;
+            color: #fff;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            max-width: 90%;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: #276749;
+        }
+
+        .toast.error {
+            background: #c53030;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="create-wrap">
+
+        <!-- ===== HEADER ===== -->
+        <header class="create-header">
+            <div class="logo">
+                <lord-icon
+                    src="https://cdn.lordicon.com/ktheyllq.json"
+                    trigger="loop"
+                    colors="primary:#4299e1"
+                    style="width:32px;height:32px;">
+                </lord-icon>
+                <h1>Freelance<span>Hub</span></h1>
+            </div>
+            <div class="right">
+                <div class="back" onclick="goBack()">
+                    <lord-icon src="https://cdn.lordicon.com/npwmqdcn.json" trigger="hover" colors="primary:#4a5568" style="width:18px;height:18px;"></lord-icon>
+                    <span>Retour</span>
+                </div>
+                <nav style="display:flex;gap:12px;align-items:center;font-size:0.85rem;font-weight:500;">
+                    <a href="{% url 'contracts:contract_list' %}" style="color:#4a5568;text-decoration:none;padding:6px 14px;border-radius:8px;transition:0.15s;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='transparent'">Missions</a>
+                    <a href="{% url 'accounts:freelance_list' %}" style="color:#4a5568;text-decoration:none;padding:6px 14px;border-radius:8px;transition:0.15s;" onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='transparent'">Freelancers</a>
+                </nav>
+                {% if user.is_authenticated %}
+                <a href="{% url 'accounts:dashboard' %}" class="profile">
+                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <span class="name">{{ user.username }}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="profile">
+                    <div class="avatar">?</div>
+                    <span class="name">Connexion</span>
+                </a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- ===== CONTENU ===== -->
+        <div class="create-content">
+
+            <div class="form-container">
+
+                <div class="page-title">
+                    <h2>📝 Créer une mission</h2>
+                    <p>Remplissez les informations ci-dessous pour publier votre mission</p>
+                </div>
+
+                <div class="form-card">
+
+                    <!-- Steps -->
+                    <div class="step-indicator">
+                        <div class="step active">
+                            <div class="num">1</div>
+                            <div class="label">Informations</div>
+                        </div>
+                        <div class="step active">
+                            <div class="num">2</div>
+                            <div class="label">Compétences</div>
+                        </div>
+                        <div class="step active">
+                            <div class="num">3</div>
+                            <div class="label">Budget</div>
+                        </div>
+                        <div class="step">
+                            <div class="num">4</div>
+                            <div class="label">Publication</div>
+                        </div>
+                    </div>
+
+                    <form id="missionForm" onsubmit="submitMission(event)" method="post">
+                        {% csrf_token %}
+
+                        <!-- ===== SECTION 1 : INFORMATIONS ===== -->
+                        <div class="form-group">
+                            <label>Titre de la mission <span class="required">*</span></label>
+                            <input type="text" id="missionTitle" placeholder="Ex: Développement d'une application mobile" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description <span class="required">*</span></label>
+                            <textarea id="missionDesc" placeholder="Décrivez en détail votre mission, les objectifs, le contexte..." required></textarea>
+                            <div class="helper">Minimum 50 caractères</div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Catégorie <span class="required">*</span></label>
+                                <select id="missionCategory" required>
+                                    <option value="">Sélectionner une catégorie</option>
+                                    <option value="Developpement Web">💻 Développement Web</option>
+                                    <option value="Design">🎨 Design</option>
+                                    <option value="Marketing Digital">📊 Marketing Digital</option>
+                                    <option value="Redaction">✍️ Rédaction</option>
+                                    <option value="Video">🎬 Vidéo</option>
+                                    <option value="Traduction">🌍 Traduction</option>
+                                    <option value="Cybersecurite">🔒 Cybersécurité</option>
+                                    <option value="IA">🤖 IA & Machine Learning</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Lieu <span class="required">*</span></label>
+                                <select id="missionLocation" required>
+                                    <option value="">Sélectionner un lieu</option>
+                                    <option value="Teletravail">🏠 Télétravail</option>
+                                    <option value="Paris">📍 Paris</option>
+                                    <option value="Lyon">📍 Lyon</option>
+                                    <option value="Marseille">📍 Marseille</option>
+                                    <option value="Bordeaux">📍 Bordeaux</option>
+                                    <option value="Lille">📍 Lille</option>
+                                    <option value="Toulouse">📍 Toulouse</option>
+                                    <option value="Nantes">📍 Nantes</option>
+                                    <option value="Nice">📍 Nice</option>
+                                    <option value="Strasbourg">📍 Strasbourg</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label>Durée <span class="required">*</span></label>
+                                <select id="missionDuration" required>
+                                    <option value="">Sélectionner</option>
+                                    <option value="1-7 jours">1-7 jours</option>
+                                    <option value="1-2 semaines">1-2 semaines</option>
+                                    <option value="1 mois">1 mois</option>
+                                    <option value="1-3 mois">1-3 mois</option>
+                                    <option value="3-6 mois">3-6 mois</option>
+                                    <option value="6+ mois">6+ mois</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Urgence <span class="required">*</span></label>
+                                <select id="missionUrgency" required>
+                                    <option value="">Sélectionner</option>
+                                    <option value="low">🟢 Normal</option>
+                                    <option value="medium">🟡 Moyen</option>
+                                    <option value="high">🔴 Urgent</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date de début</label>
+                                <input type="date" id="missionDate">
+                            </div>
+                        </div>
+
+                        <!-- ===== SECTION 2 : COMPÉTENCES ===== -->
+                        <div class="form-group">
+                            <label>Compétences requises <span class="required">*</span></label>
+                            <div class="skills-container" id="skillsContainer">
+                                <input type="text" id="skillInput" placeholder="Ajouter une compétence..." onkeydown="addSkill(event)">
+                            </div>
+                            <div class="helper">Appuyez sur Entrée pour ajouter</div>
+                            <div class="skills-suggestions">
+                                <span class="suggestion" onclick="addSuggestedSkill('React')">React</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('Node.js')">Node.js</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('Python')">Python</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('Figma')">Figma</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('SEO')">SEO</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('WordPress')">WordPress</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('UI/UX')">UI/UX</span>
+                                <span class="suggestion" onclick="addSuggestedSkill('PHP')">PHP</span>
+                            </div>
+                        </div>
+
+                        <!-- ===== SECTION 3 : BUDGET ===== -->
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label>Budget <span class="required">*</span></label>
+                                <input type="number" id="missionBudget" placeholder="0" required min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Type de paiement <span class="required">*</span></label>
+                                <select id="paymentType" required>
+                                    <option value="">Sélectionner</option>
+                                    <option value="fixed">💰 Forfait</option>
+                                    <option value="hourly">⏱️ À l'heure</option>
+                                    <option value="daily">📅 À la journée</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Devise</label>
+                                <select id="currency">
+                                    <option value="EUR">€ EUR</option>
+                                    <option value="USD">$ USD</option>
+                                    <option value="GBP">£ GBP</option>
+                                    <option value="XOF">FCFA XOF</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ===== SECTION 4 : PUBLICATION ===== -->
+                        <div class="form-group">
+                            <label>📎 Fichiers joints (optionnel)</label>
+                            <input type="file" id="missionFiles" multiple accept=".pdf,.doc,.docx,.png,.jpg">
+                            <div class="helper">PDF, DOC, DOCX, PNG, JPG - Max 5MB</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>✉️ Informations supplémentaires</label>
+                            <textarea id="missionExtra" placeholder="Informations complémentaires pour les candidats..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="resetForm()">
+                                <lord-icon src="https://cdn.lordicon.com/npwmqdcn.json" trigger="hover" colors="primary:#4a5568" style="width:20px;height:20px;"></lord-icon>
+                                Réinitialiser
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#ffffff" style="width:22px;height:22px;"></lord-icon>
+                                Publier la mission
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== COMPÉTENCES =====
+        let skills = [];
+
+        function addSkill(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const input = document.getElementById('skillInput');
+                const skill = input.value.trim();
+                if (skill && !skills.includes(skill)) {
+                    skills.push(skill);
+                    renderSkills();
+                    input.value = '';
+                }
+            }
+        }
+
+        function addSuggestedSkill(skill) {
+            if (!skills.includes(skill)) {
+                skills.push(skill);
+                renderSkills();
+            }
+            document.getElementById('skillInput').focus();
+        }
+
+        function removeSkill(skill) {
+            skills = skills.filter(s => s !== skill);
+            renderSkills();
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            const input = document.getElementById('skillInput');
+            // Garder uniquement les tags + l'input
+            container.innerHTML = '';
+            skills.forEach(skill => {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag';
+                tag.innerHTML = `${skill} <span class="remove" onclick="removeSkill('${skill}')">✕</span>`;
+                container.appendChild(tag);
+            });
+            container.appendChild(input);
+            input.focus();
+        }
+
+        // ===== CSRF =====
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                c = c.trim();
+                if (c.startsWith(name + '=')) return decodeURIComponent(c.substring(name.length + 1));
+            }
+            return '';
+        }
+
+        // ===== SOUMISSION =====
+        function submitMission(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('missionTitle').value.trim();
+            const desc = document.getElementById('missionDesc').value.trim();
+            const category = document.getElementById('missionCategory').value;
+            const location = document.getElementById('missionLocation').value;
+            const duration = document.getElementById('missionDuration').value;
+            const urgency = document.getElementById('missionUrgency').value;
+            const date = document.getElementById('missionDate').value;
+            const budget = document.getElementById('missionBudget').value;
+            const paymentType = document.getElementById('paymentType').value;
+            const currency = document.getElementById('currency').value;
+            const extra = document.getElementById('missionExtra').value.trim();
+
+            if (!title || title.length < 5) {
+                showToast('Le titre doit contenir au moins 5 caractères', 'error');
+                document.getElementById('missionTitle').focus();
+                return;
+            }
+
+            if (!desc || desc.length < 50) {
+                showToast('La description doit contenir au moins 50 caractères', 'error');
+                document.getElementById('missionDesc').focus();
+                return;
+            }
+
+            if (!category) {
+                showToast('Veuillez sélectionner une catégorie', 'error');
+                return;
+            }
+
+            if (!location) {
+                showToast('Veuillez sélectionner un lieu', 'error');
+                return;
+            }
+
+            if (!duration) {
+                showToast('Veuillez sélectionner une durée', 'error');
+                return;
+            }
+
+            if (!urgency) {
+                showToast('Veuillez sélectionner un niveau d\'urgence', 'error');
+                return;
+            }
+
+            if (skills.length === 0) {
+                showToast('Ajoutez au moins une compétence', 'error');
+                document.getElementById('skillInput').focus();
+                return;
+            }
+
+            if (!budget || budget < 1) {
+                showToast('Veuillez entrer un budget valide', 'error');
+                document.getElementById('missionBudget').focus();
+                return;
+            }
+
+            if (!paymentType) {
+                showToast('Veuillez sélectionner un type de paiement', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', desc);
+            formData.append('category', category);
+            formData.append('location', location);
+            formData.append('duration', duration);
+            formData.append('urgency', urgency);
+            formData.append('deadline', date || '');
+            formData.append('skills_required', skills.join(', '));
+            formData.append('budget', budget);
+            formData.append('payment_type', paymentType);
+            formData.append('currency', currency);
+            formData.append('extra_info', extra);
+            formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+            const submitBtn = document.querySelector('.btn-primary');
+            submitBtn.innerHTML = 'Publication en cours...';
+            submitBtn.disabled = true;
+
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(r => r.json().then(data => ({ status: r.status, data })))
+            .then(({ status, data }) => {
+                if (data.status === 'success') {
+                    showToast('Mission publiée avec succès !', 'success');
+                    submitBtn.innerHTML = 'Publier une autre';
+                    submitBtn.style.background = '#276749';
+                    document.getElementById('missionForm').reset();
+                    skills = [];
+                    renderSkills();
+                } else {
+                    let msg = data.message || 'Erreur de validation';
+                    if (data.errors) {
+                        const errs = Object.values(data.errors).flat();
+                        msg = errs.join('. ');
+                    }
+                    showToast(msg, 'error');
+                    submitBtn.innerHTML = 'Publier la mission';
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(() => {
+                showToast('Erreur lors de la publication', 'error');
+                submitBtn.innerHTML = 'Publier la mission';
+                submitBtn.disabled = false;
+            });
+        }
+
+        // ===== RÉINITIALISATION =====
+        function resetForm() {
+            if (confirm('⚠️ Êtes-vous sûr de vouloir réinitialiser le formulaire ? Toutes les données seront effacées.')) {
+                document.getElementById('missionForm').reset();
+                skills = [];
+                renderSkills();
+                document.getElementById('skillInput').value = '';
+                showToast('🔄 Formulaire réinitialisé', '');
+            }
+        }
+
+        // ===== RETOUR =====
+        function goBack() {
+            if (confirm('Êtes-vous sûr de vouloir quitter ? Les données non sauvegardées seront perdues.')) {
+                window.location.href = '{% url "contracts:contract_list" %}';
+            }
+        }
+
+        // ===== TOAST =====
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + (type || '');
+            
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // ===== ENTRÉE POUR SOUMETTRE =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'TEXTAREA') {
+                // Ne pas soumettre automatiquement depuis textarea
+                e.preventDefault();
+            }
+        });
+    </script>
+
+</body>
+</html>

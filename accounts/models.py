@@ -117,7 +117,7 @@ class ContactMessage(models.Model):
 
 
 class Newsletter(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(max_length=191, unique=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 

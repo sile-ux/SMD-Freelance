@@ -1,4 +1,4 @@
-# À rajouter à la fin de contracts/views.py
+import json
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -11,20 +11,38 @@ User = get_user_model()
 
 
 def contract_list_view(request):
-    missions = Mission.objects.all().order_by('-created_at')
+    missions = Mission.objects.filter(status='open').order_by('-created_at')
     contracts = Contract.objects.all().order_by('-created_at')
+
+    missions_data = []
+    for m in missions:
+        missions_data.append({
+            'id': m.id,
+            'title': m.title,
+            'description': m.description,
+            'client': m.client.username if m.client else 'Anonyme',
+            'budget': float(m.budget),
+            'status': m.status,
+            'category': m.category,
+            'skills': m.tag_list,
+            'urgency': m.urgency,
+            'date': m.created_at.strftime('%Y-%m-%d') if m.created_at else '',
+            'location': m.location,
+            'duration': m.duration,
+            'payment_type': m.payment_type,
+            'currency': m.currency,
+            'extra_info': m.extra_info or '',
+        })
+
     return render(request, 'contracts/contract_list.html', {
+        'missions_json': json.dumps(missions_data),
         'missions': missions,
         'contracts': contracts,
     })
 
 
 def freelance_list_api(request):
-    """Backend : Récupère la liste des profils Freelance uniquement"""
-    # On filtre les utilisateurs. (Adapte 'is_freelance' selon le nom de ton champ dans ton CustomUser)
-    # Si tu as un champ user_type, ce serait : filter(user_type='FREELANCE')
     freelances = User.objects.filter(role='FREELANCE').values('id', 'username', 'email')
-
     return JsonResponse({
         "status": "success",
         "freelances": list(freelances)
@@ -32,11 +50,9 @@ def freelance_list_api(request):
 
 
 def mission_list_api(request):
-    """Backend : Récupère toutes les missions disponibles en base de données"""
-    # On récupère les missions de la plus récente à la plus ancienne
-    missions = Mission.objects.all().order_by('-created_at').values('id', 'title', 'description', 'budget',
-                                                                    'skills_required')
-
+    missions = Mission.objects.all().order_by('-created_at').values(
+        'id', 'title', 'description', 'budget', 'skills_required'
+    )
     return JsonResponse({
         "status": "success",
         "total_missions": missions.count(),
@@ -45,7 +61,6 @@ def mission_list_api(request):
 
 
 def tarifs_api(request):
-    """Backend : Renvoie la grille tarifaire de référence en CFA"""
     grille_tarifs = {
         "Développeur Junior": "15,000 - 30,000 CFA/jour",
         "Développeur Mid-level": "40,000 - 75,000 CFA/jour",
@@ -57,13 +72,10 @@ def tarifs_api(request):
         "devise": "CFA",
         "grille": grille_tarifs
     })
+
+
 @login_required
 def create_contract_view(request):
-    """
-    Vue permettant à un client connecté de publier une nouvelle offre/mission
-    depuis son tableau de bord.
-    """
-    # Optionnel : Sécurité pour s'assurer que seul un client peut publier
     if hasattr(request.user, 'role') and request.user.role != 'CLIENT':
         messages.error(request, "Seuls les profils Clients peuvent publier des offres.")
         return redirect('accounts:dashboard')
@@ -72,39 +84,50 @@ def create_contract_view(request):
         form = QuickMissionForm(request.POST)
         if form.is_valid():
             mission = form.save(commit=False)
-            mission.client = request.user  # Associe l'offre au client connecté
+            mission.client = request.user
             mission.save()
-            messages.success(request, "🚀 Votre nouvelle offre a été publiée avec succès !")
-            return redirect('accounts:dashboard')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'message': 'Mission publiée avec succès !'})
+            messages.success(request, "Mission publiée avec succès !")
+            return redirect('contracts:contract_list')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Erreur de validation',
+                'errors': form.errors,
+            }, status=400)
     else:
         form = QuickMissionForm()
 
-    return render(request, 'contracts/create_contract.html', {'form': form})
+    return render(request, 'contracts/create-contract.html', {'form': form})
+
 
 @login_required
 def apply_to_mission_view(request, mission_id):
-    """
-    Permet à un freelance de postuler instantanément à une offre.
-    """
     mission = get_object_or_404(Mission, id=mission_id)
 
-    # Sécurité : Vérifier si l'utilisateur est bien un freelance
     if hasattr(request.user, 'role') and request.user.role != 'FREELANCE':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': 'Seuls les freelances peuvent postuler.'})
         messages.error(request, "Seuls les profils Freelances peuvent postuler aux offres.")
         return redirect('accounts:home')
 
-    # Sécurité : Empêcher le client de postuler sa propre offre
     if mission.client == request.user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': 'Vous ne pouvez pas postuler à votre propre mission.'})
         messages.error(request, "Vous ne pouvez pas postuler à votre propre mission.")
         return redirect('accounts:home')
 
-    # Vérifier si le freelance a déjà postulé
     already_applied = Application.objects.filter(mission=mission, freelancer=request.user).exists()
     if already_applied:
-        messages.warning(request, "Vous avez déjà candidaté à cette offre de mission.")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'warning', 'message': 'Vous avez déjà postulé.'})
+        messages.warning(request, "Vous avez déjà candidaté à cette offre.")
     else:
-        # Création de la candidature
         Application.objects.create(mission=mission, freelancer=request.user)
-        messages.success(request, f"🚀 Votre candidature pour '{mission.title}' a été envoyée avec succès !")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'Candidature envoyée !'})
+        messages.success(request, f"Candidature envoyée pour '{mission.title}' !")
 
-    return redirect('accounts:home')
+    return redirect('contracts:contract_list')
+
