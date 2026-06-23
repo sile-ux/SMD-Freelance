@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SMD-Tech - Paramètres</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #ffffff; /* Fond blanc pour que la page occupe tout */
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        /* ===== CONTENEUR PRINCIPAL - PLEIN ÉCRAN 100% ===== */
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            max-width: 100%; /* Supprime la limite de largeur */
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0; /* Pas d'arrondi */
+            box-shadow: none; /* Pas d'ombre */
+        }
+
+        /* ===== EN-TÊTE ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px 12px 24px;
+            flex-shrink: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #f0f4f8;
+            z-index: 5;
+        }
+
+        .header .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .header .logo span {
+            color: #00B4D8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .menu-icon:hover {
+            color: #00B4D8;
+        }
+
+        .back-btn {
+            font-size: 22px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            color: #00B4D8;
+        }
+
+        /* ===== TITRE ===== */
+        .page-header {
+            padding: 0 24px 8px 24px;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* ===== BARRE DE RECHERCHE ===== */
+        .search-bar {
+            background: #f0f4f8;
+            border-radius: 30px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 24px 14px 24px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .search-bar:focus-within {
+            border-color: #00B4D8;
+            box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.1);
+        }
+
+        .search-bar i {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 15px;
+            color: #1a1a2e;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .search-bar input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-bar .clear-btn {
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 16px;
+            display: none;
+            background: none;
+            border: none;
+        }
+
+        .search-bar .clear-btn.visible {
+            display: block;
+        }
+
+        .search-bar .clear-btn:hover {
+            color: #ef4444;
+        }
+
+        /* ===== ZONE DE CONTENU SCROLLABLE ===== */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 24px 24px 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 8px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: #00B4D8;
+        }
+
+        /* ===== LISTE DES PARAMÈTRES ===== */
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-bottom: 8px;
+        }
+
+        /* ===== ÉLÉMENT DE PARAMÈTRE ===== */
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 14px;
+            border-bottom: 1px solid #f0f4f8;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 10px;
+        }
+
+        .settings-item:hover {
+            background: #f8fafc;
+            transform: translateX(4px);
+        }
+
+        .settings-item:active {
+            transform: scale(0.98);
+        }
+
+        .settings-item .item-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .settings-item .item-left i {
+            font-size: 20px;
+            color: #00B4D8;
+            width: 28px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .settings-item:hover .item-left i {
+            transform: scale(1.1);
+        }
+
+        .settings-item .item-left .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .settings-item .item-left .item-info .item-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .settings-item .item-left .item-info .item-description {
+            font-size: 13px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .settings-item .item-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .settings-item .item-right .item-value {
+            font-size: 14px;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .settings-item:hover .item-right .item-value {
+            color: #00B4D8;
+        }
+
+        .settings-item .item-right .item-arrow {
+            color: #d1d5db;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .settings-item:hover .item-right .item-arrow {
+            transform: translateX(4px);
+            color: #00B4D8;
+        }
+
+        /* ===== BADGE ===== */
+        .badge {
+            background: #00B4D8;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .badge.success {
+            background: #22c55e;
+        }
+
+        .badge.warning {
+            background: #f59e0b;
+        }
+
+        .badge.danger {
+            background: #ef4444;
+        }
+
+        .badge-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ===== TOGGLE SWITCH ===== */
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background: #d1d5db;
+            border-radius: 13px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch:hover {
+            box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.15);
+        }
+
+        .toggle-switch.active {
+            background: #00B4D8;
+        }
+
+        .toggle-switch .toggle-slider {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(22px);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 420px;
+            width: 100%;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal .modal-header .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .modal .modal-header .modal-close {
+            font-size: 22px;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+
+        .modal .modal-header .modal-close:hover {
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal .modal-body .modal-field {
+            margin-bottom: 16px;
+        }
+
+        .modal .modal-body .modal-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal .modal-body .modal-field label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .modal .modal-body .modal-field input,
+        .modal .modal-body .modal-field select,
+        .modal .modal-body .modal-field textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e8e8ef;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #1a1a2e;
+            outline: none;
+            transition: all 0.3s;
+            background: #fff;
+        }
+
+        .modal .modal-body .modal-field input:focus,
+        .modal .modal-body .modal-field select:focus,
+        .modal .modal-body .modal-field textarea:focus {
+            border-color: #00B4D8;
+            box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.1);
+        }
+
+        .modal .modal-body .modal-field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal .modal-body .modal-field .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 0;
+        }
+
+        .modal .modal-body .modal-field .toggle-wrapper .toggle-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .modal .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal .modal-footer .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal .modal-footer .btn-primary {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        .modal .modal-footer .btn-primary:hover {
+            background: #0096C7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        .modal .modal-footer .btn-secondary {
+            background: #f0f4f8;
+            color: #6b7280;
+        }
+
+        .modal .modal-footer .btn-secondary:hover {
+            background: #e3ecf3;
+        }
+
+        .modal .modal-footer .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .modal .modal-footer .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ef;
+            padding: 10px 0 14px 0;
+            flex-shrink: 0;
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            padding: 4px 16px;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            color: #6b7280;
+            min-width: 60px;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .bottom-nav .nav-item i {
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav .nav-item:hover {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item:hover i {
+            transform: translateY(-2px);
+        }
+
+        .bottom-nav .nav-item.active {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item.active i {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item .nav-dot {
+            width: 5px;
+            height: 5px;
+            background: #00B4D8;
+            border-radius: 50%;
+            margin-top: 2px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav .nav-item.active .nav-dot {
+            opacity: 1;
+        }
+
+        /* ===== NOTIFICATION ===== */
+        .notification {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 2000;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification.success {
+            background: #22c55e;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px 10px 16px;
+            }
+
+            .header .logo {
+                font-size: 17px;
+            }
+
+            .page-header {
+                padding: 0 16px 6px 16px;
+            }
+
+            .page-title {
+                font-size: 19px;
+            }
+
+            .page-subtitle {
+                font-size: 13px;
+            }
+
+            .search-bar {
+                margin: 0 16px 10px 16px;
+                padding: 8px 14px;
+            }
+
+            .search-bar input {
+                font-size: 14px;
+            }
+
+            .scrollable-content {
+                padding: 0 16px 16px 16px;
+            }
+
+            .settings-item {
+                padding: 12px 10px;
+            }
+
+            .settings-item .item-left i {
+                font-size: 18px;
+                width: 24px;
+            }
+
+            .settings-item .item-left .item-info .item-title {
+                font-size: 15px;
+            }
+
+            .settings-item .item-left .item-info .item-description {
+                font-size: 12px;
+            }
+
+            .settings-item .item-right .item-value {
+                font-size: 13px;
+            }
+
+            .bottom-nav {
+                padding: 8px 0 12px 0;
+            }
+
+            .bottom-nav .nav-item {
+                font-size: 10px;
+                padding: 4px 10px;
+                min-width: 50px;
+            }
+
+            .bottom-nav .nav-item i {
+                font-size: 18px;
+            }
+
+            .modal {
+                padding: 20px;
+                margin: 10px;
+                max-height: 75vh;
+            }
+
+            .modal .modal-body .modal-field input,
+            .modal .modal-body .modal-field select,
+            .modal .modal-body .modal-field textarea {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            .badge {
+                font-size: 10px;
+                padding: 2px 8px;
+            }
+
+            .toggle-switch {
+                width: 42px;
+                height: 22px;
+            }
+
+            .toggle-switch .toggle-slider {
+                width: 16px;
+                height: 16px;
+                top: 3px;
+                left: 3px;
+            }
+
+            .toggle-switch.active .toggle-slider {
+                transform: translateX(20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header .logo {
+                font-size: 15px;
+            }
+
+            .page-title {
+                font-size: 18px;
+            }
+
+            .page-subtitle {
+                font-size: 12px;
+            }
+
+            .settings-item .item-left .item-info .item-title {
+                font-size: 14px;
+            }
+
+            .settings-item .item-left .item-info .item-description {
+                font-size: 11px;
+            }
+
+            .settings-item .item-left i {
+                font-size: 16px;
+                width: 22px;
+            }
+
+            .settings-item .item-right .item-value {
+                font-size: 12px;
+            }
+
+            .bottom-nav .nav-item {
+                font-size: 9px;
+                padding: 4px 6px;
+                min-width: 40px;
+            }
+
+            .bottom-nav .nav-item i {
+                font-size: 16px;
+            }
+
+            .modal {
+                padding: 16px;
+                max-height: 70vh;
+            }
+
+            .modal .modal-header .modal-title {
+                font-size: 18px;
+            }
+
+            .modal .modal-body .modal-field label {
+                font-size: 13px;
+            }
+
+            .modal .modal-footer .btn {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .notification {
+                font-size: 13px;
+                padding: 10px 16px;
+                bottom: 75px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .settings-item .item-left .item-info .item-title {
+                font-size: 13px;
+            }
+
+            .settings-item .item-left .item-info .item-description {
+                font-size: 10px;
+            }
+
+            .settings-item .item-left i {
+                font-size: 14px;
+                width: 20px;
+            }
+
+            .settings-item .item-right .item-value {
+                font-size: 11px;
+            }
+
+            .badge {
+                font-size: 9px;
+                padding: 1px 6px;
+            }
+        }
+
+        /* ===== SUR PC : PLEIN ÉCRAN SANS LIMITE ===== */
+        @media (min-width: 769px) {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+
+            .app-container {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                height: 100vh;
+            }
+
+            .bottom-nav {
+                border-radius: 0;
+            }
+
+            .modal {
+                max-width: 480px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NOTIFICATION ===== -->
+    <div class="notification" id="notification"></div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">Modifier</span>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Formulaire Profil -->
+            <form id="form-profile" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="profile">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Nom complet</label>
+                        <input type="text" name="username" value="{{ user.username }}" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Email</label>
+                        <input type="email" name="email" value="{{ user.email }}" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Bio</label>
+                        <textarea name="bio" rows="3">{{ profile.bio }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Sécurité -->
+            <form id="form-security" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="security">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Mot de passe actuel</label>
+                        <input type="password" name="current_password" required />
+                    </div>
+                    <div class="modal-field">
+                        <label>Nouveau mot de passe</label>
+                        <input type="password" name="new_password" required minlength="6" />
+                    </div>
+                    <div class="modal-field">
+                        <label>Confirmer</label>
+                        <input type="password" name="confirm_password" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Modifier</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Notifications -->
+            <form id="form-notifications" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="notifications">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Notifications par email</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.notif_email %}active{% endif %}" onclick="toggleSwitch(this)" data-name="notif_email">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="notif_email" id="notif_email" {% if profile.notif_email %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Notifications push</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.notif_push %}active{% endif %}" onclick="toggleSwitch(this)" data-name="notif_push">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="notif_push" id="notif_push" {% if profile.notif_push %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Nouvelles missions</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.notif_missions %}active{% endif %}" onclick="toggleSwitch(this)" data-name="notif_missions">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="notif_missions" id="notif_missions" {% if profile.notif_missions %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Messages</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.notif_messages %}active{% endif %}" onclick="toggleSwitch(this)" data-name="notif_messages">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="notif_messages" id="notif_messages" {% if profile.notif_messages %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Rappels</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.notif_reminders %}active{% endif %}" onclick="toggleSwitch(this)" data-name="notif_reminders">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="notif_reminders" id="notif_reminders" {% if profile.notif_reminders %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Paiements -->
+            <form id="form-payments" class="modal-form" style="display:none;">
+                <div class="modal-body">
+                    <div style="text-align:center;padding:20px;color:#6b7280;">
+                        <p style="font-size:48px;margin-bottom:12px;">🔒</p>
+                        <p style="font-size:16px;font-weight:600;color:#1a1a2e;">Paiements sécurisés</p>
+                        <p style="font-size:14px;margin-top:8px;">La gestion des cartes bancaires sera bientôt disponible via notre partenaire Stripe.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Fermer</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Confidentialité -->
+            <form id="form-privacy" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="privacy">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Profil public</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.profile_public %}active{% endif %}" onclick="toggleSwitch(this)" data-name="profile_public">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="profile_public" id="profile_public" {% if profile.profile_public %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Partager mon email</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.share_email %}active{% endif %}" onclick="toggleSwitch(this)" data-name="share_email">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="share_email" id="share_email" {% if profile.share_email %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Apparence -->
+            <form id="form-appearance" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="appearance">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Thème</label>
+                        <select name="theme">
+                            <option value="Clair" {% if profile.theme == 'Clair' %}selected{% endif %}>Clair</option>
+                            <option value="Sombre" {% if profile.theme == 'Sombre' %}selected{% endif %}>Sombre</option>
+                            <option value="Système" {% if profile.theme == 'Système' %}selected{% endif %}>Système</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Langue</label>
+                        <select name="language">
+                            <option value="Français" {% if profile.language == 'Français' %}selected{% endif %}>Français</option>
+                            <option value="English" {% if profile.language == 'English' %}selected{% endif %}>English</option>
+                            <option value="Arabe" {% if profile.language == 'Arabe' %}selected{% endif %}>العربية</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Police</label>
+                        <select name="font_size">
+                            <option value="Normale" {% if profile.font_size == 'Normale' %}selected{% endif %}>Normale</option>
+                            <option value="Grande" {% if profile.font_size == 'Grande' %}selected{% endif %}>Grande</option>
+                            <option value="Très grande" {% if profile.font_size == 'Très grande' %}selected{% endif %}>Très grande</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Préférences Missions -->
+            <form id="form-preferences" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="preferences">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Catégories préférées</label>
+                        <select name="preferred_categories">
+                            <option value="Toutes" {% if profile.preferred_categories == 'Toutes' %}selected{% endif %}>Toutes</option>
+                            <option value="Backend" {% if profile.preferred_categories == 'Backend' %}selected{% endif %}>Backend</option>
+                            <option value="Frontend" {% if profile.preferred_categories == 'Frontend' %}selected{% endif %}>Frontend</option>
+                            <option value="Fullstack" {% if profile.preferred_categories == 'Fullstack' %}selected{% endif %}>Fullstack</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Budget minimum</label>
+                        <select name="min_budget">
+                            <option value="Aucun" {% if profile.min_budget == 'Aucun' %}selected{% endif %}>Aucun</option>
+                            <option value="100000" {% if profile.min_budget == '100000' %}selected{% endif %}>100 000 CFA</option>
+                            <option value="200000" {% if profile.min_budget == '200000' %}selected{% endif %}>200 000 CFA</option>
+                            <option value="500000" {% if profile.min_budget == '500000' %}selected{% endif %}>500 000 CFA</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Alertes automatiques</label>
+                        <div class="toggle-wrapper">
+                            <div class="toggle-switch {% if profile.auto_alerts %}active{% endif %}" onclick="toggleSwitch(this)" data-name="auto_alerts">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="auto_alerts" id="auto_alerts" {% if profile.auto_alerts %}checked{% endif %} style="display:none;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+
+            <!-- Formulaire Support -->
+            <form id="form-support" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="support">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Sujet</label>
+                        <input type="text" name="subject" placeholder="Votre question..." required />
+                    </div>
+                    <div class="modal-field">
+                        <label>Message</label>
+                        <textarea name="message" rows="4" placeholder="Décrivez votre problème..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== CONTENEUR PRINCIPAL - PLEIN ÉCRAN 100% ===== -->
+    <div class="app-container">
+
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="header">
+            <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i></button>
+            <div class="logo">SMD-<span>Tech</span></div>
+            <div class="header-actions">
+                <button class="menu-icon" id="menuIcon">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== TITRE ===== -->
+        <div class="page-header">
+            <div class="page-title">⚙️ Paramètres</div>
+            <div class="page-subtitle">Gérez vos préférences en toute simplicité</div>
+        </div>
+
+        <!-- ===== BARRE DE RECHERCHE ===== -->
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchSettings" placeholder="Rechercher dans les paramètres..." />
+            <button class="clear-btn" id="clearSearch"><i class="fas fa-times-circle"></i></button>
+        </div>
+
+        <!-- ===== ZONE SCROLLABLE ===== -->
+        <div class="scrollable-content" id="scrollableContent">
+
+            <!-- ===== LISTE DES PARAMÈTRES ===== -->
+            <div class="settings-list" id="settingsList">
+
+                <!-- Profil -->
+                <div class="settings-item" data-search="profil photo avatar nom email bio" data-section="profile">
+                    <div class="item-left">
+                        <i class="fas fa-user-circle"></i>
+                        <div class="item-info">
+                            <div class="item-title">Profil</div>
+                            <div class="item-description">Nom, email, bio</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="profileValue">{{ user.username }}</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Compte & Sécurité -->
+                <div class="settings-item" data-search="compte sécurité mot de passe 2fa authentification" data-section="security">
+                    <div class="item-left">
+                        <i class="fas fa-lock"></i>
+                        <div class="item-info">
+                            <div class="item-title">Compte & Sécurité</div>
+                            <div class="item-description">Mot de passe, 2FA</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="badge success badge-pulse" id="securityBadge">Sécurisé</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="settings-item" data-search="notifications alertes email push sms" data-section="notifications">
+                    <div class="item-left">
+                        <i class="fas fa-bell"></i>
+                        <div class="item-info">
+                            <div class="item-title">Notifications</div>
+                            <div class="item-description">Email, push, alertes</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="badge" id="notifBadge">
+                            {{ profile.notif_email|yesno:"1,0" }}
+                            {% if profile.notif_push %}+1{% endif %}
+                            {% if profile.notif_missions %}+1{% endif %}
+                            {% if profile.notif_messages %}+1{% endif %}
+                            {% if profile.notif_reminders %}+1{% endif %} actives
+                        </span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Paiements -->
+                <div class="settings-item" data-search="paiements facturation carte bancaire stripe" data-section="payments">
+                    <div class="item-left">
+                        <i class="fas fa-credit-card"></i>
+                        <div class="item-info">
+                            <div class="item-title">Paiements</div>
+                            <div class="item-description">Carte, factures, stripe</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="paymentValue">Carte enregistrée</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Confidentialité -->
+                <div class="settings-item" data-search="confidentialité vie privée données cookies" data-section="privacy">
+                    <div class="item-left">
+                        <i class="fas fa-shield-alt"></i>
+                        <div class="item-info">
+                            <div class="item-title">Confidentialité</div>
+                            <div class="item-description">Profil, données, cookies</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="privacyValue">{% if profile.profile_public %}Profil public{% else %}Profil privé{% endif %}</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Apparence -->
+                <div class="settings-item" data-search="apparence thème sombre clair langue" data-section="appearance">
+                    <div class="item-left">
+                        <i class="fas fa-palette"></i>
+                        <div class="item-info">
+                            <div class="item-title">Apparence</div>
+                            <div class="item-description">Thème, langue, police</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="appearanceValue">{{ profile.theme|default:"Clair" }}</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Préférences Missions -->
+                <div class="settings-item" data-search="missions préférences alertes catégories budgets" data-section="preferences">
+                    <div class="item-left">
+                        <i class="fas fa-briefcase"></i>
+                        <div class="item-info">
+                            <div class="item-title">Préférences Missions</div>
+                            <div class="item-description">Catégories, budget, alertes</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="prefValue">{{ profile.preferred_categories|default:"Toutes" }}</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Aide & Support -->
+                <div class="settings-item" data-search="aide support contact faq assistance" data-section="support">
+                    <div class="item-left">
+                        <i class="fas fa-headset"></i>
+                        <div class="item-info">
+                            <div class="item-title">Aide & Support</div>
+                            <div class="item-description">FAQ, contact, documentation</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- À propos -->
+                <div class="settings-item" data-search="à propos version mentions légales" data-section="about">
+                    <div class="item-left">
+                        <i class="fas fa-info-circle"></i>
+                        <div class="item-info">
+                            <div class="item-title">À propos</div>
+                            <div class="item-description">Version, mentions, licence</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="versionValue">v1.0.0</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Déconnexion -->
+                <div class="settings-item" data-search="déconnexion logout quitter" data-section="logout" style="border-bottom: none;">
+                    <div class="item-left">
+                        <i class="fas fa-sign-out-alt" style="color:#ef4444;"></i>
+                        <div class="item-info">
+                            <div class="item-title" style="color:#ef4444;">Déconnexion</div>
+                            <div class="item-description">Quitter votre session</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Espacement pour le bottom nav -->
+            <div style="height: 8px;"></div>
+
+        </div>
+
+        <!-- ===== BOTTOM NAVIGATION ===== -->
+        <div class="bottom-nav">
+            <button class="nav-item" data-page="freelancers">
+                <i class="fas fa-user-tie"></i>
+                <span>Freelancers</span>
+                <span class="nav-dot"></span>
+            </button>
+            <button class="nav-item" data-page="missions">
+                <i class="fas fa-briefcase"></i>
+                <span>Missions</span>
+                <span class="nav-dot"></span>
+            </button>
+            <button class="nav-item" data-page="stats">
+                <i class="fas fa-chart-line"></i>
+                <span>Stats</span>
+                <span class="nav-dot"></span>
+            </button>
+            <button class="nav-item active" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+                <span class="nav-dot"></span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================
+        // NOTIFICATION
+        // ============================================
+        function showNotification(message, type) {
+            const el = document.getElementById('notification');
+            if (!el) return;
+            el.textContent = message;
+            el.className = 'notification' + (type ? ' ' + type : '');
+            el.classList.add('show');
+            clearTimeout(el.timeout);
+            el.timeout = setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // ============================================
+        // MODAL
+        // ============================================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+
+        function openModal(section) {
+            const form = document.getElementById('form-' + section);
+            if (!form) return;
+
+            // Titre
+            const titles = {
+                profile: 'Modifier le profil',
+                security: 'Sécurité du compte',
+                notifications: 'Gérer les notifications',
+                payments: 'Paiements sécurisés',
+                privacy: 'Confidentialité',
+                appearance: 'Apparence',
+                preferences: 'Préférences Missions',
+                support: 'Aide & Support',
+                about: 'À propos',
+                logout: 'Déconnexion'
+            };
+            modalTitle.textContent = titles[section] || 'Paramètres';
+
+            // Cacher tous les formulaires
+            document.querySelectorAll('.modal-form').forEach(f => f.style.display = 'none');
+
+            // Afficher celui sélectionné
+            form.style.display = 'block';
+
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ============================================
+        // TOGGLE SWITCH
+        // ============================================
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+            const isActive = element.classList.contains('active');
+            const name = element.dataset.name;
+            if (name) {
+                const checkbox = document.querySelector(`input[name="${name}"]`);
+                if (checkbox) checkbox.checked = isActive;
+            }
+        }
+
+        // ============================================
+        // CLIC SUR LES ÉLÉMENTS DE PARAMÈTRES
+        // ============================================
+        document.querySelectorAll('.settings-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const section = this.dataset.section;
+                const form = document.getElementById('form-' + section);
+
+                if (form) {
+                    openModal(section);
+                } else {
+                    // Sections spéciales sans formulaire
+                    if (section === 'logout') {
+                        window.location.href = "{% url 'accounts:logout' %}";
+                    } else if (section === 'about') {
+                        showNotification('📋 À propos - Version 1.0.0', 'info');
+                    } else {
+                        showNotification('📋 ' + (this.querySelector('.item-title')?.textContent || ''), 'info');
+                    }
+                }
+            });
+        });
+
+        // ============================================
+        // RECHERCHE DYNAMIQUE
+        // ============================================
+        const searchInput = document.getElementById('searchSettings');
+        const clearBtn = document.getElementById('clearSearch');
+
+        searchInput.addEventListener('input', function() {
+            const term = this.value.toLowerCase().trim();
+            clearBtn.classList.toggle('visible', term.length > 0);
+
+            let visibleCount = 0;
+            document.querySelectorAll('.settings-item').forEach(item => {
+                const searchData = item.dataset.search || '';
+                const text = item.textContent.toLowerCase();
+                const matches = term === '' || searchData.includes(term) || text.includes(term);
+                item.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (visibleCount === 0 && term !== '') {
+                showNotification('🔍 Aucun paramètre trouvé pour "' + term + '"', 'warning');
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            searchInput.focus();
+        });
+
+        // ============================================
+        // RACCOURCI CLAVIER
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+        });
+
+        // ============================================
+        // BOUTON RETOUR
+        // ============================================
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.location.href = "{% url 'accounts:dashboard' %}";
+        });
+
+        // ============================================
+        // MENU & BOTTOM NAV
+        // ============================================
+        document.getElementById('menuIcon').addEventListener('click', function() {
+            showNotification('📱 Menu latéral', 'info');
+        });
+
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.dataset.page;
+                const pages = {
+                    freelancers: "{% url 'contracts:contract_list' %}",
+                    missions: "{% url 'contracts:contract_list' %}",
+                    settings: "{% url 'accounts:parametre' %}"
+                };
+                if (pages[page]) window.location.href = pages[page];
+            });
+        });
+
+        console.log('⚙️ SMD-Tech Paramètres connecté au backend');
+    </script>
+
+</body>
+</html>

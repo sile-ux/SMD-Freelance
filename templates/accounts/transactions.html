@@ -1,0 +1,1350 @@
+{% load contracts_extras %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SMD-Tech - Transactions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* ===== CONTENEUR PRINCIPAL - PLEIN ÉCRAN ===== */
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            max-width: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== EN-TÊTE ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 12px 20px;
+            flex-shrink: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #f0f4f8;
+            z-index: 5;
+        }
+
+        .header .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .header .logo span {
+            color: #00B4D8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-icon {
+            font-size: 22px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .menu-icon:hover {
+            color: #00B4D8;
+        }
+
+        .back-btn {
+            font-size: 20px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            color: #00B4D8;
+        }
+
+        /* ===== TITRE ===== */
+        .page-header {
+            padding: 0 20px 8px 20px;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* ===== SOLDE ===== */
+        .balance-card {
+            background: linear-gradient(135deg, #00B4D8, #0096C7);
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin: 0 20px 16px 20px;
+            color: #fff;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-card .balance-info .balance-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .balance-card .balance-info .balance-amount {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .balance-card .balance-info .balance-sub {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .balance-card .balance-action button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .balance-card .balance-action button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ===== ONGLETS ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 0 20px 12px 20px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            border-radius: 12px 12px 0 0;
+            transition: all 0.3s;
+            position: relative;
+            text-align: center;
+        }
+
+        .tab:hover {
+            color: #1a1a2e;
+            background: #f8fafc;
+        }
+
+        .tab.active {
+            color: #00B4D8;
+            background: #e3f4fa;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: #00B4D8;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab i {
+            margin-right: 6px;
+        }
+
+        /* ===== ZONE DE CONTENU SCROLLABLE ===== */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scrollable-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 8px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: #00B4D8;
+        }
+
+        /* ===== CONTENU DES ONGLETS ===== */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+            padding-top: 16px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+
+        .section-desc {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 14px;
+        }
+
+        /* ===== FORMULAIRES ===== */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e8e8ef;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #1a1a2e;
+            outline: none;
+            transition: all 0.3s;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #00B4D8;
+            box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ===== MONTANTS PRÉDÉFINIS ===== */
+        .amount-presets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .amount-preset {
+            padding: 8px;
+            border: 2px solid #e8e8ef;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fff;
+        }
+
+        .amount-preset:hover {
+            border-color: #00B4D8;
+            background: #f8fafc;
+        }
+
+        .amount-preset.active {
+            border-color: #00B4D8;
+            background: #e3f4fa;
+            color: #00B4D8;
+        }
+
+        .amount-preset .preset-label {
+            font-size: 10px;
+            font-weight: 400;
+            color: #6b7280;
+        }
+
+        /* ===== RÉCAPITULATIF ===== */
+        .recap {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 16px 0;
+        }
+
+        .recap .recap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+        .recap .recap-item .recap-label {
+            color: #6b7280;
+        }
+
+        .recap .recap-item .recap-value {
+            font-weight: 600;
+        }
+
+        .recap .recap-total {
+            border-top: 2px solid #e8e8ef;
+            padding-top: 10px;
+            margin-top: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #00B4D8;
+        }
+
+        /* ===== BOUTON PRINCIPAL ===== */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #00B4D8;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #0096C7;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 180, 216, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary .spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        .btn-primary.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-primary.loading .btn-text {
+            display: none;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: #f0f4f8;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #e3ecf3;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== SUCCÈS ===== */
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        .success-screen .success-icon {
+            font-size: 60px;
+            color: #22c55e;
+            margin-bottom: 16px;
+        }
+
+        .success-screen .success-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .success-screen .success-desc {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .success-screen .success-details {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .success-screen .success-details .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+
+        .success-screen .success-details .detail-row .detail-label {
+            color: #6b7280;
+        }
+
+        .success-screen .success-details .detail-row .detail-value {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ef;
+            padding: 8px 0 12px 0;
+            flex-shrink: 0;
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            padding: 4px 12px;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            font-size: 10px;
+            color: #6b7280;
+            min-width: 44px;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .bottom-nav .nav-item i {
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav .nav-item:hover {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item:hover i {
+            transform: translateY(-2px);
+        }
+
+        .bottom-nav .nav-item.active {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item.active i {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item .nav-dot {
+            width: 4px;
+            height: 4px;
+            background: #00B4D8;
+            border-radius: 50%;
+            margin-top: 2px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav .nav-item.active .nav-dot {
+            opacity: 1;
+        }
+
+        /* ===== NOTIFICATION ===== */
+        .notification {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 2000;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification.success {
+            background: #22c55e;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .header {
+                padding: 12px 16px 10px 16px;
+            }
+            .header .logo {
+                font-size: 16px;
+            }
+            .page-header {
+                padding: 0 16px 6px 16px;
+            }
+            .page-title {
+                font-size: 18px;
+            }
+            .page-subtitle {
+                font-size: 12px;
+            }
+            .balance-card {
+                margin: 0 16px 14px 16px;
+                padding: 12px 16px;
+            }
+            .balance-card .balance-info .balance-amount {
+                font-size: 22px;
+            }
+            .tabs {
+                padding: 0 12px 10px 12px;
+                gap: 2px;
+            }
+            .tab {
+                font-size: 12px;
+                padding: 8px 4px;
+            }
+            .tab i {
+                margin-right: 4px;
+            }
+            .scrollable-content {
+                padding: 0 16px 16px 16px;
+            }
+            .amount-presets {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+            .amount-preset {
+                padding: 6px;
+                font-size: 12px;
+            }
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .btn-primary {
+                font-size: 15px;
+                padding: 12px;
+            }
+            .success-screen .success-icon {
+                font-size: 48px;
+            }
+            .success-screen .success-title {
+                font-size: 20px;
+            }
+            .bottom-nav {
+                padding: 6px 0 10px 0;
+            }
+            .bottom-nav .nav-item {
+                font-size: 9px;
+                padding: 4px 8px;
+            }
+            .bottom-nav .nav-item i {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .amount-presets {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .tab {
+                font-size: 11px;
+                padding: 6px 2px;
+            }
+            .balance-card .balance-info .balance-amount {
+                font-size: 20px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            body {
+                background: #e8ecf1;
+                padding: 0;
+            }
+            .app-container {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                height: 100vh;
+            }
+            .bottom-nav {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NOTIFICATION ===== -->
+    <div class="notification" id="notification"></div>
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="notification show {{ msg.tags }}" id="msg-{{ forloop.counter }}">{{ msg }}</div>
+    <script>setTimeout(function(){document.getElementById('msg-{{ forloop.counter }}').classList.remove('show')},4000)</script>
+    {% endfor %}
+    {% endif %}
+
+    <!-- ===== CONTENEUR PRINCIPAL ===== -->
+    <div class="app-container">
+
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="header">
+            <a href="{% url 'accounts:dashboard' %}" class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i></a>
+            <div class="logo">SMD-<span>Tech</span></div>
+            <div class="header-actions">
+                <button class="menu-icon" id="menuIcon">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== TITRE ===== -->
+        <div class="page-header">
+            <div class="page-title">💳 Transactions</div>
+            <div class="page-subtitle">Gérez vos dépôts, paiements et retraits</div>
+        </div>
+
+        <!-- ===== SOLDE ===== -->
+        <div class="balance-card">
+            <div class="balance-info">
+                <div class="balance-label">Solde disponible</div>
+                <div class="balance-amount" id="balanceAmount">{{ wallet.balance|intcomma }} CFA</div>
+                <div class="balance-sub">Dernière mise à jour : {{ wallet.updated_at|date:"d/m/Y H:i" }}</div>
+            </div>
+            <div class="balance-action">
+                <button onclick="showNotification('📊 Historique des transactions', 'info')">
+                    <i class="fas fa-history"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== ONGLETS ===== -->
+        <div class="tabs">
+            <button class="tab active" data-tab="deposit">
+                <i class="fas fa-arrow-down"></i> Dépôt
+            </button>
+            <button class="tab" data-tab="mission">
+                <i class="fas fa-briefcase"></i> Mission
+            </button>
+            <button class="tab" data-tab="withdraw">
+                <i class="fas fa-arrow-up"></i> Retrait
+            </button>
+        </div>
+
+        <!-- ===== ZONE SCROLLABLE ===== -->
+        <div class="scrollable-content" id="scrollableContent">
+
+            <!-- ===== ONGLET 1 : DÉPÔT SUR SON COMPTE ===== -->
+            <div class="tab-content active" id="tab-deposit">
+                <form method="post" action="{% url 'accounts:transaction' %}">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="deposit">
+
+                <div class="section-title">💰 Déposer sur votre compte</div>
+                <div class="section-desc">Alimentez votre portefeuille SMD-Tech pour payer vos missions ou retirer.</div>
+
+                <!-- Méthodes de paiement -->
+                <div class="form-group">
+                    <label>Méthode de paiement</label>
+                    <select name="method" id="depositMethod">
+                        <option value="orange">Orange Money</option>
+                        <option value="wave">Wave</option>
+                        <option value="mtn">MTN Mobile Money</option>
+                        <option value="stripe">Carte bancaire (Stripe)</option>
+                    </select>
+                </div>
+
+                <!-- Montants -->
+                <label style="font-size:13px;font-weight:500;color:#1a1a2e;display:block;margin-bottom:6px;">Montant</label>
+                <div class="amount-presets" id="depositPresets">
+                    <div class="amount-preset" data-amount="5000">5 000 <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="10000">10 000 <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="25000">25 000 <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="50000">50 000 <span class="preset-label">CFA</span></div>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="amount" id="depositCustom" placeholder="Saisir un montant" min="100" step="100" />
+                </div>
+
+                <!-- Numéro de téléphone (pour mobile money) -->
+                <div class="form-group">
+                    <label>Numéro de téléphone</label>
+                    <input type="tel" name="phone" id="depositPhone" placeholder="77 123 45 67" required />
+                </div>
+
+                <!-- Récapitulatif -->
+                <div class="recap">
+                    <div class="recap-item">
+                        <span class="recap-label">Méthode</span>
+                        <span class="recap-value" id="depositMethodLabel">Orange Money</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Montant</span>
+                        <span class="recap-value" id="depositAmountLabel">—</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Frais</span>
+                        <span class="recap-value" id="depositFees">—</span>
+                    </div>
+                    <div class="recap-total">
+                        <span>Total à payer</span>
+                        <span id="depositTotal">—</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="depositBtn">
+                    <span class="btn-text"><i class="fas fa-lock"></i> Déposer maintenant</span>
+                    <span class="spinner"><i class="fas fa-spinner"></i></span>
+                </button>
+
+                <div style="text-align:center;padding:12px 0 8px 0;font-size:12px;color:#6b7280;">
+                    <i class="fas fa-shield-alt" style="color:#00B4D8;"></i> Paiement sécurisé
+                </div>
+                </form>
+            </div>
+
+            <!-- ===== ONGLET 2 : DÉPÔT POUR MISSION (SÉQUESTRE) ===== -->
+            <div class="tab-content" id="tab-mission">
+                <form method="post" action="{% url 'accounts:transaction' %}">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="mission">
+
+                <div class="section-title">📋 Payer une mission</div>
+                <div class="section-desc">Déposez les fonds pour valider le début d'une mission. Le montant sera bloqué jusqu'à la livraison.</div>
+
+                <!-- Sélection du projet -->
+                <div class="form-group">
+                    <label>Projet / Mission</label>
+                    <select name="contract_id" id="missionProject">
+                        <option value="">— Sélectionnez un projet —</option>
+                        {% for c in contracts %}
+                        <option value="{{ c.id }}">{{ c.title }}</option>
+                        {% empty %}
+                        <option value="">Aucun contrat ouvert</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sélection du freelance -->
+                <div class="form-group">
+                    <label>Freelance</label>
+                    <select name="freelance_id" id="missionFreelance">
+                        <option value="">— Sélectionnez un freelance —</option>
+                        {% for fp in freelancers %}
+                        <option value="{{ fp.user.id }}">{{ fp.user.username }} ({{ fp.rating }}★) — {{ fp.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Montant -->
+                <label style="font-size:13px;font-weight:500;color:#1a1a2e;display:block;margin-bottom:6px;">Montant à verser</label>
+                <div class="amount-presets" id="missionPresets">
+                    <div class="amount-preset" data-amount="50000">50K <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="100000">100K <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="250000">250K <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="350000">350K <span class="preset-label">CFA</span></div>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="amount" id="missionCustom" placeholder="Saisir un montant" min="100" step="100" />
+                </div>
+
+                <!-- Récapitulatif -->
+                <div class="recap">
+                    <div class="recap-item">
+                        <span class="recap-label">Projet</span>
+                        <span class="recap-value" id="missionProjectLabel">—</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Freelance</span>
+                        <span class="recap-value" id="missionFreelanceLabel">—</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Montant</span>
+                        <span class="recap-value" id="missionAmountLabel">—</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Commission (5%)</span>
+                        <span class="recap-value" id="missionFeeLabel">—</span>
+                    </div>
+                    <div class="recap-total">
+                        <span>Total à payer</span>
+                        <span id="missionTotal">—</span>
+                    </div>
+                </div>
+
+                <!-- Méthode de paiement -->
+                <div class="form-group">
+                    <label>Méthode de paiement</label>
+                    <select name="method" id="missionMethod">
+                        <option value="wallet">Portefeuille SMD-Tech</option>
+                        <option value="orange">Orange Money</option>
+                        <option value="wave">Wave</option>
+                        <option value="stripe">Carte bancaire</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" id="missionBtn">
+                    <span class="btn-text"><i class="fas fa-lock"></i> Payer la mission</span>
+                    <span class="spinner"><i class="fas fa-spinner"></i></span>
+                </button>
+
+                <div style="text-align:center;padding:12px 0 8px 0;font-size:12px;color:#6b7280;">
+                    <i class="fas fa-shield-alt" style="color:#00B4D8;"></i> Les fonds sont sécurisés jusqu'à validation
+                </div>
+                </form>
+            </div>
+
+            <!-- ===== ONGLET 3 : RETRAIT ===== -->
+            <div class="tab-content" id="tab-withdraw">
+                <form method="post" action="{% url 'accounts:transaction' %}">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="withdraw">
+
+                <div class="section-title">🏦 Retirer de l'argent</div>
+                <div class="section-desc">Retirez vos fonds vers votre compte Mobile Money ou bancaire.</div>
+
+                <!-- Méthode de retrait -->
+                <div class="form-group">
+                    <label>Méthode de retrait</label>
+                    <select name="method" id="withdrawMethod">
+                        <option value="orange">Orange Money</option>
+                        <option value="wave">Wave</option>
+                        <option value="mtn">MTN Mobile Money</option>
+                        <option value="bank">Virement bancaire</option>
+                    </select>
+                </div>
+
+                <!-- Montant -->
+                <label style="font-size:13px;font-weight:500;color:#1a1a2e;display:block;margin-bottom:6px;">Montant à retirer</label>
+                <div class="amount-presets" id="withdrawPresets">
+                    <div class="amount-preset" data-amount="10000">10K <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="25000">25K <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="50000">50K <span class="preset-label">CFA</span></div>
+                    <div class="amount-preset" data-amount="100000">100K <span class="preset-label">CFA</span></div>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="amount" id="withdrawCustom" placeholder="Saisir un montant" min="100" step="100" />
+                </div>
+
+                <!-- Numéro de téléphone / IBAN -->
+                <div class="form-group">
+                    <label id="withdrawLabel">Numéro de téléphone</label>
+                    <input type="text" name="account" id="withdrawAccount" placeholder="77 123 45 67" required />
+                </div>
+
+                <!-- Récapitulatif -->
+                <div class="recap">
+                    <div class="recap-item">
+                        <span class="recap-label">Méthode</span>
+                        <span class="recap-value" id="withdrawMethodLabel">Orange Money</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Montant</span>
+                        <span class="recap-value" id="withdrawAmountLabel">—</span>
+                    </div>
+                    <div class="recap-item">
+                        <span class="recap-label">Frais (1.5%)</span>
+                        <span class="recap-value" id="withdrawFees">—</span>
+                    </div>
+                    <div class="recap-total">
+                        <span>Net à recevoir</span>
+                        <span id="withdrawTotal">—</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="withdrawBtn">
+                    <span class="btn-text"><i class="fas fa-lock"></i> Retirer maintenant</span>
+                    <span class="spinner"><i class="fas fa-spinner"></i></span>
+                </button>
+
+                <div style="text-align:center;padding:12px 0 8px 0;font-size:12px;color:#6b7280;">
+                    <i class="fas fa-shield-alt" style="color:#00B4D8;"></i> Délai de traitement : 24-48h
+                </div>
+                </form>
+            </div>
+
+            <!-- ===== ÉCRAN DE SUCCÈS GLOBAL ===== -->
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="success-title" id="successTitle">Opération réussie !</div>
+                <div class="success-desc" id="successDesc">Votre transaction a été effectuée avec succès.</div>
+                <div class="success-details" id="successDetails">
+                    <!-- Rempli dynamiquement -->
+                </div>
+                <button class="btn-secondary" onclick="resetAll()" style="width:100%;">
+                    <i class="fas fa-redo"></i> Effectuer une nouvelle transaction
+                </button>
+            </div>
+
+            <div style="height: 8px;"></div>
+
+        </div>
+
+        <!-- ===== BOTTOM NAVIGATION ===== -->
+        <div class="bottom-nav">
+            <a href="{% url 'contracts:contract_list' %}" class="nav-item" data-page="freelancers">
+                <i class="fas fa-user-tie"></i>
+                <span>Freelancers</span>
+                <span class="nav-dot"></span>
+            </a>
+            <a href="{% url 'accounts:dashboard' %}" class="nav-item" data-page="missions">
+                <i class="fas fa-briefcase"></i>
+                <span>Missions</span>
+                <span class="nav-dot"></span>
+            </a>
+            <a href="{% url 'accounts:transaction' %}" class="nav-item active" data-page="transactions">
+                <i class="fas fa-wallet"></i>
+                <span>Transactions</span>
+                <span class="nav-dot"></span>
+            </a>
+            <a href="{% url 'accounts:parametre' %}" class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+                <span class="nav-dot"></span>
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================
+        // GÉNÉRAL
+        // ============================================
+        let currentTab = 'deposit';
+        let isProcessing = false;
+
+        // ============================================
+        // NOTIFICATION
+        // ============================================
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification';
+            if (type) notification.classList.add(type);
+            notification.classList.add('show');
+            clearTimeout(notification.timeout);
+            notification.timeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // ONGLETS
+        // ============================================
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const tabId = this.dataset.tab;
+                currentTab = tabId;
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                document.getElementById('tab-' + tabId).classList.add('active');
+                document.getElementById('successScreen').classList.remove('show');
+            });
+        });
+
+        // ============================================
+        // FONCTIONS UTILITAIRES POUR LES MONTANTS
+        // ============================================
+        function setupAmountPresets(containerId, customId, callback) {
+            const container = document.getElementById(containerId);
+            const custom = document.getElementById(customId);
+            if (!container || !custom) return;
+
+            container.querySelectorAll('.amount-preset').forEach(preset => {
+                preset.addEventListener('click', function() {
+                    container.querySelectorAll('.amount-preset').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    const val = parseInt(this.dataset.amount);
+                    custom.value = val;
+                    if (callback) callback(val);
+                });
+            });
+
+            custom.addEventListener('input', function() {
+                const val = parseInt(this.value);
+                if (val > 0) {
+                    container.querySelectorAll('.amount-preset').forEach(p => p.classList.remove('active'));
+                    if (callback) callback(val);
+                } else if (this.value === '') {
+                    // Keep last valid amount visible in recap
+                }
+            });
+        }
+
+        function getSelectedAmount(containerId, customId) {
+            const container = document.getElementById(containerId);
+            const custom = document.getElementById(customId);
+            const activePreset = container.querySelector('.amount-preset.active');
+            if (activePreset) return parseInt(activePreset.dataset.amount);
+            const customVal = parseInt(custom.value);
+            if (customVal > 0) return customVal;
+            return 0;
+        }
+
+        // ============================================
+        // 1. DÉPÔT SUR COMPTE — Mise à jour du récap
+        // ============================================
+        let depositAmount = null;
+
+        setupAmountPresets('depositPresets', 'depositCustom', (val) => {
+            depositAmount = val;
+            updateDepositRecap();
+        });
+
+        document.getElementById('depositCustom').addEventListener('input', function() {
+            const val = parseInt(this.value);
+            if (val > 0) {
+                depositAmount = val;
+                updateDepositRecap();
+            }
+        });
+
+        document.getElementById('depositMethod').addEventListener('change', updateDepositRecap);
+
+        function updateDepositRecap() {
+            const method = document.getElementById('depositMethod');
+            const methodName = method.options[method.selectedIndex].text;
+            document.getElementById('depositMethodLabel').textContent = methodName;
+            if (depositAmount === null) {
+                document.getElementById('depositAmountLabel').textContent = '—';
+                document.getElementById('depositFees').textContent = '—';
+                document.getElementById('depositTotal').textContent = '—';
+                return;
+            }
+            const amount = depositAmount || 0;
+            document.getElementById('depositAmountLabel').textContent = amount.toLocaleString() + ' CFA';
+            const fees = amount >= 50000 ? 0 : (amount >= 10000 ? 100 : 0);
+            document.getElementById('depositFees').textContent = fees + ' CFA';
+            document.getElementById('depositTotal').textContent = (amount + fees).toLocaleString() + ' CFA';
+        }
+
+        // ============================================
+        // 2. PAIEMENT MISSION — Mise à jour du récap
+        // ============================================
+        let missionAmount = null;
+
+        setupAmountPresets('missionPresets', 'missionCustom', (val) => {
+            missionAmount = val;
+            updateMissionRecap();
+        });
+
+        document.getElementById('missionCustom').addEventListener('input', function() {
+            const val = parseInt(this.value);
+            if (val > 0) {
+                missionAmount = val;
+                updateMissionRecap();
+            }
+        });
+
+        document.getElementById('missionProject').addEventListener('change', updateMissionRecap);
+        document.getElementById('missionFreelance').addEventListener('change', updateMissionRecap);
+
+        function updateMissionRecap() {
+            const project = document.getElementById('missionProject');
+            const pText = project.selectedIndex > 0 ? project.options[project.selectedIndex].text : '—';
+            document.getElementById('missionProjectLabel').textContent = pText;
+            const freelance = document.getElementById('missionFreelance');
+            const fText = freelance.selectedIndex > 0 ? freelance.options[freelance.selectedIndex].text : '—';
+            document.getElementById('missionFreelanceLabel').textContent = fText;
+            if (missionAmount === null) {
+                document.getElementById('missionAmountLabel').textContent = '—';
+                document.getElementById('missionFeeLabel').textContent = '—';
+                document.getElementById('missionTotal').textContent = '—';
+                return;
+            }
+            const amount = missionAmount || 0;
+            document.getElementById('missionAmountLabel').textContent = amount.toLocaleString() + ' CFA';
+            const fee = Math.round(amount * 0.05);
+            document.getElementById('missionFeeLabel').textContent = fee.toLocaleString() + ' CFA';
+            document.getElementById('missionTotal').textContent = (amount + fee).toLocaleString() + ' CFA';
+        }
+
+        // ============================================
+        // 3. RETRAIT — Mise à jour du récap
+        // ============================================
+        let withdrawAmount = null;
+
+        setupAmountPresets('withdrawPresets', 'withdrawCustom', (val) => {
+            withdrawAmount = val;
+            updateWithdrawRecap();
+        });
+
+        document.getElementById('withdrawCustom').addEventListener('input', function() {
+            const val = parseInt(this.value);
+            if (val > 0) {
+                withdrawAmount = val;
+                updateWithdrawRecap();
+            }
+        });
+
+        document.getElementById('withdrawMethod').addEventListener('change', function() {
+            const method = this.value;
+            const label = document.getElementById('withdrawLabel');
+            const input = document.getElementById('withdrawAccount');
+            if (method === 'bank') {
+                label.textContent = 'IBAN / Numéro de compte';
+                input.placeholder = 'FR76 1234 5678 9012 3456 7890 123';
+            } else {
+                label.textContent = 'Numéro de téléphone';
+                input.placeholder = '77 123 45 67';
+            }
+            updateWithdrawRecap();
+        });
+
+        function updateWithdrawRecap() {
+            const method = document.getElementById('withdrawMethod');
+            const methodName = method.options[method.selectedIndex].text;
+            document.getElementById('withdrawMethodLabel').textContent = methodName;
+            if (withdrawAmount === null) {
+                document.getElementById('withdrawAmountLabel').textContent = '—';
+                document.getElementById('withdrawFees').textContent = '—';
+                document.getElementById('withdrawTotal').textContent = '—';
+                return;
+            }
+            const amount = withdrawAmount || 0;
+            document.getElementById('withdrawAmountLabel').textContent = amount.toLocaleString() + ' CFA';
+            const fees = Math.round(amount * 0.015);
+            document.getElementById('withdrawFees').textContent = fees + ' CFA';
+            document.getElementById('withdrawTotal').textContent = (amount - fees).toLocaleString() + ' CFA';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        // Pas de montant présélectionné au chargement
+
+        // ============================================
+        // RESET — Réinitialiser tous les formulaires
+        // ============================================
+        function resetAll() {
+            depositAmount = null;
+            missionAmount = null;
+            withdrawAmount = null;
+            document.querySelectorAll('.amount-preset').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#depositCustom, #missionCustom, #withdrawCustom').forEach(inp => inp.value = '');
+            document.querySelectorAll('input[type="tel"], input[type="text"]').forEach(inp => inp.value = '');
+            document.getElementById('depositAmountLabel').textContent = '—';
+            document.getElementById('depositFees').textContent = '—';
+            document.getElementById('depositTotal').textContent = '—';
+            document.getElementById('missionAmountLabel').textContent = '—';
+            document.getElementById('missionFeeLabel').textContent = '—';
+            document.getElementById('missionTotal').textContent = '—';
+            document.getElementById('withdrawAmountLabel').textContent = '—';
+            document.getElementById('withdrawFees').textContent = '—';
+            document.getElementById('withdrawTotal').textContent = '—';
+        }
+
+        // ============================================
+        // RACCOURCIS CLAVIER
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeTab = currentTab;
+                const btn = document.getElementById(activeTab === 'deposit' ? 'depositBtn' :
+                    activeTab === 'mission' ? 'missionBtn' : 'withdrawBtn');
+                if (btn && !btn.disabled && !isProcessing) {
+                    btn.click();
+                }
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('notification').classList.remove('show');
+            }
+        });
+
+        // ============================================
+        // BOUTON RETOUR
+        // ============================================
+        document.getElementById('backBtn').addEventListener('click', function() {
+            showNotification('⬅️ Retour à la page précédente', 'info');
+        });
+
+        // ============================================
+        // MENU
+        // ============================================
+        document.getElementById('menuIcon').addEventListener('click', function() {
+            showNotification('📱 Menu latéral', 'info');
+        });
+
+        // ============================================
+        // NAVIGATION BOTTOM
+        // ============================================
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+                const pageNames = {
+                    freelancers: 'Freelancers',
+                    missions: 'Missions',
+                    transactions: 'Transactions',
+                    settings: 'Paramètres'
+                };
+                showNotification(`📱 Navigation vers ${pageNames[page] || page}`, 'info');
+            });
+        });
+
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        console.log('💳 SMD-Tech - Transactions (hub central)');
+        console.log('✅ 3 actions : Dépôt, Mission, Retrait');
+        console.log('📱 Plein écran et responsive');
+
+        // Mise à jour initiale
+        setTimeout(() => {
+            updateDepositRecap();
+            updateMissionRecap();
+            updateWithdrawRecap();
+        }, 100);
+
+        setTimeout(() => {
+            showNotification('💡 Sélectionnez une action dans les onglets', 'info');
+        }, 500);
+    </script>
+
+</body>
+</html>

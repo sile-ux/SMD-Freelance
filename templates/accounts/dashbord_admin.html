@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Panel</title>
+    
+    <!-- Police Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Lordicon -->
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+    <style>
+        /* ===== RESET ET PLEIN ÉCRAN ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Rubik', sans-serif;
+            background: #f0f4f8;
+        }
+
+        /* ===== CONTENEUR PRINCIPAL ===== */
+        .admin-wrap {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 1fr;
+            background: #f0f4f8;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .admin-sidebar {
+            background: #ffffff;
+            border-right: 1px solid #dce7f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            box-shadow: 2px 0 12px rgba(66, 153, 225, 0.08);
+            position: relative;
+        }
+
+        .sidebar-brand {
+            padding: 24px 22px 20px 22px;
+            border-bottom: 1px solid #dce7f5;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-brand .logo lord-icon {
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1a365d;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-brand .logo h1 span {
+            color: #4299e1;
+        }
+
+        .sidebar-brand .sub {
+            font-size: 0.7rem;
+            color: #718096;
+            font-weight: 400;
+            margin-top: 4px;
+            padding-left: 46px;
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 0 12px 0;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: #bee3f8;
+            border-radius: 8px;
+        }
+
+        .menu-label {
+            padding: 8px 22px 6px 22px;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #a0aec0;
+            font-weight: 600;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 22px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: #4a5568;
+            gap: 14px;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 450;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: #ebf8ff;
+            color: #2b6cb0;
+        }
+
+        .menu-item.active {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border-left-color: #4299e1;
+            font-weight: 500;
+        }
+
+        .menu-item .icon-wrap {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .menu-item .icon-wrap lord-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .menu-item .badge {
+            margin-left: auto;
+            background: #bee3f8;
+            color: #2b6cb0;
+            padding: 1px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .menu-item .badge.danger {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .menu-item .badge.success {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .menu-item .badge.warning {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .sidebar-footer {
+            padding: 16px 22px;
+            border-top: 1px solid #dce7f5;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer .profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-footer .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4299e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer .info .name {
+            font-weight: 500;
+            font-size: 0.88rem;
+            color: #1a365d;
+        }
+
+        .sidebar-footer .info .role {
+            font-size: 0.72rem;
+            color: #718096;
+        }
+
+        .sidebar-footer .info .status {
+            font-size: 0.65rem;
+            color: #38a169;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .sidebar-footer .info .status::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #38a169;
+        }
+
+        /* ===== MAIN ===== */
+        .admin-main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background: #f0f4f8;
+        }
+
+        /* ===== HEADER ===== */
+        .admin-header {
+            background: #ffffff;
+            padding: 14px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dce7f5;
+            flex-shrink: 0;
+        }
+
+        .admin-header .left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .admin-header .left h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a365d;
+        }
+
+        .admin-header .left .path {
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: 400;
+        }
+
+        .admin-header .right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-header .right .date {
+            font-size: 0.82rem;
+            color: #718096;
+            font-weight: 400;
+        }
+
+        .admin-header .right .notif {
+            position: relative;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-header .right .notif .dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background: #e53e3e;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .admin-header .right .logout {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #718096;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: 0.15s;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+        }
+
+        .admin-header .right .logout:hover {
+            background: #ebf8ff;
+            color: #e53e3e;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .close-sidebar-btn {
+            display: none;
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #1a365d;
+            font-family: 'Rubik', sans-serif;
+            z-index: 10;
+        }
+
+        /* ===== CONTENU ===== */
+        .admin-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 30px 30px 30px;
+        }
+
+        .admin-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .admin-content::-webkit-scrollbar-thumb {
+            background: #bee3f8;
+            border-radius: 8px;
+        }
+
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 20px 24px;
+            border-radius: 12px;
+            border: 1px solid #dce7f5;
+            transition: 0.15s;
+            box-shadow: 0 1px 3px rgba(66, 153, 225, 0.06);
+        }
+
+        .stat-card:hover {
+            border-color: #bee3f8;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.12);
+        }
+
+        .stat-card .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .top .icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #ebf8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-card .top .icon-box lord-icon {
+            width: 22px;
+            height: 22px;
+        }
+
+        .stat-card .top .change {
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 3px 12px;
+            border-radius: 12px;
+        }
+
+        .change.up {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .change.down {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a365d;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.82rem;
+            color: #718096;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        /* ===== SECTION HEAD ===== */
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 28px 0 16px 0;
+        }
+
+        .section-head h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #1a365d;
+        }
+
+        .section-head .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .section-head .actions button {
+            padding: 7px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: 0.15s;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #bee3f8 !important;
+            color: #2b6cb0;
+        }
+
+        .btn-outline:hover {
+            border-color: #4299e1 !important;
+            color: #2b6cb0;
+            background: #ebf8ff;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #4a5568;
+        }
+
+        .btn-ghost:hover {
+            background: #ebf8ff;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+            transform: translateY(-1px);
+        }
+
+        /* ===== TABLEAU ===== */
+        .table-wrap {
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #dce7f5;
+            box-shadow: 0 1px 3px rgba(66, 153, 225, 0.06);
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        .table-wrap thead {
+            background: #f7fafc;
+        }
+
+        .table-wrap th {
+            padding: 14px 20px;
+            text-align: left;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dce7f5;
+        }
+
+        .table-wrap td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #edf2f7;
+            color: #1a365d;
+        }
+
+        .table-wrap tbody tr {
+            transition: 0.1s;
+        }
+
+        .table-wrap tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-cell .av {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .user-cell .av.freelance {
+            background: #9f7aea;
+        }
+
+        .user-cell .av.client {
+            background: #4fd1c5;
+        }
+
+        .user-cell .av.admin {
+            background: #4299e1;
+        }
+
+        .user-cell .name {
+            font-weight: 500;
+        }
+
+        .user-cell .email {
+            font-size: 0.78rem;
+            color: #718096;
+        }
+
+        .badge-status {
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-status.active {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .badge-status.pending {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .badge-status.suspended {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .badge-status.online {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .badge-status.offline {
+            background: #edf2f7;
+            color: #718096;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .row-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 6px;
+            transition: 0.1s;
+            font-size: 0.9rem;
+        }
+
+        .row-actions .chat-btn:hover {
+            background: #bee3f8;
+        }
+
+        .row-actions .check-btn:hover {
+            background: #c6f6d5;
+        }
+
+        .row-actions .block-btn:hover {
+            background: #fed7d7;
+        }
+
+        /* ===== LITIGES ===== */
+        .disputes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 14px;
+        }
+
+        .dispute-card {
+            background: #ffffff;
+            padding: 20px 22px;
+            border-radius: 12px;
+            border: 1px solid #dce7f5;
+            transition: 0.15s;
+            box-shadow: 0 1px 3px rgba(66, 153, 225, 0.06);
+        }
+
+        .dispute-card:hover {
+            border-color: #bee3f8;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.12);
+        }
+
+        .dispute-card .head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .dispute-card .id {
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: #1a365d;
+        }
+
+        .dispute-card .status {
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 3px 14px;
+            border-radius: 12px;
+        }
+
+        .status.open {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .status.in-progress {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .status.resolved {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .dispute-card .parties {
+            font-size: 0.82rem;
+            color: #718096;
+            margin: 6px 0 8px 0;
+        }
+
+        .dispute-card .reason {
+            font-size: 0.88rem;
+            margin: 6px 0 12px 0;
+            color: #1a365d;
+        }
+
+        .dispute-card .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dispute-card .actions button {
+            padding: 5px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+            font-size: 0.78rem;
+            transition: 0.15s;
+        }
+
+        /* ===== PAIEMENTS ===== */
+        .payments-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 14px;
+        }
+
+        .payment-card {
+            background: #ffffff;
+            padding: 20px 22px;
+            border-radius: 12px;
+            border: 1px solid #dce7f5;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(66, 153, 225, 0.06);
+            transition: 0.15s;
+        }
+
+        .payment-card:hover {
+            border-color: #bee3f8;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.12);
+        }
+
+        .payment-card .amount {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1a365d;
+            letter-spacing: -0.5px;
+        }
+
+        .payment-card .label {
+            font-size: 0.82rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        /* ===== OVERLAY SIDEBAR MOBILE ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 54, 93, 0.4);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .disputes-grid {
+                grid-template-columns: 1fr;
+            }
+            .payments-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-sidebar {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 85%;
+                max-width: 320px;
+                height: 100vh;
+                z-index: 1000;
+                background: #fff;
+                box-shadow: 0 0 40px rgba(26, 54, 93, 0.2);
+                border-right: none;
+            }
+
+            .admin-sidebar.open {
+                display: flex;
+                animation: slideIn 0.25s ease;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(-100%);
+                }
+                to {
+                    transform: translateX(0);
+                }
+            }
+
+            .close-sidebar-btn {
+                display: block !important;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payments-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-content {
+                padding: 16px;
+            }
+
+            .admin-header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .admin-header .left h2 {
+                font-size: 1rem;
+            }
+
+            .admin-header .right .date {
+                display: none;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+            }
+
+            .table-wrap table {
+                min-width: 700px;
+                font-size: 0.82rem;
+            }
+
+            .section-head {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .section-head .actions {
+                flex-wrap: wrap;
+            }
+
+            .section-head .actions button {
+                flex: 1;
+                text-align: center;
+                font-size: 0.75rem;
+                padding: 7px 12px;
+            }
+
+            .disputes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== SECTIONS ===== */
+        .section-page {
+            display: none;
+        }
+
+        .section-page.active {
+            display: block;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 54, 93, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 36px;
+            max-width: 520px;
+            width: 92%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(26, 54, 93, 0.2);
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-box h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1a365d;
+        }
+
+        .modal-box .field {
+            margin-bottom: 16px;
+        }
+
+        .modal-box .field label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.84rem;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .modal-box .field input,
+        .modal-box .field textarea,
+        .modal-box .field select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 8px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.9rem;
+            transition: 0.15s;
+            background: #f7fafc;
+        }
+
+        .modal-box .field input:focus,
+        .modal-box .field textarea:focus,
+        .modal-box .field select:focus {
+            border-color: #4299e1;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.12);
+        }
+
+        .modal-box .field textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .modal-box .field input[type="file"] {
+            padding: 8px;
+            background: #f7fafc;
+        }
+
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 22px;
+        }
+
+        .modal-box .modal-actions button {
+            padding: 9px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+            font-size: 0.88rem;
+            transition: 0.15s;
+        }
+
+        .modal-box .modal-actions .cancel {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+
+        .modal-box .modal-actions .cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-box .modal-actions .submit {
+            background: #4299e1;
+            color: #fff;
+        }
+
+        .modal-box .modal-actions .submit:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== OVERLAY MOBILE ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- ===== CONTENEUR ===== -->
+    <div class="admin-wrap">
+
+        <!-- ===== SIDEBAR ===== -->
+        <div class="admin-sidebar" id="sidebar">
+            <button class="close-sidebar-btn" onclick="closeSidebar()">✕</button>
+            
+            <div class="sidebar-brand">
+                <div class="logo">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/ktheyllq.json"
+                        trigger="loop"
+                        colors="primary:#4299e1"
+                        style="width:34px;height:34px;">
+                    </lord-icon>
+                    <h1>Admin<span>Panel</span></h1>
+                </div>
+                <div class="sub">Contrôle total de la plateforme</div>
+            </div>
+
+            <div class="sidebar-menu">
+                <div class="menu-label">Navigation</div>
+                
+                <div class="menu-item active" data-section="dashboard">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/msfukujo.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Tableau de bord
+                </div>
+                
+                <div class="menu-item" data-section="users">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Utilisateurs
+                    <span class="badge">247</span>
+                </div>
+                
+                <div class="menu-item" data-section="freelancers">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Valider Freelances
+                    <span class="badge danger">5</span>
+                </div>
+                
+                <div class="menu-item" data-section="payments">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Paiements
+                    <span class="badge success">12</span>
+                </div>
+                
+                <div class="menu-item" data-section="disputes">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/mhczqzrn.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Litiges
+                    <span class="badge danger">3</span>
+                </div>
+                
+                <div class="menu-item" data-section="missions">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Missions
+                    <span class="badge">18</span>
+                </div>
+                
+                <div class="menu-label">Gestion</div>
+                
+                <div class="menu-item" data-section="documents">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Documents
+                </div>
+                
+                <div class="menu-item" data-section="settings">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/wzrgrlfk.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Paramètres
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="profile">
+                    <div class="avatar">AD</div>
+                    <div class="info">
+                        <div class="name">Admin Principal</div>
+                        <div class="role">Super Administrateur</div>
+                        <div class="status">En ligne</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== MAIN ===== -->
+        <div class="admin-main">
+
+            <!-- HEADER -->
+            <div class="admin-header">
+                <div class="left">
+                    <button class="mobile-toggle" onclick="toggleSidebar()">
+                        <lord-icon src="https://cdn.lordicon.com/xtvkovgo.json" trigger="click" colors="primary:#4299e1" style="width:30px;height:30px;"></lord-icon>
+                    </button>
+                    <h2 id="pageTitle">📊 Tableau de bord</h2>
+                    <span class="path" id="pagePath">Vue d'ensemble</span>
+                </div>
+                <div class="right">
+                    <span class="date" id="currentDate"></span>
+                    <div class="notif" onclick="showNotifs()">
+                        <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#718096" style="width:26px;height:26px;"></lord-icon>
+                        <span class="dot"></span>
+                    </div>
+                    <button class="logout" onclick="confirmLogout()">🚪 Déconnexion</button>
+                </div>
+            </div>
+
+            <!-- CONTENU -->
+            <div class="admin-content" id="adminContent">
+
+                <!-- ===== DASHBOARD ===== -->
+                <div class="section-page active" id="page-dashboard">
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="top">
+                                <span class="icon-box">
+                                    <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                </span>
+                                <span class="change up">▲ +12%</span>
+                            </div>
+                            <div class="value">247</div>
+                            <div class="label">Utilisateurs totaux</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="top">
+                                <span class="icon-box">
+                                    <lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                </span>
+                                <span class="change up">▲ +8%</span>
+                            </div>
+                            <div class="value">156</div>
+                            <div class="label">Freelances actifs</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="top">
+                                <span class="icon-box">
+                                    <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                </span>
+                                <span class="change up">▲ +23%</span>
+                            </div>
+                            <div class="value">€48 392</div>
+                            <div class="label">Revenus du mois</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="top">
+                                <span class="icon-box">
+                                    <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                </span>
+                                <span class="change down">▼ -2%</span>
+                            </div>
+                            <div class="value">18</div>
+                            <div class="label">Missions en cours</div>
+                        </div>
+                    </div>
+
+                    <!-- Utilisateurs récents -->
+                    <div class="section-head">
+                        <h3>👤 Utilisateurs récemment actifs</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="switchSection('users')">Voir tous</button>
+                            <button class="btn-outline" onclick="openModal('contact')">📧 Contacter</button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Rôle</th>
+                                    <th>Statut</th>
+                                    <th>Connecté</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="av freelance">JD</span>
+                                            <div>
+                                                <div class="name">Jean Dupont</div>
+                                                <div class="email">jean.dupont@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Freelance</td>
+                                    <td><span class="badge-status active">Actif</span></td>
+                                    <td><span class="badge-status online">En ligne</span></td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="chat-btn" onclick="openModal('contact','Jean Dupont')">💬</button>
+                                            <button class="check-btn" onclick="validateUser('Jean Dupont')">✅</button>
+                                            <button class="block-btn" onclick="suspendUser('Jean Dupont')">⛔</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="av client">ML</span>
+                                            <div>
+                                                <div class="name">Marie Laurent</div>
+                                                <div class="email">marie.laurent@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Client</td>
+                                    <td><span class="badge-status active">Actif</span></td>
+                                    <td><span class="badge-status offline">Hors ligne</span></td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="chat-btn" onclick="openModal('contact','Marie Laurent')">💬</button>
+                                            <button class="check-btn" onclick="validateUser('Marie Laurent')">✅</button>
+                                            <button class="block-btn" onclick="suspendUser('Marie Laurent')">⛔</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="av freelance">PR</span>
+                                            <div>
+                                                <div class="name">Pierre Richard</div>
+                                                <div class="email">pierre.richard@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Freelance</td>
+                                    <td><span class="badge-status pending">En attente</span></td>
+                                    <td><span class="badge-status offline">Hors ligne</span></td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="chat-btn" onclick="openModal('contact','Pierre Richard')">💬</button>
+                                            <button class="check-btn" onclick="validateFreelance('Pierre Richard')">✅</button>
+                                            <button class="block-btn" onclick="suspendUser('Pierre Richard')">⛔</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="av client">SB</span>
+                                            <div>
+                                                <div class="name">Sophie Bernard</div>
+                                                <div class="email">sophie.bernard@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Client</td>
+                                    <td><span class="badge-status active">Actif</span></td>
+                                    <td><span class="badge-status online">En ligne</span></td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="chat-btn" onclick="openModal('contact','Sophie Bernard')">💬</button>
+                                            <button class="check-btn" onclick="validateUser('Sophie Bernard')">✅</button>
+                                            <button class="block-btn" onclick="suspendUser('Sophie Bernard')">⛔</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Litiges -->
+                    <div class="section-head">
+                        <h3>⚖️ Litiges en cours</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="switchSection('disputes')">Gérer les litiges</button>
+                        </div>
+                    </div>
+
+                    <div class="disputes-grid">
+                        <div class="dispute-card">
+                            <div class="head">
+                                <span class="id">#LIT-2024-001</span>
+                                <span class="status open">🟠 Ouvert</span>
+                            </div>
+                            <div class="parties">👤 Jean Dupont (Freelance) vs 👤 Marie Laurent (Client)</div>
+                            <div class="reason">📝 Non-paiement du projet - Montant: €2 500</div>
+                            <div class="actions">
+                                <button class="btn-primary" onclick="resolveDispute('LIT-2024-001')">✅ Résoudre</button>
+                                <button class="btn-outline" onclick="openModal('contact','Parties du litige')">💬 Contacter</button>
+                            </div>
+                        </div>
+                        <div class="dispute-card">
+                            <div class="head">
+                                <span class="id">#LIT-2024-002</span>
+                                <span class="status in-progress">🟡 En cours</span>
+                            </div>
+                            <div class="parties">👤 Pierre Richard (Freelance) vs 👤 Sophie Bernard (Client)</div>
+                            <div class="reason">📝 Livraison non conforme aux spécifications</div>
+                            <div class="actions">
+                                <button class="btn-primary" onclick="resolveDispute('LIT-2024-002')">✅ Résoudre</button>
+                                <button class="btn-outline" onclick="openModal('contact','Parties du litige')">💬 Contacter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paiements -->
+                    <div class="section-head">
+                        <h3>💰 Paiements récents</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="switchSection('payments')">Voir tous</button>
+                        </div>
+                    </div>
+
+                    <div class="payments-grid">
+                        <div class="payment-card">
+                            <div class="amount">€12 450</div>
+                            <div class="label">Ce mois-ci</div>
+                        </div>
+                        <div class="payment-card">
+                            <div class="amount">€8 230</div>
+                            <div class="label">En attente</div>
+                        </div>
+                        <div class="payment-card">
+                            <div class="amount">€3 200</div>
+                            <div class="label">En cours de traitement</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== UTILISATEURS ===== -->
+                <div class="section-page" id="page-users">
+                    <div class="section-head">
+                        <h3>👥 Tous les utilisateurs</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="openModal('contact')">📧 Envoyer un message</button>
+                            <button class="btn-outline" onclick="openModal('document')">📄 Envoyer un document</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Rôle</th>
+                                    <th>Statut</th>
+                                    <th>Connecté</th>
+                                    <th>Date d'inscription</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Rempli par JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== VALIDATION FREELANCES ===== -->
+                <div class="section-page" id="page-freelancers">
+                    <div class="section-head">
+                        <h3>✅ Validation des comptes freelance</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="validateAll()">📋 Valider tout</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Freelance</th>
+                                    <th>Compétences</th>
+                                    <th>Statut</th>
+                                    <th>Documents</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="av freelance">PR</span>
+                                            <div>
+                                                <div class="name">Pierre Richard</div>
+                                                <div class="email">pierre.richard@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>💻 Développeur Web</td>
+                                    <td><span class="badge-status pending">En attente</span></td>
+                                    <td>📄 3 documents</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="check-btn" onclick="validateFreelance('Pierre Richard')">✅ Valider</button>
+                                            <button class="chat-btn" onclick="openModal('contact','Pierre Richard')">💬</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <span class="av freelance">AL</span>
+                                            <div>
+                                                <div class="name">Alice Lambert</div>
+                                                <div class="email">alice.lambert@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>🎨 Designer UI/UX</td>
+                                    <td><span class="badge-status pending">En attente</span></td>
+                                    <td>📄 2 documents</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="check-btn" onclick="validateFreelance('Alice Lambert')">✅ Valider</button>
+                                            <button class="chat-btn" onclick="openModal('contact','Alice Lambert')">💬</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== PAIEMENTS ===== -->
+                <div class="section-page" id="page-payments">
+                    <div class="section-head">
+                        <h3>💰 Gestion des paiements</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="openModal('payment')">📊 Générer un rapport</button>
+                        </div>
+                    </div>
+                    <div class="payments-grid">
+                        <div class="payment-card">
+                            <div class="amount">€48 392</div>
+                            <div class="label">Total des paiements</div>
+                        </div>
+                        <div class="payment-card">
+                            <div class="amount">€12 450</div>
+                            <div class="label">Ce mois-ci</div>
+                        </div>
+                        <div class="payment-card">
+                            <div class="amount">€8 230</div>
+                            <div class="label">En attente de validation</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:18px;background:#fff;padding:22px;border-radius:12px;border:1px solid #dce7f5;">
+                        <p style="color:#718096;font-size:0.9rem;text-align:center;">
+                            📊 Les paiements sont traités via Stripe. Consultez les transactions détaillées.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ===== LITIGES ===== -->
+                <div class="section-page" id="page-disputes">
+                    <div class="section-head">
+                        <h3>⚖️ Gestion des litiges</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="openModal('dispute')">➕ Nouveau litige</button>
+                        </div>
+                    </div>
+                    <div class="disputes-grid" id="disputesContainer">
+                        <!-- Rempli par JS -->
+                    </div>
+                </div>
+
+                <!-- ===== MISSIONS ===== -->
+                <div class="section-page" id="page-missions">
+                    <div class="section-head">
+                        <h3>📋 Missions en cours</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="openModal('mission')">➕ Nouvelle mission</button>
+                        </div>
+                    </div>
+                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
+                        <p style="color:#718096;text-align:center;font-size:0.95rem;">
+                            📋 18 missions actives · 12 en attente · 6 terminées
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ===== DOCUMENTS ===== -->
+                <div class="section-page" id="page-documents">
+                    <div class="section-head">
+                        <h3>📄 Gestion des documents</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="openModal('document')">📤 Envoyer un document</button>
+                        </div>
+                    </div>
+                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
+                        <p style="color:#718096;text-align:center;font-size:0.95rem;">
+                            📄 Gérez tous les documents partagés sur la plateforme.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ===== PARAMÈTRES ===== -->
+                <div class="section-page" id="page-settings">
+                    <div class="section-head">
+                        <h3>⚙️ Paramètres</h3>
+                    </div>
+                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
+                        <p style="color:#718096;text-align:center;font-size:0.95rem;">
+                            ⚙️ Configuration de la plateforme, sécurité et préférences.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h3 id="modalTitle">📧 Contacter un utilisateur</h3>
+            <div id="modalBody">
+                <div class="field">
+                    <label>Destinataire</label>
+                    <input type="text" id="modalRecipient" placeholder="Nom de l'utilisateur">
+                </div>
+                <div class="field">
+                    <label>Sujet</label>
+                    <input type="text" id="modalSubject" placeholder="Sujet du message">
+                </div>
+                <div class="field">
+                    <label>Message</label>
+                    <textarea id="modalMessage" placeholder="Votre message..."></textarea>
+                </div>
+                <div class="field" id="fileField" style="display:none;">
+                    <label>Joindre un fichier (PDF)</label>
+                    <input type="file" accept=".pdf">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel" onclick="closeModal()">Annuler</button>
+                <button class="submit" onclick="submitModal()">Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATE =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const d = new Date();
+            document.getElementById('currentDate').textContent = '📅 ' + d.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            loadUsers();
+            loadDisputes();
+        });
+
+        // ===== SIDEBAR =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ===== NAVIGATION =====
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const section = this.dataset.section;
+                switchSection(section);
+                if (window.innerWidth <= 768) closeSidebar();
+            });
+        });
+
+        function switchSection(section) {
+            document.querySelectorAll('.section-page').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + section).classList.add('active');
+
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.menu-item[data-section="${section}"]`).classList.add('active');
+
+            const titles = {
+                dashboard: '📊 Tableau de bord',
+                users: '👥 Utilisateurs',
+                freelancers: '✅ Validation Freelances',
+                payments: '💰 Paiements',
+                disputes: '⚖️ Litiges',
+                missions: '📋 Missions',
+                documents: '📄 Documents',
+                settings: '⚙️ Paramètres'
+            };
+            document.getElementById('pageTitle').textContent = titles[section] || 'Tableau de bord';
+            document.getElementById('pagePath').textContent = section === 'dashboard' ? 'Vue d\'ensemble' : 'Gestion';
+        }
+
+        // ===== LOAD USERS =====
+        function loadUsers() {
+            const users = [
+                { name: 'Jean Dupont', email: 'jean.dupont@email.com', role: 'Freelance', status: 'active', online: 'online', date: '15/06/2024' },
+                { name: 'Marie Laurent', email: 'marie.laurent@email.com', role: 'Client', status: 'active', online: 'offline', date: '14/06/2024' },
+                { name: 'Pierre Richard', email: 'pierre.richard@email.com', role: 'Freelance', status: 'pending', online: 'offline', date: '12/06/2024' },
+                { name: 'Sophie Bernard', email: 'sophie.bernard@email.com', role: 'Client', status: 'active', online: 'online', date: '10/06/2024' },
+                { name: 'Alice Lambert', email: 'alice.lambert@email.com', role: 'Freelance', status: 'pending', online: 'offline', date: '08/06/2024' },
+                { name: 'Thomas Martin', email: 'thomas.martin@email.com', role: 'Client', status: 'suspended', online: 'offline', date: '05/06/2024' },
+                { name: 'Julie Petit', email: 'julie.petit@email.com', role: 'Freelance', status: 'active', online: 'online', date: '03/06/2024' },
+            ];
+
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                const avClass = u.role === 'Freelance' ? 'freelance' : u.role === 'Admin' ? 'admin' : 'client';
+                const statusClass = u.status === 'active' ? 'active' : u.status === 'pending' ? 'pending' : 'suspended';
+                const statusLabel = u.status === 'active' ? 'Actif' : u.status === 'pending' ? 'En attente' : 'Suspendu';
+                const onlineClass = u.online === 'online' ? 'online' : 'offline';
+                const onlineLabel = u.online === 'online' ? 'En ligne' : 'Hors ligne';
+                const initials = u.name.split(' ').map(n => n[0]).join('');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <span class="av ${avClass}">${initials}</span>
+                                <div>
+                                    <div class="name">${u.name}</div>
+                                    <div class="email">${u.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${u.role}</td>
+                        <td><span class="badge-status ${statusClass}">${statusLabel}</span></td>
+                        <td><span class="badge-status ${onlineClass}">${onlineLabel}</span></td>
+                        <td>${u.date}</td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="chat-btn" onclick="openModal('contact','${u.name}')">💬</button>
+                                ${u.status === 'pending' ? `<button class="check-btn" onclick="validateFreelance('${u.name}')">✅</button>` : ''}
+                                <button class="block-btn" onclick="suspendUser('${u.name}')">⛔</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ===== LOAD DISPUTES =====
+        function loadDisputes() {
+            const disputes = [
+                { id: 'LIT-2024-001', status: 'open', freelance: 'Jean Dupont', client: 'Marie Laurent', reason: 'Non-paiement du projet - Montant: €2 500' },
+                { id: 'LIT-2024-002', status: 'in-progress', freelance: 'Pierre Richard', client: 'Sophie Bernard', reason: 'Livraison non conforme aux spécifications' },
+                { id: 'LIT-2024-003', status: 'open', freelance: 'Alice Lambert', client: 'Thomas Martin', reason: 'Retard de livraison de 2 semaines' },
+            ];
+
+            const container = document.getElementById('disputesContainer');
+            container.innerHTML = '';
+            disputes.forEach(d => {
+                const statusLabel = d.status === 'open' ? '🟠 Ouvert' : d.status === 'in-progress' ? '🟡 En cours' : '✅ Résolu';
+                container.innerHTML += `
+                    <div class="dispute-card">
+                        <div class="head">
+                            <span class="id">#${d.id}</span>
+                            <span class="status ${d.status}">${statusLabel}</span>
+                        </div>
+                        <div class="parties">👤 ${d.freelance} (Freelance) vs 👤 ${d.client} (Client)</div>
+                        <div class="reason">📝 ${d.reason}</div>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="resolveDispute('${d.id}')">✅ Résoudre</button>
+                            <button class="btn-outline" onclick="openModal('contact','Parties du litige')">💬 Contacter</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ===== ACTIONS =====
+        function validateUser(name) {
+            if (confirm('✅ Valider le compte de ' + name + ' ?')) {
+                alert('✅ Le compte de ' + name + ' a été validé avec succès !');
+            }
+        }
+
+        function validateFreelance(name) {
+            if (confirm('✅ Valider le compte freelance de ' + name + ' ?')) {
+                alert('✅ Le compte freelance de ' + name + ' a été validé ! Il peut maintenant accepter des missions.');
+            }
+        }
+
+        function suspendUser(name) {
+            if (confirm('⛔ Êtes-vous sûr de vouloir suspendre ' + name + ' ?')) {
+                alert('⛔ ' + name + ' a été suspendu.');
+            }
+        }
+
+        function validateAll() {
+            if (confirm('✅ Valider tous les comptes freelance en attente ?')) {
+                alert('✅ Tous les comptes freelance ont été validés !');
+            }
+        }
+
+        function resolveDispute(id) {
+            if (confirm('✅ Résoudre le litige ' + id + ' ?')) {
+                alert('✅ Le litige ' + id + ' a été résolu. Les deux parties ont été informées.');
+            }
+        }
+
+        function showNotifs() {
+            alert('🔔 Vous avez 3 notifications non lues :\n\n' +
+                  '1. Nouveau litige #LIT-2024-003\n' +
+                  '2. Pierre Richard demande une validation de compte\n' +
+                  '3. Paiement de €1 200 reçu');
+        }
+
+        function confirmLogout() {
+            if (confirm('🚪 Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                alert('👋 Déconnexion réussie !');
+            }
+        }
+
+        // ===== MODAL =====
+        function openModal(type, recipient) {
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            const fileField = document.getElementById('fileField');
+
+            document.getElementById('modalRecipient').value = recipient || '';
+            document.getElementById('modalSubject').value = '';
+            document.getElementById('modalMessage').value = '';
+            fileField.style.display = 'none';
+
+            if (type === 'contact') {
+                title.textContent = '💬 Contacter un utilisateur';
+                body.innerHTML = `
+                    <div class="field"><label>Destinataire</label><input type="text" id="modalRecipient" value="${recipient || ''}" placeholder="Nom de l'utilisateur"></div>
+                    <div class="field"><label>Sujet</label><input type="text" id="modalSubject" placeholder="Sujet du message"></div>
+                    <div class="field"><label>Message</label><textarea id="modalMessage" placeholder="Votre message..."></textarea></div>
+                `;
+            } else if (type === 'document') {
+                title.textContent = '📄 Envoyer un document';
+                body.innerHTML = `
+                    <div class="field"><label>Destinataire</label><input type="text" id="modalRecipient" placeholder="Nom de l'utilisateur"></div>
+                    <div class="field"><label>Sujet</label><input type="text" id="modalSubject" placeholder="Sujet du document"></div>
+                    <div class="field"><label>Message</label><textarea id="modalMessage" placeholder="Message accompagnant le document..."></textarea></div>
+                    <div class="field" id="fileField"><label>Joindre un fichier (PDF)</label><input type="file" accept=".pdf"></div>
+                `;
+                document.getElementById('fileField').style.display = 'block';
+            } else if (type === 'payment') {
+                title.textContent = '📊 Générer un rapport de paiements';
+                body.innerHTML = `
+                    <div class="field"><label>Période</label><select><option>Ce mois-ci</option><option>Mois dernier</option><option>3 derniers mois</option><option>Année en cours</option><option>Personnalisé</option></select></div>
+                    <div class="field"><label>Format</label><select><option>PDF</option><option>Excel</option><option>CSV</option></select></div>
+                `;
+            } else if (type === 'dispute') {
+                title.textContent = '➕ Nouveau litige';
+                body.innerHTML = `
+                    <div class="field"><label>Freelance concerné</label><input type="text" placeholder="Nom du freelance"></div>
+                    <div class="field"><label>Client concerné</label><input type="text" placeholder="Nom du client"></div>
+                    <div class="field"><label>Raison du litige</label><textarea placeholder="Décrivez le litige..."></textarea></div>
+                `;
+            } else if (type === 'mission') {
+                title.textContent = '➕ Nouvelle mission';
+                body.innerHTML = `
+                    <div class="field"><label>Titre de la mission</label><input type="text" placeholder="Titre de la mission"></div>
+                    <div class="field"><label>Freelance</label><input type="text" placeholder="Nom du freelance"></div>
+                    <div class="field"><label>Client</label><input type="text" placeholder="Nom du client"></div>
+                    <div class="field"><label>Montant</label><input type="text" placeholder="€"></div>
+                `;
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function submitModal() {
+            const recipient = document.getElementById('modalRecipient')?.value || 'Utilisateur';
+            const subject = document.getElementById('modalSubject')?.value || 'Sans sujet';
+            const message = document.getElementById('modalMessage')?.value || 'Pas de message';
+            
+            alert('✅ Message envoyé à ' + recipient + ' !\n\nSujet: ' + subject + '\nMessage: ' + message);
+            closeModal();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeSidebar();
+            }
+        });
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+
+</body>
+</html>

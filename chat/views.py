@@ -9,6 +9,42 @@ User = get_user_model()
 
 
 @login_required
+def latest_chat(request):
+    """Redirige vers la dernière discussion active de l'utilisateur"""
+    if request.user.role == User.Role.FREELANCE.value:
+        thread = request.user.freelance_threads.order_by('-created_at').first()
+    else:
+        thread = request.user.client_threads.order_by('-created_at').first()
+
+    if thread:
+        return redirect('chat:chat_room', thread_id=thread.id)
+    return redirect('chat:my_threads')
+
+
+@login_required
+def my_threads(request):
+    """Affiche la liste des discussions de l'utilisateur connecté"""
+    if request.user.role == User.Role.FREELANCE.value:
+        threads = request.user.freelance_threads.all()
+    else:
+        threads = request.user.client_threads.all()
+
+    thread_data = []
+    for thread in threads:
+        last_msg = thread.messages.order_by('-created_at').first()
+        unread = thread.messages.filter(is_read=False).exclude(sender=request.user).count()
+        other_user = thread.freelance if request.user == thread.client else thread.client
+        thread_data.append({
+            'thread': thread,
+            'last_message': last_msg,
+            'unread_count': unread,
+            'other_user': other_user,
+        })
+
+    return render(request, 'chat/thread_list.html', {'threads': thread_data})
+
+
+@login_required
 def start_or_get_thread(request, user_id): # 🔄 Changé freelance_id -> user_id
     """API : Initialise ou récupère un salon de discussion avec un freelance"""
     freelance = get_object_or_404(User, id=user_id)
@@ -121,6 +157,27 @@ def send_message_api(request, thread_id):
     return JsonResponse({"error": "Méthode non autorisée. Utilisez POST."}, status=405)
 
 
+def get_user_threads(user):
+    """Retourne tous les threads de l'utilisateur avec métadonnées"""
+    if user.role == User.Role.FREELANCE.value:
+        threads_qs = user.freelance_threads.all()
+    else:
+        threads_qs = user.client_threads.all()
+
+    threads = []
+    for t in threads_qs:
+        last_msg = t.messages.order_by('-created_at').first()
+        unread = t.messages.filter(is_read=False).exclude(sender=user).count()
+        other_user = t.freelance if user == t.client else t.client
+        threads.append({
+            'thread': t,
+            'last_message': last_msg,
+            'unread_count': unread,
+            'other_user': other_user,
+        })
+    return threads
+
+
 @login_required
 def chat_room(request, thread_id):
     """Affiche une salle de discussion spécifique et ses messages."""
@@ -129,10 +186,20 @@ def chat_room(request, thread_id):
     if request.user != thread.client and request.user != thread.freelance:
         return redirect('accounts:dashboard')
 
+    if request.method == 'POST':
+        text = request.POST.get('text', '').strip()
+        if text:
+            Message.objects.create(thread=thread, sender=request.user, text=text)
+        return redirect('chat:chat_room', thread_id=thread.id)
+
     chat_messages = thread.messages.all().order_by('created_at')
+    other_user = thread.freelance if request.user == thread.client else thread.client
+    threads = get_user_threads(request.user)
 
     context = {
         'thread': thread,
         'chat_messages': chat_messages,
+        'other_user': other_user,
+        'threads': threads,
     }
-    return render(request, 'chat/room.html', context)
+    return render(request, 'chat/chat_room.html', context)

@@ -2,7 +2,7 @@ app_name = 'accounts'
 from django.urls import path
 from . import views
 from .views import home_view, choice_register, register_client, freelance_register_view, user_login, user_logout, \
-    dashboard
+    dashboard, transaction_view, parametre_view
 
 urlpatterns = [
 
@@ -26,6 +26,8 @@ urlpatterns = [
     path('connexion/', views.user_login, name='login'),
     path('deconnexion/', views.user_logout, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('transaction/', views.transaction_view, name='transaction'),
+    path('parametre/', views.parametre_view, name='parametre'),
     path('inscription-freelance/', views.freelance_register_view, name='freelance_register_view'),
 ]
 

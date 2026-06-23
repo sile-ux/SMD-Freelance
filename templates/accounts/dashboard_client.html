@@ -1,73 +1,1203 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% block title %}SMD-Tech - Contacter un Freelancer{% endblock %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Reset & base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-{% block title %}Tableau de Bord Client - SMD-Tech{% endblock %}
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 0;
+            position: relative;
+        }
 
-{% block content %}
-<script src="https://cdn.lordicon.com/lordicon.js"></script>
-<div class="space-y-8">
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Espace Client de {{ user.username }}</h1>
-            <p class="text-gray-500 text-sm mt-1">
-                {% if user.client_profile.company_name %}
-                    Entreprise : <strong>{{ user.client_profile.company_name }}</strong>
-                {% else %}
-                    Compte Particulier / Personnel
-                {% endif %}
-            </p>
+        /* Conteneur principal */
+        .app-container {
+            width: calc(100% - 300px);
+            min-height: 100vh;
+            background: #ffffff;
+            box-shadow: none;
+            padding: 18px 18px 16px;
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            margin-left: 300px;
+        }
+
+        /* ----- En-tête ----- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .header .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: -0.5px;
+        }
+
+        .header .logo span {
+            color: #00B4D8;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+        }
+
+        .menu-icon:hover {
+            color: #00B4D8;
+        }
+
+        /* ----- Menu latéral ----- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 30px 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar .close-btn {
+            font-size: 24px;
+            color: #1a1a2e;
+            cursor: pointer;
+            margin-bottom: 30px;
+            display: block;
+            text-align: right;
+        }
+
+        .sidebar .close-btn:hover {
+            color: #00B4D8;
+        }
+
+        .sidebar .menu-item {
+            display: block;
+            padding: 14px 0;
+            border-bottom: 1px solid #e8e8ef;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a2e;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .sidebar .menu-group {
+            flex: 1;
+        }
+
+        .sidebar .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar .menu-item:hover {
+            color: #00B4D8;
+        }
+
+        .sidebar .menu-item i {
+            margin-right: 12px;
+            width: 24px;
+            color: #00B4D8;
+        }
+
+        .sidebar .language-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid #e8e8ef;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+        .sidebar .language-switch select {
+            border: 1px solid #dfe7ee;
+            border-radius: 10px;
+            padding: 6px 8px;
+            font-size: 13px;
+            color: #1a1a2e;
+            background: #fff;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* ----- Titre de la page ----- */
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        /* ----- Barre de recherche ----- */
+        .search-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .user-profile-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 2;
+            width: 56px;
+        }
+
+        .user-profile-mini .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00B4D8, #0ea5e9);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0, 180, 216, 0.22);
+        }
+
+        .user-profile-mini .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .user-profile-mini .user-info strong {
+            font-size: 10px;
+            color: #1a1a2e;
+            line-height: 1.1;
+        }
+
+        .user-profile-mini .user-info span {
+            font-size: 9px;
+            color: #6b7280;
+        }
+
+        .search-bar {
+            background: #f0f4f8;
+            border-radius: 999px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            border: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar:focus-within {
+            border-color: #00B4D8;
+        }
+
+        .search-bar i {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 13px;
+            color: #1a1a2e;
+        }
+
+        .search-bar input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-btn {
+            padding: 8px 12px;
+            min-width: 96px;
+            white-space: nowrap;
+            border-radius: 999px;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+
+        /* ----- Statistiques rapides ----- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #eef2f7;
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 3px;
+        }
+
+        .stat-card strong {
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+        /* ----- Filtres ----- */
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .filter-item {
+            background: #f0f4f8;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+            flex: 1 0 auto;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .filter-item:hover {
+            background: #e3ecf3;
+        }
+
+        .filter-item.active {
+            border-color: #00B4D8;
+            background: #e3f4fa;
+        }
+
+        .filter-item i {
+            font-size: 12px;
+            color: #6b7280;
+            transition: transform 0.3s;
+        }
+
+        .filter-item.active i {
+            transform: rotate(180deg);
+        }
+
+        .filter-item .stars {
+            color: #f59e0b;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .filter-item .chevron {
+            font-size: 10px;
+            color: #6b7280;
+            margin-left: 4px;
+        }
+
+        /* Dropdown des filtres */
+        .filter-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            padding: 10px 0;
+            min-width: 180px;
+            z-index: 10;
+            border: 1px solid #e8e8ef;
+        }
+
+        .filter-dropdown.show {
+            display: block;
+        }
+
+        .filter-dropdown .dropdown-item {
+            padding: 10px 18px;
+            font-size: 14px;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-dropdown .dropdown-item:hover {
+            background: #f0f4f8;
+        }
+
+        .filter-dropdown .dropdown-item i {
+            color: #00B4D8;
+            font-size: 14px;
+        }
+
+        .filter-dropdown .dropdown-item .check {
+            margin-left: auto;
+            color: #00B4D8;
+            display: none;
+        }
+
+        .filter-dropdown .dropdown-item.selected .check {
+            display: inline;
+        }
+
+        /* ----- Liste des freelancers ----- */
+        .freelancer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 12px;
+            max-height: none;
+            overflow: visible;
+            padding-right: 0;
+        }
+
+        .category-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .category-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        /* Carte freelancer */
+        .freelancer-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px;
+            border: 1px solid #e8e8ef;
+            transition: all 0.3s;
+            animation: fadeIn 0.3s ease;
+            min-width: 0;
+        }
+
+        .freelancer-card.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .freelancer-card:hover {
+            border-color: #00B4D8;
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.1);
+        }
+
+        .freelancer-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .freelancer-card .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .freelancer-card .name .badge {
+            font-size: 11px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-left: 4px;
+        }
+
+        .freelancer-card .rating {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .freelancer-card .rating i {
+            color: #f59e0b;
+            font-size: 13px;
+            margin-right: 2px;
+        }
+
+        .freelancer-card .title {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .freelancer-card .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .freelancer-card .skill-tag {
+            background: #f0f4f8;
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            color: #1a1a2e;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .freelancer-card .skill-tag.highlight {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        /* ----- Boutons en bas ----- */
+        .bottom-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 30px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0096C7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #00B4D8;
+            border: 2px solid #00B4D8;
+        }
+
+        .btn-outline:hover {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        .btn-outline i {
+            margin-right: 6px;
+        }
+
+        /* ----- Footer ----- */
+        .page-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            margin-top: 8px;
+            border-top: 1px solid #eef2f7;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .page-footer a {
+            color: #00B4D8;
+            text-decoration: none;
+        }
+
+        /* Scrollbar */
+        .freelancer-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .freelancer-list::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 8px;
+        }
+
+        .freelancer-list::-webkit-scrollbar-thumb:hover {
+            background: #00B4D8;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.5s;
+            z-index: 2000;
+            white-space: nowrap;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body {
+                padding: 0;
+            }
+
+            .app-container {
+                width: 100%;
+                max-width: 100%;
+                margin-left: 0;
+                padding: 16px 12px 14px;
+            }
+
+            .menu-icon {
+                display: block;
+            }
+
+            .sidebar {
+                width: 260px;
+                left: -260px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .user-profile-mini {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: auto;
+                align-self: flex-end;
+                margin-bottom: 8px;
+            }
+
+            .search-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-btn {
+                width: 100%;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-item {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .freelancer-card {
+                padding: 14px;
+            }
+        }
+
+        @media (min-width: 901px) {
+            body {
+                padding: 0;
+            }
+
+            .app-container {
+                width: calc(100% - 320px);
+                max-width: none;
+                margin: 0;
+                margin-left: 300px;
+                min-height: 100vh;
+            }
+
+            .menu-icon {
+                display: none;
+            }
+
+            .sidebar {
+                left: 0;
+            }
+
+            .overlay {
+                display: none;
+            }
+
+            .search-area {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Menu latéral -->
+    <div class="sidebar" id="sidebar">
+        <div class="close-btn" id="closeSidebar">
+            <i class="fas fa-times"></i>
         </div>
-        <a href="{% url 'contracts:create_contract' %}" class="bg-gray-900 text-white text-sm font-semibold px-5 py-3 rounded-xl hover:bg-black transition shadow-sm">
-            + Créer une nouvelle offre
-        </a>
+        <div class="menu-group">
+            <a href="{% url 'accounts:home' %}" class="menu-item"><i class="fas fa-home"></i> Accueil</a>
+            <a href="#search-section" class="menu-item"><i class="fas fa-search"></i> Rechercher</a>
+            <a href="{% url 'contracts:create_contract' %}" class="menu-item"><i class="fas fa-file-contract"></i> Créer un contrat</a>
+            <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
+            <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-briefcase"></i> Contrats</a>
+            <a href="{% url 'chat:latest_chat' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
+            <a href="{% url 'accounts:transaction' %}" class="menu-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+            <a href="{% url 'accounts:parametre' %}" class="menu-item"><i class="fas fa-cog"></i> Paramètres</a>
+        </div>
+        <div class="sidebar-bottom">
+            <div class="language-switch">
+                <span>Langue</span>
+                <select id="languageSelect">
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+            <a href="{% url 'accounts:logout' %}" class="menu-item"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+        </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <h3 class="text-lg font-bold text-gray-900 mb-6">Vos missions en ligne</h3>
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
 
-        {% if user.contracts_posted.all %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {% for contract in user.contracts_posted.all %}
-                    <div class="border border-gray-100 rounded-xl p-5 flex flex-col justify-between hover:border-gray-300 transition">
-                        <div>
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-0.5 rounded uppercase">
-                                    {{ contract.status }}
-                                </span>
-                                <span class="text-xs text-gray-400">{{ contract.created_at|date:"d M Y" }}</span>
-                            </div>
-                            <h4 class="font-bold text-gray-900 text-base mb-1">{{ contract.title }}</h4>
-                            <p class="text-xs text-gray-500 line-clamp-2 mb-4">{{ contract.description }}</p>
-                        </div>
+    <!-- Conteneur principal -->
+    <div class="app-container">
 
-                        <div class="border-t border-gray-50 pt-3 flex justify-between items-center text-xs">
+        <!-- En-tête -->
+        <div class="header">
+            <div class="logo">SMD-<span>Tech</span></div>
+            <div class="menu-icon" id="menuIcon">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+
+        <!-- Titre -->
+        <div class="page-title">Contacter un Freelancer</div>
+        <div class="page-subtitle">Rechercher par compétence, nom, etc.</div>
+
+        <!-- Profil de l'utilisateur connecté -->
+        <div class="user-profile-mini">
+            <div class="avatar">{{ user.username|first|upper }}</div>
+            <div class="user-info">
+                {{ user.username }}
+                <span>Client{% if profile.compagny_name %} — {{ profile.compagny_name }}{% endif %}</span>
+            </div>
+        </div>
+
+        <!-- Barre de recherche -->
+        <div class="search-area" id="search-section">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Rechercher par compétence, nom, etc." />
+            </div>
+            <button class="btn btn-primary search-btn" id="searchBtn">Rechercher</button>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <span>Freelancers</span>
+                <strong>{{ freelance_count|default:"0" }}+</strong>
+            </div>
+            <div class="stat-card">
+                <span>Mes contrats</span>
+                <strong>{{ contract_count|default:"0" }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>Disponibles</span>
+                <strong>24h/7</strong>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters">
+            <div class="filter-item" data-filter="skills">
+                Compétences <i class="fas fa-chevron-down chevron"></i>
+                <div class="filter-dropdown" id="skillsDropdown">
+                    <div class="dropdown-item" data-value="all"><i class="fas fa-list"></i> Toutes <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="django"><i class="fab fa-python"></i> Django <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="react"><i class="fab fa-react"></i> React <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="fullstack"><i class="fas fa-code"></i> Fullstack <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="aml"><i class="fas fa-shield-alt"></i> AML <span class="check"><i class="fas fa-check"></i></span></div>
+                </div>
+            </div>
+            <div class="filter-item" data-filter="experience">
+                Expérience <i class="fas fa-chevron-down chevron"></i>
+                <div class="filter-dropdown" id="experienceDropdown">
+                    <div class="dropdown-item" data-value="all"><i class="fas fa-list"></i> Toutes <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="junior"><i class="fas fa-seedling"></i> Junior (0-2 ans) <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="intermediate"><i class="fas fa-user"></i> Intermédiaire (3-5 ans) <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="senior"><i class="fas fa-user-graduate"></i> Senior (6+ ans) <span class="check"><i class="fas fa-check"></i></span></div>
+                </div>
+            </div>
+            <div class="filter-item" data-filter="rating">
+                <span class="stars">★★★★</span> <i class="fas fa-chevron-down chevron"></i>
+                <div class="filter-dropdown" id="ratingDropdown">
+                    <div class="dropdown-item" data-value="all"><i class="fas fa-list"></i> Toutes <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="4.5"><i class="fas fa-star"></i> 4.5+ <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="4.0"><i class="fas fa-star"></i> 4.0+ <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="3.5"><i class="fas fa-star"></i> 3.5+ <span class="check"><i class="fas fa-check"></i></span></div>
+                </div>
+            </div>
+        </div>
+
+        {% load contracts_extras %}
+        <!-- Liste des freelancers -->
+        <div class="freelancer-list" id="freelancerList">
+            <div class="category-section">
+                <div class="category-title">Freelancers disponibles</div>
+                <div class="category-grid">
+                    {% for fp in freelancers %}
+                    <div class="freelancer-card" data-skills="{{ fp.skills|lower }}" data-experience="{{ fp.experience_level }}" data-rating="{{ fp.rating }}">
+                        <div class="card-header">
                             <div>
-                                <span class="text-gray-400 block uppercase font-bold tracking-wider text-[10px]">Budget</span>
-                                <strong class="text-gray-900 text-sm">{{ contract.budget }} CFA</strong>
+                                <span class="name">{{ fp.user.username }} {% if fp.online_status == 'online' %}<span class="badge">● En ligne</span>{% endif %}</span>
                             </div>
-                            <div class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md font-semibold">
-                                {{ contract.applications.count }} candidature(s)
-                            </div>
+                            <div class="rating"><i class="fas fa-star"></i> {{ fp.rating }}</div>
+                        </div>
+                        <div class="title">{{ fp.title }}</div>
+                        <div class="skills">
+                            {% for skill in fp.skill_list %}
+                            <span class="skill-tag{% if forloop.first %} highlight{% endif %}">{{ skill }}</span>
+                            {% endfor %}
                         </div>
                     </div>
-                {% endfor %}
+                    {% empty %}
+                    <p style="text-align:center;padding:20px;color:#6b7280;grid-column:1/-1;">Aucun freelancer disponible pour le moment.</p>
+                    {% endfor %}
+                </div>
             </div>
-        {% else %}
-            <div class="text-center py-16 border border-dashed border-gray-200 rounded-2xl max-w-md mx-auto">
+        </div>
 
-                <lord-icon
-    src="https://cdn.lordicon.com/fttvwdlw.json"
-    trigger="loop"
-    stroke="bold"
-    state="loop-roll"
-    colors="primary:#242424,secondary:#c71f16"
-    style="width:150px;height:150px">
-</lord-icon>
-                <p class="text-sm text-gray-500">Vous n'avez publié aucun projet pour le moment.</p>
-                <a href="{% url 'contracts:create_contract' %}" class="inline-block mt-4 bg-gray-900 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-black transition">
-                    Déposer mon premier besoin
-                </a>
-            </div>
-        {% endif %}
+        <!-- Footer -->
+        <div class="page-footer">
+            <span>© 2026 SMD-Tech</span>
+            <a href="{% url 'contracts:contract_list' %}">Voir tous les profils</a>
+        </div>
+
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        // ============= MENU LATERAL =============
+        const menuIcon = document.getElementById('menuIcon');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const languageSelect = document.getElementById('languageSelect');
+
+        const translations = {
+            fr: {
+                title: 'Contacter un Freelancer',
+                subtitle: 'Rechercher par compétence, nom, etc.',
+                searchPlaceholder: 'Rechercher par compétence, nom, etc.',
+                searchBtn: 'Rechercher',
+                statsFreelancers: 'Freelancers',
+                statsRating: 'Note moyenne',
+                statsAvailable: 'Disponibles',
+                filtersSkills: 'Compétences',
+                filtersExp: 'Expérience',
+                categoryWeb: 'Développeurs Web',
+                categoryDesign: 'Design & UX'
+            },
+            en: {
+                title: 'Contact a Freelancer',
+                subtitle: 'Search by skill, name, etc.',
+                searchPlaceholder: 'Search by skill, name, etc.',
+                searchBtn: 'Search',
+                statsFreelancers: 'Freelancers',
+                statsRating: 'Average rating',
+                statsAvailable: 'Available',
+                filtersSkills: 'Skills',
+                filtersExp: 'Experience',
+                categoryWeb: 'Web Developers',
+                categoryDesign: 'Design & UX'
+            },
+            ar: {
+                title: 'تواصل مع مستقل',
+                subtitle: 'ابحث حسب المهارة أو الاسم أو غيرها.',
+                searchPlaceholder: 'ابحث حسب المهارة أو الاسم أو غيرها.',
+                searchBtn: 'بحث',
+                statsFreelancers: 'مستقلون',
+                statsRating: 'متوسط التقييم',
+                statsAvailable: 'متاحون',
+                filtersSkills: 'المهارات',
+                filtersExp: 'الخبرة',
+                categoryWeb: 'مطورون ويب',
+                categoryDesign: 'التصميم وتجربة المستخدم'
+            }
+        };
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        menuIcon.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        overlay.addEventListener('click', closeSidebarFunc);
+
+        function applyLanguage(lang) {
+            const t = translations[lang] || translations.fr;
+            document.documentElement.lang = lang;
+            document.querySelector('.page-title').textContent = t.title;
+            document.querySelector('.page-subtitle').textContent = t.subtitle;
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+            document.getElementById('searchBtn').textContent = t.searchBtn;
+            document.querySelectorAll('.stat-card span')[0].textContent = t.statsFreelancers;
+            document.querySelectorAll('.stat-card span')[1].textContent = t.statsRating;
+            document.querySelectorAll('.stat-card span')[2].textContent = t.statsAvailable;
+            document.querySelector('.filters .filter-item[data-filter="skills"]').childNodes[0].nodeValue = ` ${t.filtersSkills} `;
+            document.querySelector('.filters .filter-item[data-filter="experience"]').childNodes[0].nodeValue = ` ${t.filtersExp} `;
+            document.querySelectorAll('.category-title')[0].textContent = t.categoryWeb;
+            document.querySelectorAll('.category-title')[1].textContent = t.categoryDesign;
+        }
+
+        languageSelect.addEventListener('change', function() {
+            applyLanguage(this.value);
+        });
+
+        applyLanguage('fr');
+
+        // ============= FILTRES DEROULANTS =============
+        const filterItems = document.querySelectorAll('.filter-item');
+        let activeDropdown = null;
+
+        filterItems.forEach(item => {
+            const dropdown = item.querySelector('.filter-dropdown');
+            const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+
+            // Sélectionner "Toutes" par défaut
+            dropdownItems.forEach(d => {
+                if (d.dataset.value === 'all') {
+                    d.classList.add('selected');
+                }
+            });
+
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+
+                // Fermer tous les autres dropdowns
+                filterItems.forEach(f => {
+                    if (f !== this) {
+                        f.classList.remove('active');
+                        f.querySelector('.filter-dropdown').classList.remove('show');
+                    }
+                });
+
+                this.classList.toggle('active');
+                dropdown.classList.toggle('show');
+            });
+
+            // Clic sur un élément du dropdown
+            dropdownItems.forEach(dItem => {
+                dItem.addEventListener('click', function(e) {
+                    e.stopPropagation();
+
+                    // Désélectionner tous les items du même dropdown
+                    dropdownItems.forEach(d => d.classList.remove('selected'));
+
+                    // Sélectionner celui-ci
+                    this.classList.add('selected');
+
+                    // Mettre à jour le texte du filtre
+                    const filterText = this.textContent.trim();
+                    const filterLabel = item.querySelector('.stars') || item;
+                    if (item.dataset.filter === 'rating') {
+                        // Pour la note, on garde les étoiles
+                        const stars = '★★★★';
+                        const ratingValue = this.dataset.value;
+                        if (ratingValue === 'all') {
+                            filterLabel.innerHTML = `${stars} <i class="fas fa-chevron-down chevron"></i>`;
+                        } else {
+                            filterLabel.innerHTML =
+                                `${stars} ${ratingValue}+ <i class="fas fa-chevron-down chevron"></i>`;
+                        }
+                    } else {
+                        const text = this.textContent.trim();
+                        if (text.includes('Toutes')) {
+                            if (item.dataset.filter === 'skills') {
+                                filterLabel.innerHTML =
+                                    `Compétences <i class="fas fa-chevron-down chevron"></i>`;
+                            } else if (item.dataset.filter === 'experience') {
+                                filterLabel.innerHTML =
+                                    `Expérience <i class="fas fa-chevron-down chevron"></i>`;
+                            }
+                        } else {
+                            // Extraire le texte sans l'icône
+                            const cleanText = text.replace(/[^\w\s\-+.]/g, '').trim();
+                            filterLabel.innerHTML =
+                                `${cleanText} <i class="fas fa-chevron-down chevron"></i>`;
+                        }
+                    }
+
+                    // Fermer le dropdown
+                    item.classList.remove('active');
+                    dropdown.classList.remove('show');
+
+                    // Appliquer les filtres
+                    applyFilters();
+
+                    // Notification
+                    showNotification(`Filtre appliqué : ${this.textContent.trim()}`);
+                });
+            });
+        });
+
+        // Fermer les dropdowns en cliquant ailleurs
+        document.addEventListener('click', function() {
+            filterItems.forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.filter-dropdown').classList.remove('show');
+            });
+        });
+
+        // ============= RECHERCHE DYNAMIQUE =============
+        const searchInput = document.getElementById('searchInput');
+        const freelancerCards = document.querySelectorAll('.freelancer-card');
+
+        searchInput.addEventListener('input', function() {
+            applyFilters();
+        });
+
+        // ============= FONCTION DE FILTRAGE =============
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            // Récupérer les valeurs sélectionnées des filtres
+            let selectedSkill = 'all';
+            let selectedExperience = 'all';
+            let selectedRating = 'all';
+
+            // Skills
+            const skillsDropdownItems = document.querySelectorAll('#skillsDropdown .dropdown-item');
+            skillsDropdownItems.forEach(item => {
+                if (item.classList.contains('selected')) {
+                    selectedSkill = item.dataset.value;
+                }
+            });
+
+            // Experience
+            const expDropdownItems = document.querySelectorAll('#experienceDropdown .dropdown-item');
+            expDropdownItems.forEach(item => {
+                if (item.classList.contains('selected')) {
+                    selectedExperience = item.dataset.value;
+                }
+            });
+
+            // Rating
+            const ratingDropdownItems = document.querySelectorAll('#ratingDropdown .dropdown-item');
+            ratingDropdownItems.forEach(item => {
+                if (item.classList.contains('selected')) {
+                    selectedRating = item.dataset.value;
+                }
+            });
+
+            // Filtrer chaque carte
+            freelancerCards.forEach(card => {
+                const skills = card.dataset.skills.split(',');
+                const experience = card.dataset.experience;
+                const rating = parseFloat(card.dataset.rating);
+                const name = card.querySelector('.name').textContent.toLowerCase();
+                const title = card.querySelector('.title').textContent.toLowerCase();
+                const skillTags = Array.from(card.querySelectorAll('.skill-tag')).map(tag => tag.textContent
+                .toLowerCase());
+
+                // Filtre par recherche
+                const matchesSearch = searchTerm === '' ||
+                    name.includes(searchTerm) ||
+                    title.includes(searchTerm) ||
+                    skillTags.some(tag => tag.includes(searchTerm));
+
+                // Filtre par compétence
+                const matchesSkill = selectedSkill === 'all' ||
+                    skills.includes(selectedSkill) ||
+                    skillTags.some(tag => tag.includes(selectedSkill));
+
+                // Filtre par expérience
+                let matchesExperience = true;
+                if (selectedExperience !== 'all') {
+                    if (selectedExperience === 'junior') {
+                        matchesExperience = experience === 'junior' || experience === 'intermediate' ||
+                            experience === 'senior' ? false : true;
+                        // Simplification : on considère que junior = moins de 2 ans
+                        matchesExperience = experience === 'junior';
+                    } else if (selectedExperience === 'intermediate') {
+                        matchesExperience = experience === 'intermediate';
+                    } else if (selectedExperience === 'senior') {
+                        matchesExperience = experience === 'senior';
+                    }
+                }
+
+                // Filtre par note
+                let matchesRating = true;
+                if (selectedRating !== 'all') {
+                    const minRating = parseFloat(selectedRating);
+                    matchesRating = rating >= minRating;
+                }
+
+                // Afficher ou masquer
+                if (matchesSearch && matchesSkill && matchesExperience && matchesRating) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Vérifier s'il y a des résultats
+            const visibleCards = document.querySelectorAll('.freelancer-card:not(.hidden)');
+            if (visibleCards.length === 0) {
+                showNotification('Aucun freelancer trouvé');
+            }
+        }
+
+        // ============= BOUTON RECHERCHE =============
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            applyFilters();
+            showNotification('Recherche effectuée !');
+        });
+
+        // ============= NOTIFICATION =============
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            clearTimeout(notification.timeout);
+            notification.timeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2500);
+        }
+
+        // ============= INITIALISATION =============
+        // Appliquer les filtres au chargement
+        setTimeout(applyFilters, 100);
+
+        // ============= ANIMATION DES SKILLS (effet hover) =============
+        document.querySelectorAll('.skill-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                const skill = this.textContent;
+                searchInput.value = skill;
+                applyFilters();
+                showNotification(`Recherche par compétence : ${skill}`);
+            });
+        });
+
+        console.log('🚀 SMD-Tech App initialisée !');
+        console.log('💡 Cliquez sur les filtres pour les dérouler');
+        console.log('🔍 Tapez dans la barre de recherche pour filtrer');
+        console.log('📱 Cliquez sur le menu hamburger pour ouvrir le menu');
+    </script>
+
+</body>
+</html>

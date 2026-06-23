@@ -22,12 +22,52 @@ class Contract(models.Model):
 
 
 class Mission(models.Model):
+    URGENCY_CHOICES = (
+        ('normal', 'Normal'),
+        ('urgent', 'Urgent'),
+        ('long', 'Long terme'),
+    )
+    STATUS_CHOICES = (
+        ('active', 'Active'),
+        ('filled', 'Pourvue'),
+        ('cancelled', 'Annulée'),
+    )
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='missions_posted', null=True, blank=True)
     title = models.CharField(max_length=200, verbose_name="Titre de la mission")
     description = models.TextField(verbose_name="Description du besoin")
     budget = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Budget estimé")
     skills_required = models.CharField(max_length=255, help_text="Séparez par des virgules")
+    deadline = models.DateField(verbose_name="Date limite", null=True, blank=True)
+    urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='normal')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def tag_list(self):
+        return [s.strip() for s in self.skills_required.split(',') if s.strip()]
+
+    @property
+    def budget_category(self):
+        b = float(self.budget)
+        if b < 200000:
+            return 'small'
+        elif b < 500000:
+            return 'medium'
+        return 'large'
+
+    @property
+    def category_slug(self):
+        tags = self.tag_list
+        return tags[0].lower() if tags else 'general'
+
+    @property
+    def badge_text(self):
+        from datetime import date, timedelta
+        if self.created_at:
+            created = self.created_at.date()
+            if (date.today() - created).days <= 7:
+                return 'Nouveau'
+        return dict(self.URGENCY_CHOICES).get(self.urgency, '')
 
     def __str__(self):
         return self.title

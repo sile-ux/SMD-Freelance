@@ -5,9 +5,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 
-from .models import Mission, Application  # Ou Contract selon ton choix de modèle principal
+from .models import Mission, Application, Contract
 from .forms import QuickMissionForm
 User = get_user_model()
+
+
+def contract_list_view(request):
+    missions = Mission.objects.all().order_by('-created_at')
+    contracts = Contract.objects.all().order_by('-created_at')
+    return render(request, 'contracts/contract_list.html', {
+        'missions': missions,
+        'contracts': contracts,
+    })
 
 
 def freelance_list_api(request):

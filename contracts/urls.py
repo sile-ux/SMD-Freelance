@@ -11,6 +11,6 @@ urlpatterns = [
     path('tarifs/api/', views.tarifs_api, name='tarifs'),
     path('contract/create/', views.create_contract_view, name='create_contract'),
     path('publier-offre/', views.create_contract_view, name='create_contract'),
-    path('publier-offre/', views.create_contract_view, name='create_contract'),
     path('postuler/<int:mission_id>/', views.apply_to_mission_view, name='apply_to_mission'),
+    path('liste/', views.contract_list_view, name='contract_list'),
 ]

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib import messages
-from .models import User, FreelanceProfile, ClientProfile
+from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter
 
 
 # Action personnalisée pour valider les profils en masse
@@ -39,7 +39,26 @@ class FreelanceProfileAdmin(admin.ModelAdmin):
     actions = [make_verified, make_unverified]
 
 
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'created_at', 'is_read')
+    list_filter = ('is_read', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    actions = ['mark_as_read']
+
+    @admin.action(description="Marquer comme lus")
+    def mark_as_read(self, request, queryset):
+        queryset.update(is_read=True)
+
+
+class NewsletterAdmin(admin.ModelAdmin):
+    list_display = ('email', 'subscribed_at', 'is_active')
+    list_filter = ('is_active', 'subscribed_at')
+    search_fields = ('email',)
+
+
 # Enregistrement des modèles dans le panneau d'administration
 admin.site.register(User)
 admin.site.register(ClientProfile)
 admin.site.register(FreelanceProfile, FreelanceProfileAdmin)
+admin.site.register(ContactMessage, ContactMessageAdmin)
+admin.site.register(Newsletter, NewsletterAdmin)

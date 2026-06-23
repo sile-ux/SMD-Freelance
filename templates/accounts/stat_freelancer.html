@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SMD-Tech - Statistiques</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* ===== CONTENEUR PRINCIPAL - PLEIN ÉCRAN ===== */
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            max-width: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== EN-TÊTE ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px 12px 20px;
+            flex-shrink: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #f0f4f8;
+            z-index: 5;
+        }
+
+        .header .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .header .logo span {
+            color: #00B4D8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-icon {
+            font-size: 22px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .menu-icon:hover {
+            color: #00B4D8;
+        }
+
+        .back-btn {
+            font-size: 20px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            color: #00B4D8;
+        }
+
+        .refresh-btn {
+            font-size: 18px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s;
+            background: none;
+            border: none;
+        }
+
+        .refresh-btn:hover {
+            color: #00B4D8;
+            transform: rotate(180deg);
+        }
+
+        .refresh-btn:active {
+            transform: rotate(360deg);
+        }
+
+        /* ===== TITRE ===== */
+        .page-header {
+            padding: 0 20px 8px 20px;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* ===== FILTRES PÉRIODE ===== */
+        .period-filters {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px 12px 20px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .period-filter {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            background: #f0f4f8;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 0 0 auto;
+        }
+
+        .period-filter:hover {
+            background: #e3ecf3;
+            transform: translateY(-2px);
+        }
+
+        .period-filter.active {
+            border-color: #00B4D8;
+            background: #e3f4fa;
+            color: #00B4D8;
+        }
+
+        .period-filter:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== ZONE DE CONTENU SCROLLABLE ===== */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scrollable-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 8px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: #00B4D8;
+        }
+
+        /* ===== GRILLE KPI ===== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid #e8e8ef;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #00B4D8;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .kpi-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .kpi-card:hover {
+            border-color: #00B4D8;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 180, 216, 0.12);
+        }
+
+        .kpi-card:active {
+            transform: scale(0.97);
+        }
+
+        .kpi-card .kpi-icon {
+            font-size: 16px;
+            color: #00B4D8;
+            margin-bottom: 4px;
+        }
+
+        .kpi-card .kpi-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            transition: all 0.3s;
+        }
+
+        .kpi-card:hover .kpi-value {
+            color: #00B4D8;
+        }
+
+        .kpi-card .kpi-value .kpi-currency {
+            font-size: 12px;
+            font-weight: 400;
+            color: #6b7280;
+        }
+
+        .kpi-card .kpi-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .kpi-card .kpi-change {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .kpi-card .kpi-change.positive {
+            color: #22c55e;
+            background: #dcfce7;
+        }
+
+        .kpi-card .kpi-change.negative {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        /* ===== LISTE DES STATISTIQUES ===== */
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-bottom: 8px;
+        }
+
+        .stats-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 12px;
+            border-bottom: 1px solid #f0f4f8;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+
+        .stats-item:hover {
+            background: #f8fafc;
+            transform: translateX(4px);
+        }
+
+        .stats-item:active {
+            transform: scale(0.98);
+        }
+
+        .stats-item .item-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stats-item .item-left i {
+            font-size: 16px;
+            color: #00B4D8;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .stats-item:hover .item-left i {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .stats-item .item-left .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stats-item .item-left .item-info .item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a2e;
+        }
+
+        .stats-item .item-left .item-info .item-description {
+            font-size: 12px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stats-item .item-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .stats-item .item-right .item-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a2e;
+            transition: all 0.3s;
+        }
+
+        .stats-item:hover .item-right .item-value {
+            color: #00B4D8;
+        }
+
+        .stats-item .item-right .item-value .item-sub {
+            font-size: 11px;
+            font-weight: 400;
+            color: #6b7280;
+        }
+
+        .stats-item .item-right .item-arrow {
+            color: #d1d5db;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .stats-item:hover .item-right .item-arrow {
+            transform: translateX(4px);
+            color: #00B4D8;
+        }
+
+        /* ===== BARRE DE PROGRESSION ===== */
+        .progress-bar-container {
+            padding: 2px 12px 6px 48px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #f0f4f8;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .progress-bar .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-bar .progress-fill.blue { background: #00B4D8; }
+        .progress-bar .progress-fill.green { background: #22c55e; }
+        .progress-bar .progress-fill.orange { background: #f59e0b; }
+        .progress-bar .progress-fill.purple { background: #8b5cf6; }
+        .progress-bar .progress-fill.red { background: #ef4444; }
+        .progress-bar .progress-fill.pink { background: #ec4899; }
+
+        /* ===== BADGE ===== */
+        .badge {
+            background: #00B4D8;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .badge.success {
+            background: #22c55e;
+        }
+
+        .badge.warning {
+            background: #f59e0b;
+        }
+
+        .badge.danger {
+            background: #ef4444;
+        }
+
+        /* ===== MODAL DÉTAIL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 380px;
+            width: 100%;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal .modal-header .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .modal .modal-header .modal-close {
+            font-size: 20px;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+
+        .modal .modal-header .modal-close:hover {
+            color: #ef4444;
+            transform: rotate(90deg);
+        }
+
+        .modal .modal-body .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+
+        .modal .modal-body .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal .modal-body .detail-item .detail-label {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .modal .modal-body .detail-item .detail-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .modal .modal-body .detail-item .detail-value.highlight {
+            color: #00B4D8;
+        }
+
+        .modal .modal-footer {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal .modal-footer .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal .modal-footer .btn-primary {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        .modal .modal-footer .btn-primary:hover {
+            background: #0096C7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        .modal .modal-footer .btn-secondary {
+            background: #f0f4f8;
+            color: #6b7280;
+        }
+
+        .modal .modal-footer .btn-secondary:hover {
+            background: #e3ecf3;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #ffffff;
+            border-top: 1px solid #e8e8ef;
+            padding: 8px 0 12px 0;
+            flex-shrink: 0;
+        }
+
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            padding: 4px 12px;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            font-size: 10px;
+            color: #6b7280;
+            min-width: 44px;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .bottom-nav .nav-item i {
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav .nav-item:hover {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item:hover i {
+            transform: translateY(-2px);
+        }
+
+        .bottom-nav .nav-item.active {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item.active i {
+            color: #00B4D8;
+        }
+
+        .bottom-nav .nav-item .nav-dot {
+            width: 4px;
+            height: 4px;
+            background: #00B4D8;
+            border-radius: 50%;
+            margin-top: 2px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav .nav-item.active .nav-dot {
+            opacity: 1;
+        }
+
+        /* ===== NOTIFICATION ===== */
+        .notification {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 2000;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification.success {
+            background: #22c55e;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .header {
+                padding: 12px 16px 10px 16px;
+            }
+
+            .header .logo {
+                font-size: 16px;
+            }
+
+            .page-header {
+                padding: 0 16px 6px 16px;
+            }
+
+            .page-title {
+                font-size: 18px;
+            }
+
+            .page-subtitle {
+                font-size: 12px;
+            }
+
+            .period-filters {
+                padding: 0 16px 10px 16px;
+                gap: 6px;
+            }
+
+            .period-filter {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+
+            .scrollable-content {
+                padding: 0 16px 16px 16px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .kpi-card {
+                padding: 10px;
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 17px;
+            }
+
+            .stats-item {
+                padding: 12px 8px;
+            }
+
+            .stats-item .item-left i {
+                font-size: 14px;
+                width: 18px;
+            }
+
+            .stats-item .item-left .item-info .item-title {
+                font-size: 13px;
+            }
+
+            .stats-item .item-left .item-info .item-description {
+                font-size: 11px;
+            }
+
+            .stats-item .item-right .item-value {
+                font-size: 14px;
+            }
+
+            .progress-bar-container {
+                padding: 2px 8px 6px 40px;
+            }
+
+            .bottom-nav {
+                padding: 6px 0 10px 0;
+            }
+
+            .bottom-nav .nav-item {
+                font-size: 9px;
+                padding: 4px 8px;
+            }
+
+            .bottom-nav .nav-item i {
+                font-size: 16px;
+            }
+
+            .modal {
+                padding: 18px;
+                margin: 10px;
+                max-height: 70vh;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .kpi-grid {
+                gap: 6px;
+            }
+
+            .kpi-card {
+                padding: 8px;
+            }
+
+            .kpi-card .kpi-value {
+                font-size: 15px;
+            }
+
+            .kpi-card .kpi-label {
+                font-size: 10px;
+            }
+
+            .stats-item .item-left .item-info .item-title {
+                font-size: 12px;
+            }
+
+            .stats-item .item-left .item-info .item-description {
+                font-size: 10px;
+            }
+
+            .stats-item .item-right .item-value {
+                font-size: 13px;
+            }
+
+            .period-filter {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            body {
+                background: #e8ecf1;
+                padding: 0;
+            }
+
+            .app-container {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                height: 100vh;
+            }
+
+            .bottom-nav {
+                border-radius: 0;
+            }
+
+            .modal {
+                max-width: 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NOTIFICATION ===== -->
+    <div class="notification" id="notification"></div>
+
+    <!-- ===== MODAL DÉTAIL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">Détails</span>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Contenu dynamique -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCloseBtn">Fermer</button>
+                <button class="btn btn-primary" id="modalAction">Voir plus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENEUR PRINCIPAL - PLEIN ÉCRAN ===== -->
+    <div class="app-container">
+
+        <!-- ===== EN-TÊTE ===== -->
+        <div class="header">
+            <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i></button>
+            <div class="logo">SMD-<span>Tech</span></div>
+            <div class="header-actions">
+                <button class="refresh-btn" id="refreshBtn" title="Actualiser">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="menu-icon" id="menuIcon">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== TITRE ===== -->
+        <div class="page-header">
+            <div class="page-title">📊 Statistiques</div>
+            <div class="page-subtitle">Analysez vos performances en temps réel</div>
+        </div>
+
+        <!-- ===== FILTRES PÉRIODE ===== -->
+        <div class="period-filters">
+            <span class="period-filter" data-period="week" data-label="Cette semaine">Cette semaine</span>
+            <span class="period-filter active" data-period="month" data-label="Ce mois">Ce mois</span>
+            <span class="period-filter" data-period="quarter" data-label="Ce trimestre">Ce trimestre</span>
+            <span class="period-filter" data-period="year" data-label="Cette année">Cette année</span>
+        </div>
+
+        <!-- ===== ZONE SCROLLABLE ===== -->
+        <div class="scrollable-content" id="scrollableContent">
+
+            <!-- ===== GRILLE KPI ===== -->
+            <div class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card" data-kpi="revenue">
+                    <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="kpi-value" id="kpiRevenue">2.45M <span class="kpi-currency">CFA</span></div>
+                    <div class="kpi-label">Revenus totaux</div>
+                    <span class="kpi-change positive" id="kpiRevenueChange"><i class="fas fa-arrow-up"></i> +12.5%</span>
+                </div>
+                <div class="kpi-card" data-kpi="missions">
+                    <div class="kpi-icon"><i class="fas fa-briefcase"></i></div>
+                    <div class="kpi-value" id="kpiMissions">18</div>
+                    <div class="kpi-label">Missions complétées</div>
+                    <span class="kpi-change positive" id="kpiMissionsChange"><i class="fas fa-arrow-up"></i> +3</span>
+                </div>
+                <div class="kpi-card" data-kpi="rating">
+                    <div class="kpi-icon"><i class="fas fa-star"></i></div>
+                    <div class="kpi-value" id="kpiRating">4.9</div>
+                    <div class="kpi-label">Note moyenne</div>
+                    <span class="kpi-change positive" id="kpiRatingChange"><i class="fas fa-arrow-up"></i> +0.1</span>
+                </div>
+                <div class="kpi-card" data-kpi="clients">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="kpi-value" id="kpiClients">24</div>
+                    <div class="kpi-label">Clients satisfaits</div>
+                    <span class="kpi-change positive" id="kpiClientsChange"><i class="fas fa-arrow-up"></i> +6</span>
+                </div>
+            </div>
+
+            <!-- ===== LISTE DES STATISTIQUES ===== -->
+            <div class="stats-list" id="statsList">
+
+                <!-- Revenus mensuels -->
+                <div class="stats-item" data-stat="revenue-detail">
+                    <div class="item-left">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="item-info">
+                            <div class="item-title">Revenus mensuels</div>
+                            <div class="item-description">Jan à Juin 2026</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="statRevenue">1.6M <span class="item-sub">CFA</span></span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill blue" style="width:65%;" id="progressRevenue"></div>
+                    </div>
+                </div>
+
+                <!-- Statut des missions -->
+                <div class="stats-item" data-stat="status">
+                    <div class="item-left">
+                        <i class="fas fa-tasks"></i>
+                        <div class="item-info">
+                            <div class="item-title">Statut des missions</div>
+                            <div class="item-description">Terminées, en cours, en attente</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="statStatus">75% <span class="item-sub">taux</span></span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill green" style="width:75%;" id="progressStatus"></div>
+                    </div>
+                </div>
+
+                <!-- Taux de réussite -->
+                <div class="stats-item" data-stat="success">
+                    <div class="item-left">
+                        <i class="fas fa-medal"></i>
+                        <div class="item-info">
+                            <div class="item-title">Taux de réussite</div>
+                            <div class="item-description">Missions livrées dans les délais</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="statSuccess">94%</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill purple" style="width:94%;" id="progressSuccess"></div>
+                    </div>
+                </div>
+
+                <!-- Satisfaction client -->
+                <div class="stats-item" data-stat="satisfaction">
+                    <div class="item-left">
+                        <i class="fas fa-smile"></i>
+                        <div class="item-info">
+                            <div class="item-title">Satisfaction client</div>
+                            <div class="item-description">Note moyenne des retours</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="statSatisfaction">4.9 <span class="item-sub">/ 5.0</span></span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill orange" style="width:98%;" id="progressSatisfaction"></div>
+                    </div>
+                </div>
+
+                <!-- Compétences demandées -->
+                <div class="stats-item" data-stat="skills">
+                    <div class="item-left">
+                        <i class="fas fa-code"></i>
+                        <div class="item-info">
+                            <div class="item-title">Compétences demandées</div>
+                            <div class="item-description">Django, React, Python</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="badge success">Top</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill pink" style="width:80%;" id="progressSkills"></div>
+                    </div>
+                </div>
+
+                <!-- Localisation clients -->
+                <div class="stats-item" data-stat="location">
+                    <div class="item-left">
+                        <i class="fas fa-globe-africa"></i>
+                        <div class="item-info">
+                            <div class="item-title">Localisation clients</div>
+                            <div class="item-description">Sénégal, Côte d'Ivoire, France</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="statLocation">45% <span class="item-sub">Sénégal</span></span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill blue" style="width:45%;" id="progressLocation"></div>
+                    </div>
+                </div>
+
+                <!-- Activité récente -->
+                <div class="stats-item" data-stat="activity" style="border-bottom: none;">
+                    <div class="item-left">
+                        <i class="fas fa-activity"></i>
+                        <div class="item-info">
+                            <div class="item-title">Activité récente</div>
+                            <div class="item-description">Connexions, candidatures, messages</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="statActivity">47 <span class="item-sub">connexions</span></span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Espacement pour le bottom nav -->
+            <div style="height: 8px;"></div>
+
+        </div>
+
+        <!-- ===== BOTTOM NAVIGATION ===== -->
+        <div class="bottom-nav">
+            <button class="nav-item" data-page="freelancers">
+                <i class="fas fa-user-tie"></i>
+                <span>Freelancers</span>
+                <span class="nav-dot"></span>
+            </button>
+            <button class="nav-item" data-page="missions">
+                <i class="fas fa-briefcase"></i>
+                <span>Missions</span>
+                <span class="nav-dot"></span>
+            </button>
+            <button class="nav-item active" data-page="stats">
+                <i class="fas fa-chart-line"></i>
+                <span>Stats</span>
+                <span class="nav-dot"></span>
+            </button>
+            <button class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Paramètres</span>
+                <span class="nav-dot"></span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================
+        // DONNÉES STATISTIQUES PAR PÉRIODE
+        // ============================================
+        const statsData = {
+            week: {
+                revenue: '650K',
+                missions: '4',
+                rating: '4.9',
+                clients: '6',
+                revenueChange: '+8.2%',
+                missionsChange: '+2',
+                ratingChange: '+0.0',
+                clientsChange: '+3',
+                details: {
+                    'Revenus': '650,000 CFA',
+                    'Missions': '4 missions',
+                    'Taux de réussite': '92%',
+                    'Satisfaction': '4.8/5.0',
+                    'Clients actifs': '6'
+                }
+            },
+            month: {
+                revenue: '1.6M',
+                missions: '8',
+                rating: '4.9',
+                clients: '12',
+                revenueChange: '+12.5%',
+                missionsChange: '+3',
+                ratingChange: '+0.1',
+                clientsChange: '+5',
+                details: {
+                    'Revenus': '1,600,000 CFA',
+                    'Missions': '8 missions',
+                    'Taux de réussite': '94%',
+                    'Satisfaction': '4.9/5.0',
+                    'Clients actifs': '12'
+                }
+            },
+            quarter: {
+                revenue: '4.2M',
+                missions: '18',
+                rating: '4.8',
+                clients: '24',
+                revenueChange: '+18.3%',
+                missionsChange: '+7',
+                ratingChange: '-0.1',
+                clientsChange: '+10',
+                details: {
+                    'Revenus': '4,200,000 CFA',
+                    'Missions': '18 missions',
+                    'Taux de réussite': '91%',
+                    'Satisfaction': '4.7/5.0',
+                    'Clients actifs': '24'
+                }
+            },
+            year: {
+                revenue: '12.8M',
+                missions: '52',
+                rating: '4.7',
+                clients: '68',
+                revenueChange: '+34.2%',
+                missionsChange: '+15',
+                ratingChange: '-0.2',
+                clientsChange: '+22',
+                details: {
+                    'Revenus': '12,800,000 CFA',
+                    'Missions': '52 missions',
+                    'Taux de réussite': '89%',
+                    'Satisfaction': '4.6/5.0',
+                    'Clients actifs': '68'
+                }
+            }
+        };
+
+        let currentPeriod = 'month';
+        let isRefreshing = false;
+
+        // ============================================
+        // NOTIFICATION
+        // ============================================
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification';
+            if (type) notification.classList.add(type);
+            notification.classList.add('show');
+
+            clearTimeout(notification.timeout);
+            notification.timeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // MISE À JOUR DES STATISTIQUES
+        // ============================================
+        function updateStats(period) {
+            const data = statsData[period];
+            if (!data) return;
+
+            document.getElementById('kpiRevenue').innerHTML = data.revenue + ' <span class="kpi-currency">CFA</span>';
+            document.getElementById('kpiMissions').textContent = data.missions;
+            document.getElementById('kpiRating').textContent = data.rating;
+            document.getElementById('kpiClients').textContent = data.clients;
+
+            const revenueChange = document.getElementById('kpiRevenueChange');
+            revenueChange.innerHTML = (data.revenueChange.includes('+') ? `<i class="fas fa-arrow-up"></i> ${data.revenueChange}` :
+                `<i class="fas fa-arrow-down"></i> ${data.revenueChange}`);
+            revenueChange.className = `kpi-change ${data.revenueChange.includes('+') ? 'positive' : 'negative'}`;
+
+            const missionsChange = document.getElementById('kpiMissionsChange');
+            missionsChange.innerHTML = (data.missionsChange.includes('+') ? `<i class="fas fa-arrow-up"></i> ${data.missionsChange}` :
+                `<i class="fas fa-arrow-down"></i> ${data.missionsChange}`);
+            missionsChange.className = `kpi-change ${data.missionsChange.includes('+') ? 'positive' : 'negative'}`;
+
+            const ratingChange = document.getElementById('kpiRatingChange');
+            ratingChange.innerHTML = (data.ratingChange.includes('+') ? `<i class="fas fa-arrow-up"></i> ${data.ratingChange}` :
+                `<i class="fas fa-arrow-down"></i> ${data.ratingChange}`);
+            ratingChange.className = `kpi-change ${data.ratingChange.includes('+') ? 'positive' : 'negative'}`;
+
+            const clientsChange = document.getElementById('kpiClientsChange');
+            clientsChange.innerHTML = (data.clientsChange.includes('+') ? `<i class="fas fa-arrow-up"></i> ${data.clientsChange}` :
+                `<i class="fas fa-arrow-down"></i> ${data.clientsChange}`);
+            clientsChange.className = `kpi-change ${data.clientsChange.includes('+') ? 'positive' : 'negative'}`;
+
+            const statMappings = {
+                'statRevenue': { value: data.revenue + ' CFA', sub: '' },
+                'statStatus': { value: '75%', sub: 'taux' },
+                'statSuccess': { value: '94%', sub: '' },
+                'statSatisfaction': { value: '4.9', sub: '/ 5.0' },
+                'statLocation': { value: '45%', sub: 'Sénégal' },
+                'statActivity': { value: '47', sub: 'connexions' }
+            };
+
+            Object.keys(statMappings).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const statData = statMappings[id];
+                    el.innerHTML = `${statData.value} <span class="item-sub">${statData.sub}</span>`;
+                }
+            });
+
+            animateBars();
+            const label = document.querySelector(`.period-filter[data-period="${period}"]`)?.textContent || period;
+            showNotification(`📊 Période : ${label}`, 'info');
+        }
+
+        // ============================================
+        // ANIMATION DES BARRES
+        // ============================================
+        function animateBars() {
+            const bars = document.querySelectorAll('.progress-fill');
+            bars.forEach(bar => {
+                const targetWidth = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = targetWidth;
+                }, 150);
+            });
+        }
+
+        // ============================================
+        // ACTUALISATION
+        // ============================================
+        function refreshData() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.style.transform = 'rotate(360deg)';
+
+            showNotification('🔄 Actualisation des données...', 'info');
+
+            setTimeout(() => {
+                const data = statsData[currentPeriod];
+                if (data) {
+                    showNotification('✅ Données actualisées avec succès !', 'success');
+                }
+                refreshBtn.style.transform = 'rotate(0deg)';
+                isRefreshing = false;
+            }, 800);
+        }
+
+        // ============================================
+        // FILTRES PÉRIODE
+        // ============================================
+        document.querySelectorAll('.period-filter').forEach(filter => {
+            filter.addEventListener('click', function() {
+                document.querySelectorAll('.period-filter').forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = this.dataset.period;
+                updateStats(currentPeriod);
+            });
+        });
+
+        // ============================================
+        // MODAL DÉTAILS
+        // ============================================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        function openModal(title, details) {
+            modalTitle.textContent = title;
+            let bodyHTML = '';
+            Object.keys(details).forEach(key => {
+                bodyHTML += `
+                    <div class="detail-item">
+                        <span class="detail-label">${key}</span>
+                        <span class="detail-value highlight">${details[key]}</span>
+                    </div>
+                `;
+            });
+            modalBody.innerHTML = bodyHTML;
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('modalAction').addEventListener('click', function() {
+            showNotification('📊 Plus de détails disponibles sur la version web', 'info');
+            closeModal();
+        });
+
+        // ============================================
+        // CLIC SUR LES KPI
+        // ============================================
+        document.querySelectorAll('.kpi-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const label = this.querySelector('.kpi-label')?.textContent || 'Indicateur';
+                const value = this.querySelector('.kpi-value')?.textContent?.trim() || '';
+                const change = this.querySelector('.kpi-change')?.textContent?.trim() || 'Stable';
+                const period = document.querySelector('.period-filter.active')?.textContent || 'Ce mois';
+
+                const details = {
+                    '📊 Indicateur': label,
+                    '💰 Valeur': value,
+                    '📈 Évolution': change,
+                    '📅 Période': period
+                };
+
+                const data = statsData[currentPeriod];
+                if (data && data.details) {
+                    Object.keys(data.details).forEach(key => {
+                        if (key.toLowerCase().includes(label.toLowerCase().slice(0, 5))) {
+                            details['Détails'] = data.details[key];
+                        }
+                    });
+                }
+
+                openModal(`📊 ${label}`, details);
+            });
+        });
+
+        // ============================================
+        // CLIC SUR LES ÉLÉMENTS DE STATS
+        // ============================================
+        document.querySelectorAll('.stats-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const title = this.querySelector('.item-title')?.textContent || 'Statistique';
+                const value = this.querySelector('.item-value')?.textContent?.trim() || '';
+                const period = document.querySelector('.period-filter.active')?.textContent || 'Ce mois';
+
+                const details = {
+                    '📋 Statistique': title,
+                    '📊 Valeur': value,
+                    '📅 Période': period
+                };
+
+                const data = statsData[currentPeriod];
+                if (data && data.details) {
+                    Object.keys(data.details).forEach(key => {
+                        if (key.toLowerCase().includes(title.toLowerCase().slice(0, 5)) ||
+                            title.toLowerCase().includes(key.toLowerCase().slice(0, 5))) {
+                            details['Détails'] = data.details[key];
+                        }
+                    });
+                }
+
+                openModal(`📊 ${title}`, details);
+            });
+        });
+
+        // ============================================
+        // BOUTON ACTUALISER
+        // ============================================
+        document.getElementById('refreshBtn').addEventListener('click', refreshData);
+
+        // ============================================
+        // RACCOURCIS CLAVIER
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'r' || e.key === 'R') {
+                if (!e.ctrlKey && !e.metaKey) {
+                    refreshData();
+                }
+            }
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // ============================================
+        // BOUTON RETOUR
+        // ============================================
+        document.getElementById('backBtn').addEventListener('click', function() {
+            showNotification('⬅️ Retour à la page précédente', 'info');
+        });
+
+        // ============================================
+        // MENU
+        // ============================================
+        document.getElementById('menuIcon').addEventListener('click', function() {
+            showNotification('📱 Menu latéral', 'info');
+        });
+
+        // ============================================
+        // NAVIGATION BOTTOM
+        // ============================================
+        document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+
+                document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+
+                const pageNames = {
+                    freelancers: 'Freelancers',
+                    missions: 'Missions',
+                    stats: 'Statistiques',
+                    settings: 'Paramètres'
+                };
+
+                showNotification(`📱 Navigation vers ${pageNames[page] || page}`, 'info');
+            });
+        });
+
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        console.log('📊 SMD-Tech Statistiques - Plein Écran');
+        console.log('📈 ' + document.querySelectorAll('.stats-item').length + ' indicateurs disponibles');
+
+        setTimeout(() => {
+            updateStats('month');
+        }, 100);
+
+        setTimeout(() => {
+            showNotification('💡 Cliquez sur une statistique pour plus de détails', 'info');
+        }, 600);
+    </script>
+
+</body>
+</html>

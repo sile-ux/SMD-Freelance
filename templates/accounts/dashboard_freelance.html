@@ -1,86 +1,1152 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SMD-Tech - Missions Disponibles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* Reset & base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-{% block title %}Tableau de Bord Freelance - SMD-Tech{% endblock %}
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 0;
+            position: relative;
+        }
 
-{% block content %}
-<div class="space-y-8">
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold text-gray-900">Espace de {{ user.username }}</h1>
-                {% if profile.is_verified %}
-                    <span class="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full border border-green-200">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Profil Vérifié
-                    </span>
-                {% else %}
-                    <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200">
-                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span> En attente de validation admin
-                    </span>
-                {% endif %}
-            </div>
-            <p class="text-gray-500 text-sm mt-1">{{ profile.title|default:"Spécialiste Tech" }}</p>
+        /* Conteneur principal */
+        .app-container {
+            width: calc(100% - 300px);
+            min-height: 100vh;
+            background: #ffffff;
+            box-shadow: none;
+            padding: 18px 18px 16px;
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            margin-left: 300px;
+        }
+
+        /* ----- En-tête ----- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: -0.5px;
+        }
+
+        .header .logo span {
+            color: #00B4D8;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            color: #1a1a2e;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.2s;
+        }
+
+        .menu-icon:hover {
+            color: #00B4D8;
+        }
+
+        /* ----- Menu latéral ----- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 30px 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar .close-btn {
+            font-size: 24px;
+            color: #1a1a2e;
+            cursor: pointer;
+            margin-bottom: 30px;
+            display: block;
+            text-align: right;
+        }
+
+        .sidebar .close-btn:hover {
+            color: #00B4D8;
+        }
+
+        .sidebar .menu-group {
+            flex: 1;
+        }
+
+        .sidebar .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar .menu-item {
+            padding: 14px 0;
+            border-bottom: 1px solid #e8e8ef;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .sidebar .menu-item:hover {
+            color: #00B4D8;
+        }
+
+        .sidebar .menu-item i {
+            margin-right: 12px;
+            width: 24px;
+            color: #00B4D8;
+        }
+
+        .sidebar .menu-item.active {
+            color: #00B4D8;
+            background: #e3f4fa;
+            border-radius: 8px;
+            padding-left: 12px;
+        }
+
+        .sidebar .language-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid #e8e8ef;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+        .sidebar .language-switch select {
+            border: 1px solid #dfe7ee;
+            border-radius: 10px;
+            padding: 6px 8px;
+            font-size: 13px;
+            color: #1a1a2e;
+            background: #fff;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* ----- Titre de la page ----- */
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .user-profile-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            z-index: 2;
+            width: 56px;
+        }
+
+        .user-profile-mini .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00B4D8, #0ea5e9);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0, 180, 216, 0.22);
+        }
+
+        .user-profile-mini .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .user-profile-mini .user-info strong {
+            font-size: 10px;
+            color: #1a1a2e;
+            line-height: 1.1;
+        }
+
+        .user-profile-mini .user-info span {
+            font-size: 9px;
+            color: #6b7280;
+        }
+
+        /* ----- Barre de recherche ----- */
+        .search-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .search-bar {
+            background: #f0f4f8;
+            border-radius: 999px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            border: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar:focus-within {
+            border-color: #00B4D8;
+        }
+
+        .search-bar i {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 13px;
+            color: #1a1a2e;
+        }
+
+        .search-bar input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* ----- Filtres ----- */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            background: #f0f4f8;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+            flex: 1 0 auto;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .filter-item:hover {
+            background: #e3ecf3;
+        }
+
+        .filter-item.active {
+            border-color: #00B4D8;
+            background: #e3f4fa;
+        }
+
+        .filter-item i {
+            font-size: 12px;
+            color: #6b7280;
+            transition: transform 0.3s;
+        }
+
+        .filter-item.active i {
+            transform: rotate(180deg);
+        }
+
+        .filter-item .chevron {
+            font-size: 10px;
+            color: #6b7280;
+            margin-left: 4px;
+        }
+
+        /* Dropdown des filtres */
+        .filter-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            padding: 10px 0;
+            min-width: 180px;
+            z-index: 10;
+            border: 1px solid #e8e8ef;
+        }
+
+        .filter-dropdown.show {
+            display: block;
+        }
+
+        .filter-dropdown .dropdown-item {
+            padding: 10px 18px;
+            font-size: 14px;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-dropdown .dropdown-item:hover {
+            background: #f0f4f8;
+        }
+
+        .filter-dropdown .dropdown-item i {
+            color: #00B4D8;
+            font-size: 14px;
+            width: 20px;
+        }
+
+        .filter-dropdown .dropdown-item .check {
+            margin-left: auto;
+            color: #00B4D8;
+            display: none;
+        }
+
+        .filter-dropdown .dropdown-item.selected .check {
+            display: inline;
+        }
+
+        /* ----- Liste des missions ----- */
+        .missions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+            max-height: none;
+            overflow: visible;
+            padding-right: 0;
+        }
+
+        /* Carte mission */
+        .mission-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px;
+            border: 1px solid #e8e8ef;
+            transition: all 0.3s;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .mission-card.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mission-card:hover {
+            border-color: #00B4D8;
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.1);
+        }
+
+        .mission-card .mission-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .mission-card .mission-title .badge {
+            font-size: 10px;
+            font-weight: 600;
+            background: #00B4D8;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-left: 8px;
+            display: inline-block;
+        }
+
+        .mission-card .mission-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .mission-card .mission-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .mission-card .budget {
+            font-size: 18px;
+            font-weight: 700;
+            color: #00B4D8;
+        }
+
+        .mission-card .budget i {
+            font-size: 14px;
+            color: #6b7280;
+            margin-right: 4px;
+        }
+
+        .mission-card .btn-apply {
+            background: #00B4D8;
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mission-card .btn-apply:hover {
+            background: #0096C7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        .mission-card .btn-apply:active {
+            transform: scale(0.95);
+        }
+
+        .mission-card .mission-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .mission-card .mission-tag {
+            background: #f0f4f8;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #1a1a2e;
+            font-weight: 500;
+        }
+
+        .mission-card .mission-tag.highlight {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        /* ----- Statistiques rapides ----- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 10px 8px;
+            margin-bottom: 12px;
+            border: 1px solid #e8e8ef;
+        }
+
+        .stats .stat-item {
+            text-align: center;
+        }
+
+        .stats .stat-item .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .stats .stat-item .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .stats .stat-item .stat-number i {
+            color: #00B4D8;
+            margin-right: 4px;
+        }
+
+        /* ----- Boutons en bas ----- */
+        .bottom-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            padding: 10px 12px;
+            border-radius: 30px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0096C7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #00B4D8;
+            border: 2px solid #00B4D8;
+        }
+
+        .btn-outline:hover {
+            background: #00B4D8;
+            color: #fff;
+        }
+
+        .btn-outline i {
+            margin-right: 6px;
+        }
+
+        /* Footer */
+        .page-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            margin-top: 8px;
+            border-top: 1px solid #eef2f7;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .page-footer a {
+            color: #00B4D8;
+            text-decoration: none;
+        }
+
+        /* Scrollbar */
+        .missions-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .missions-list::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 8px;
+        }
+
+        .missions-list::-webkit-scrollbar-thumb:hover {
+            background: #00B4D8;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.5s;
+            z-index: 2000;
+            white-space: nowrap;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body {
+                padding: 0;
+            }
+
+            .app-container {
+                width: 100%;
+                max-width: 100%;
+                margin-left: 0;
+                padding: 16px 12px 14px;
+            }
+
+            .menu-icon {
+                display: block;
+            }
+
+            .sidebar {
+                width: 260px;
+                left: -260px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .user-profile-mini {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: auto;
+                align-self: flex-end;
+                margin-bottom: 8px;
+            }
+
+            .search-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-btn {
+                width: 100%;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-item {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .mission-card {
+                padding: 14px;
+            }
+        }
+
+        @media (min-width: 901px) {
+            body {
+                padding: 0;
+            }
+
+            .app-container {
+                width: calc(100% - 320px);
+                max-width: none;
+                margin: 0;
+                margin-left: 300px;
+                min-height: 100vh;
+            }
+
+            .menu-icon {
+                display: none;
+            }
+
+            .sidebar {
+                left: 0;
+            }
+
+            .overlay {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Menu latéral -->
+    <div class="sidebar" id="sidebar">
+        <div class="close-btn" id="closeSidebar">
+            <i class="fas fa-times"></i>
         </div>
-        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl text-center min-w-[140px]">
-            <p class="text-xs text-indigo-600 font-bold uppercase tracking-wider">Tarif Horaire</p>
-            <p class="text-xl font-black text-indigo-700 mt-0.5">{{ profile.hourly_rate|default:"0" }} <span class="text-xs font-normal">CFA/h</span></p>
+        <div class="menu-group">
+            <a href="{% url 'accounts:home' %}" class="menu-item"><i class="fas fa-home"></i> Accueil</a>
+            <a href="{% url 'accounts:dashboard' %}" class="menu-item active"><i class="fas fa-briefcase"></i> Missions</a>
+            <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
+            <a href="{% url 'chat:latest_chat' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
+            <a href="#stats-section" class="menu-item"><i class="fas fa-chart-line"></i> Statistiques</a>
+        </div>
+        <div class="sidebar-bottom">
+            <div class="language-switch">
+                <span><i class="fas fa-globe"></i> Langue</span>
+                <select id="languageSelect">
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+            <a href="{% url 'accounts:parametre' %}" class="menu-item"><i class="fas fa-cog"></i> Paramètres</a>
+            <a href="{% url 'accounts:logout' %}" class="menu-item"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-6">
-            <div>
-                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Mes Compétences</h3>
-                <div class="flex flex-wrap gap-1.5">
-                    {% if profile.skills %}
-                        {% for skill in profile.skills.split %}
-                            <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-md">{{ skill|cut:"," }}</span>
-                        {% endfor %}
-                    {% else %}
-                        <p class="text-xs text-gray-400 italic">Aucune compétence renseignée.</p>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="border-t border-gray-100 pt-4 text-sm space-y-2 text-gray-600">
-                <p><strong>Email :</strong> {{ user.email }}</p>
-                <p><strong>Téléphone :</strong> {{ user.phone_number|default:"Non renseigné" }}</p>
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Conteneur principal -->
+    <div class="app-container">
+
+        <!-- En-tête -->
+        <div class="header">
+            <div class="logo">SMD-<span>Tech</span></div>
+            <div class="menu-icon" id="menuIcon">
+                <i class="fas fa-bars"></i>
             </div>
         </div>
 
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold text-gray-900">Mes candidatures envoyées</h3>
-                <a href="#" class="text-xs font-semibold text-indigo-600 hover:underline">Trouver des missions →</a>
-            </div>
+        <!-- Titre -->
+        <div class="page-title">Missions Disponibles</div>
+        <div class="page-subtitle">Trouvez la mission qui vous correspond</div>
 
-            {% if user.my_applications.all %}
-                <div class="overflow-hidden border border-gray-100 rounded-xl divide-y divide-gray-100">
-                    {% for app in user.my_applications.all %}
-                        <div class="p-4 flex items-center justify-between hover:bg-gray-50 transition">
-                            <div>
-                                <h4 class="font-bold text-gray-900 text-sm">{{ app.contract.title }}</h4>
-                                <p class="text-xs text-gray-400 mt-0.5">Soumis le {{ app.created_at|date:"d M Y" }} • Votre offre : <strong class="text-gray-700">{{ app.bid_amount }} CFA</strong></p>
-                            </div>
-                            <div>
-                                {% if app.status == 'PENDING' %}
-                                    <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-md">En attente</span>
-                                {% elif app.status == 'ACCEPTED' %}
-                                    <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-md">Acceptée</span>
-                                {% else %}
-                                    <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-md">Refusée</span>
-                                {% endif %}
-                            </div>
-                        </div>
+        <div class="user-profile-mini">
+            <div class="avatar">{{ user.username|first|upper }}</div>
+            <div class="user-info">
+                <strong>{{ user.username }}</strong>
+                <span>Freelancer{% if profile.specialty %} — {{ profile.specialty }}{% endif %}</span>
+            </div>
+        </div>
+
+        <!-- Barre de recherche -->
+        <div class="search-area">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Rechercher une mission..." />
+            </div>
+            <button class="btn btn-primary search-btn" id="searchBtn"><i class="fas fa-search"></i> Rechercher</button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats" id="stats-section">
+            <div class="stat-item">
+                <div class="stat-number" id="statMissions"><i class="fas fa-briefcase"></i> {{ mission_count|default:"0" }}</div>
+                <div class="stat-label">Missions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><i class="fas fa-users"></i> {{ application_count|default:"0" }}</div>
+                <div class="stat-label">Mes candidatures</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><i class="fas fa-clock"></i> {{ urgent_count|default:"0" }}</div>
+                <div class="stat-label">Urgentes</div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters">
+            <div class="filter-item" data-filter="category">
+                Catégorie <i class="fas fa-chevron-down chevron"></i>
+                <div class="filter-dropdown" id="categoryDropdown">
+                    <div class="dropdown-item selected" data-value="all"><i class="fas fa-list"></i> Toutes <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="backend"><i class="fas fa-server"></i> Backend <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="frontend"><i class="fas fa-paint-brush"></i> Frontend <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="fullstack"><i class="fas fa-code"></i> Fullstack <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="api"><i class="fas fa-plug"></i> API <span class="check"><i class="fas fa-check"></i></span></div>
+                </div>
+            </div>
+            <div class="filter-item" data-filter="budget">
+                Budget <i class="fas fa-chevron-down chevron"></i>
+                <div class="filter-dropdown" id="budgetDropdown">
+                    <div class="dropdown-item selected" data-value="all"><i class="fas fa-list"></i> Tous <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="small"><i class="fas fa-coins"></i> Small (≤ 200k) <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="medium"><i class="fas fa-coins"></i> Medium (200k - 500k) <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="large"><i class="fas fa-coins"></i> Large (500k+) <span class="check"><i class="fas fa-check"></i></span></div>
+                </div>
+            </div>
+            <div class="filter-item" data-filter="deadline">
+                Date limite <i class="fas fa-chevron-down chevron"></i>
+                <div class="filter-dropdown" id="deadlineDropdown">
+                    <div class="dropdown-item selected" data-value="all"><i class="fas fa-list"></i> Toutes <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="urgent"><i class="fas fa-clock"></i> Urgent (≤ 3 jours) <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="normal"><i class="fas fa-calendar-alt"></i> Normal (≤ 7 jours) <span class="check"><i class="fas fa-check"></i></span></div>
+                    <div class="dropdown-item" data-value="long"><i class="fas fa-calendar-plus"></i> Long terme (≤ 30 jours) <span class="check"><i class="fas fa-check"></i></span></div>
+                </div>
+            </div>
+        </div>
+
+        {% load contracts_extras %}
+        <!-- Liste des missions -->
+        <div class="missions-list" id="missionsList">
+            {% for mission in missions %}
+            <div class="mission-card" data-category="{{ mission.category_slug }}" data-budget="{{ mission.budget_category }}" data-deadline="{{ mission.urgency }}">
+                <div class="mission-title">
+                    {{ mission.title }}
+                    {% if mission.badge_text %}<span class="badge">{{ mission.badge_text }}</span>{% endif %}
+                </div>
+                <div class="mission-description">
+                    {{ mission.description }}
+                </div>
+                <div class="mission-tags">
+                    {% for tag in mission.tag_list %}
+                    <span class="mission-tag{% if forloop.first %} highlight{% endif %}">{{ tag }}</span>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="text-center py-12 border border-dashed border-gray-200 rounded-xl">
-                    <p class="text-sm text-gray-400">Vous n'avez pas encore postulé à des projets.</p>
-                    <a href="#" class="inline-block mt-4 bg-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
-                        Parcourir les offres
-                    </a>
+                <div class="mission-footer">
+                    <span class="budget"><i class="fas fa-money-bill-wave"></i> {{ mission.budget|intcomma }} CFA</span>
+                    <button class="btn-apply" data-mission="{{ mission.title }}">Postuler</button>
                 </div>
-            {% endif %}
+            </div>
+            {% empty %}
+            <p style="text-align:center;padding:40px;color:#6b7280;">Aucune mission disponible pour le moment.</p>
+            {% endfor %}
         </div>
+
+        <!-- Boutons bas -->
+        <div class="bottom-actions">
+            <button class="btn btn-primary" id="refreshBtn"><i class="fas fa-sync-alt"></i> Actualiser</button>
+            <a href="{% url 'contracts:create_contract' %}" class="btn btn-outline" style="text-decoration:none;"><i class="fas fa-plus"></i> Publier une mission</a>
+        </div>
+
+        <div class="page-footer">
+            <span>© 2026 SMD-Tech</span>
+            <a href="{% url 'contracts:contract_list' %}">Voir tous les profils</a>
+        </div>
+
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        // ============= MENU LATERAL =============
+        const menuIcon = document.getElementById('menuIcon');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        menuIcon.addEventListener('click', openSidebar);
+        closeSidebar.addEventListener('click', closeSidebarFunc);
+        overlay.addEventListener('click', closeSidebarFunc);
+
+        // ============= FILTRES DEROULANTS =============
+        const filterItems = document.querySelectorAll('.filter-item');
+
+        filterItems.forEach(item => {
+            const dropdown = item.querySelector('.filter-dropdown');
+            const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+
+                // Fermer tous les autres dropdowns
+                filterItems.forEach(f => {
+                    if (f !== this) {
+                        f.classList.remove('active');
+                        f.querySelector('.filter-dropdown').classList.remove('show');
+                    }
+                });
+
+                this.classList.toggle('active');
+                dropdown.classList.toggle('show');
+            });
+
+            // Clic sur un élément du dropdown
+            dropdownItems.forEach(dItem => {
+                dItem.addEventListener('click', function(e) {
+                    e.stopPropagation();
+
+                    // Désélectionner tous les items du même dropdown
+                    dropdownItems.forEach(d => d.classList.remove('selected'));
+
+                    // Sélectionner celui-ci
+                    this.classList.add('selected');
+
+                    // Mettre à jour le texte du filtre
+                    const cleanText = this.textContent.trim().replace(/[^\w\s\-+.]/g, '').trim();
+                    const filterLabel = item;
+                    if (cleanText.includes('Toutes') || cleanText.includes('Tous')) {
+                        if (item.dataset.filter === 'category') {
+                            filterLabel.innerHTML =
+                                `Catégorie <i class="fas fa-chevron-down chevron"></i>`;
+                        } else if (item.dataset.filter === 'budget') {
+                            filterLabel.innerHTML =
+                                `Budget <i class="fas fa-chevron-down chevron"></i>`;
+                        } else if (item.dataset.filter === 'deadline') {
+                            filterLabel.innerHTML =
+                                `Date limite <i class="fas fa-chevron-down chevron"></i>`;
+                        }
+                    } else {
+                        const shortText = cleanText.length > 15 ? cleanText.substring(0, 12) + '...' : cleanText;
+                        filterLabel.innerHTML =
+                            `${shortText} <i class="fas fa-chevron-down chevron"></i>`;
+                    }
+
+                    // Fermer le dropdown
+                    item.classList.remove('active');
+                    dropdown.classList.remove('show');
+
+                    // Appliquer les filtres
+                    applyFilters();
+
+                    // Notification
+                    showNotification(`Filtre : ${this.textContent.trim()}`);
+                });
+            });
+        });
+
+        // Fermer les dropdowns en cliquant ailleurs
+        document.addEventListener('click', function() {
+            filterItems.forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.filter-dropdown').classList.remove('show');
+            });
+        });
+
+        // ============= RECHERCHE DYNAMIQUE =============
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const missionCards = document.querySelectorAll('.mission-card');
+
+        searchInput.addEventListener('input', function() {
+            applyFilters();
+        });
+
+        searchBtn.addEventListener('click', function() {
+            applyFilters();
+            showNotification('🔎 Recherche appliquée');
+        });
+
+        // ============= FONCTION DE FILTRAGE =============
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            // Récupérer les valeurs sélectionnées des filtres
+            let selectedCategory = 'all';
+            let selectedBudget = 'all';
+            let selectedDeadline = 'all';
+
+            // Category
+            const categoryItems = document.querySelectorAll('#categoryDropdown .dropdown-item');
+            categoryItems.forEach(item => {
+                if (item.classList.contains('selected')) {
+                    selectedCategory = item.dataset.value;
+                }
+            });
+
+            // Budget
+            const budgetItems = document.querySelectorAll('#budgetDropdown .dropdown-item');
+            budgetItems.forEach(item => {
+                if (item.classList.contains('selected')) {
+                    selectedBudget = item.dataset.value;
+                }
+            });
+
+            // Deadline
+            const deadlineItems = document.querySelectorAll('#deadlineDropdown .dropdown-item');
+            deadlineItems.forEach(item => {
+                if (item.classList.contains('selected')) {
+                    selectedDeadline = item.dataset.value;
+                }
+            });
+
+            // Filtrer chaque carte
+            missionCards.forEach(card => {
+                const categories = card.dataset.category.split(',');
+                const budget = card.dataset.budget;
+                const deadline = card.dataset.deadline;
+                const title = card.querySelector('.mission-title').textContent.toLowerCase();
+                const description = card.querySelector('.mission-description').textContent.toLowerCase();
+                const tags = Array.from(card.querySelectorAll('.mission-tag')).map(tag => tag.textContent
+                .toLowerCase());
+
+                // Filtre par recherche
+                const matchesSearch = searchTerm === '' ||
+                    title.includes(searchTerm) ||
+                    description.includes(searchTerm) ||
+                    tags.some(tag => tag.includes(searchTerm));
+
+                // Filtre par catégorie
+                const matchesCategory = selectedCategory === 'all' ||
+                    categories.includes(selectedCategory);
+
+                // Filtre par budget
+                const matchesBudget = selectedBudget === 'all' ||
+                    budget === selectedBudget;
+
+                // Filtre par date limite
+                const matchesDeadline = selectedDeadline === 'all' ||
+                    deadline === selectedDeadline;
+
+                // Afficher ou masquer
+                if (matchesSearch && matchesCategory && matchesBudget && matchesDeadline) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Mettre à jour les statistiques
+            const visibleCards = document.querySelectorAll('.mission-card:not(.hidden)');
+            const statNumber = document.querySelector('.stat-item:first-child .stat-number');
+            if (statNumber) {
+                statNumber.innerHTML = `<i class="fas fa-briefcase"></i> ${visibleCards.length}`;
+            }
+
+            // Vérifier s'il y a des résultats
+            if (visibleCards.length === 0) {
+                showNotification('Aucune mission trouvée');
+            }
+        }
+
+        // ============= BOUTON POSTULER =============
+        document.querySelectorAll('.btn-apply').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const missionName = this.dataset.mission || 'cette mission';
+                showNotification(`✅ Candidature envoyée pour : ${missionName}`);
+                this.textContent = '✅ Postulé';
+                this.style.background = '#28a745';
+                this.disabled = true;
+
+                // Animation de confirmation
+                const card = this.closest('.mission-card');
+                card.style.borderColor = '#28a745';
+                card.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.2)';
+            });
+        });
+
+        // ============= BOUTON ACTUALISER =============
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            showNotification('🔄 Actualisation des missions...');
+            setTimeout(() => {
+                applyFilters();
+                showNotification('✅ Missions actualisées !');
+            }, 500);
+        });
+
+        // ============= BOUTON PUBLIER MISSION =============
+        // handled by <a> link
+
+        // ============= NOTIFICATION =============
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            clearTimeout(notification.timeout);
+            notification.timeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============= INITIALISATION =============
+        // Appliquer les filtres au chargement
+        setTimeout(applyFilters, 100);
+
+        // ============= STATISTIQUES INTERACTIVES =============
+        document.querySelectorAll('.stat-item').forEach(stat => {
+            stat.addEventListener('click', function() {
+                const label = this.querySelector('.stat-label').textContent;
+                if (label.includes('Missions')) {
+                    // Réinitialiser les filtres
+                    document.querySelectorAll('.dropdown-item.selected').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    document.querySelectorAll('.dropdown-item[data-value="all"]').forEach(item => {
+                        item.classList.add('selected');
+                    });
+                    // Réinitialiser les textes des filtres
+                    filterItems.forEach(item => {
+                        const defaultText = item.dataset.filter === 'category' ? 'Catégorie' :
+                            item.dataset.filter === 'budget' ? 'Budget' : 'Date limite';
+                        item.innerHTML =
+                            `${defaultText} <i class="fas fa-chevron-down chevron"></i>`;
+                    });
+                    searchInput.value = '';
+                    applyFilters();
+                    showNotification('📊 Affichage de toutes les missions');
+                }
+            });
+        });
+
+        console.log('🚀 SMD-Tech Missions App initialisée !');
+        console.log('💡 Cliquez sur les filtres pour les dérouler');
+        console.log('🔍 Tapez dans la barre de recherche pour filtrer');
+        console.log('📝 Cliquez sur "Postuler" pour candidater');
+        console.log('📊 Cliquez sur les stats pour réinitialiser les filtres');
+    </script>
+
+</body>
+</html>

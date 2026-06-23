@@ -344,12 +344,21 @@
         </button>
 
         <!-- Auth buttons -->
+        {% if user.is_authenticated %}
+        <a href="{% url 'accounts:dashboard' %}" class="px-4 py-2 rounded-xl text-sm font-semibold text-sky-600 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+          <i class="fa-solid fa-gauge text-xs mr-1.5"></i>Dashboard
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="btn-sky px-4 py-2 text-sm shadow-md shadow-sky-200/50 dark:shadow-sky-900/50">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>Déconnexion
+        </a>
+        {% else %}
         <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-xl text-sm font-semibold text-sky-600 dark:text-sky-300 border-2 border-sky-200 dark:border-sky-700 hover:border-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
           Connexion
         </a>
         <a href="{% url 'accounts:choice_register' %}" class="btn-sky px-4 py-2 text-sm shadow-md shadow-sky-200/50 dark:shadow-sky-900/50">
           <i class="fa-solid fa-user-plus text-xs"></i>S'inscrire
         </a>
+        {% endif %}
       </div>
 
       <!-- Mobile toggle -->
@@ -386,12 +395,21 @@
           <button id="theme-toggle-mob" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-sky-200 dark:border-sky-700 text-sm font-semibold text-gray-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
             <i class="fa-solid fa-moon" id="mob-theme-icon"></i>Thème
           </button>
+          {% if user.is_authenticated %}
+          <a href="{% url 'accounts:dashboard' %}" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-sky-200 dark:border-sky-700 text-sm font-semibold text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
+            <i class="fa-solid fa-gauge text-xs"></i>Dashboard
+          </a>
+          <a href="{% url 'accounts:logout' %}" class="flex-1 btn-sky py-2.5 justify-center text-sm shadow-md">
+            <i class="fa-solid fa-right-from-bracket text-xs"></i>Déconnexion
+          </a>
+          {% else %}
           <a href="{% url 'accounts:login' %}" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-sky-200 dark:border-sky-700 text-sm font-semibold text-sky-600 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-900/30 transition-all">
             Connexion
           </a>
           <a href="{% url 'accounts:choice_register' %}" class="flex-1 btn-sky py-2.5 justify-center text-sm shadow-md">
             Inscription
           </a>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -418,7 +436,7 @@
       <a href="#mission-form" class="bg-[#0EA5E9] hover:bg-sky-400 text-white font-bold py-4 px-8 rounded-full transition-transform hover:scale-105 shadow-lg shadow-sky-500/30">
         Déposer un projet
       </a>
-      <a href="{% url 'contracts:freelance_list' %}" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold py-4 px-8 rounded-full transition-colors">
+      <a href="{% url 'contracts:contract_list' %}" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white font-bold py-4 px-8 rounded-full transition-colors">
         Trouver un talent
       </a>
     </div>
@@ -610,101 +628,46 @@
         Des experts <span class="gradient-text">vérifiés</span>
       </h2>
       <p class="text-gray-500 dark:text-sky-300 text-lg max-w-xl mx-auto">Chaque freelancer est évalué sur ses compétences, sa ponctualité et la qualité de ses livrables.</p>
-        <a href="{% url 'contracts:freelance_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-accent hover:text-accent">Explore profiles</a>
+        <a href="{% url 'contracts:contract_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-accent hover:text-accent">Voir les profils</a>
     </div>
 
     <!-- Freelancer slider -->
     <div class="relative">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="freelancer-grid">
-        <!-- Card 1 -->
-        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.05s">
+        {% for f in freelances %}
+        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.0{{ forloop.counter }}s">
           <div class="relative inline-block mb-4">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg shadow-sky-200 dark:shadow-sky-900">KN</div>
-            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg shadow-sky-200 dark:shadow-sky-900">{{ f.user.username|slice:":2"|upper }}</div>
+            {% if f.is_verified %}<span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>{% endif %}
           </div>
-          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">{{ freelance.user.username }}</h4>
-          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">{{ freelance.title }}</p>
+          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">{{ f.user.username }}</h4>
+          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">{{ f.title }}</p>
           <div class="stars mb-3 flex justify-center gap-0.5">
             <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
           </div>
           <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="tech-tag">Django</span>
-            <span class="tech-tag">React</span>
+            {% if f.skills %}
+            <span class="tech-tag">{{ f.skills|truncatechars:20 }}</span>
+            {% endif %}
           </div>
           <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
-            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>47 missions</span>
-            <span class="font-semibold text-sky-600 dark:text-sky-300">15 000 XAF/h</span>
+            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>{{ f.user.my_applications.count }} missions</span>
+            <span class="font-semibold text-sky-600 dark:text-sky-300">{{ f.hourly_rate|floatformat:0 }} XAF/h</span>
           </div>
         </div>
-
-        <!-- Card 2 -->
-        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.1s">
-          <div class="relative inline-block mb-4">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg">AM</div>
-            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>
+        {% empty %}
+        <div class="col-span-full text-center py-12 text-gray-400 dark:text-sky-500">
+          <i class="fa-solid fa-users-slash text-4xl mb-4 block opacity-50"></i>
+          <p class="text-lg font-medium">Aucun freelancer pour le moment</p>
+          <p class="text-sm mt-1">Revenez bientôt ou inscrivez-vous pour être le premier !</p>
           </div>
-          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">Amina Mbaye</h4>
-          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">Designer UI/UX Senior</p>
-          <div class="stars mb-3 flex justify-center gap-0.5">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="tech-tag">Figma</span>
-            <span class="tech-tag">Prototypage</span>
-          </div>
-          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
-            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>63 missions</span>
-            <span class="font-semibold text-sky-600 dark:text-sky-300">18 000 XAF/h</span>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.15s">
-          <div class="relative inline-block mb-4">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg">JT</div>
-            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full border-2 border-white"></span>
-          </div>
-          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">Jean-Paul Tamba</h4>
-          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">Expert DevOps & Cloud</p>
-          <div class="stars mb-3 flex justify-center gap-0.5">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span style="color:#d1d5db">★</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="tech-tag">AWS</span>
-            <span class="tech-tag">Docker</span>
-          </div>
-          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
-            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>29 missions</span>
-            <span class="font-semibold text-sky-600 dark:text-sky-300">20 000 XAF/h</span>
-          </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="glass-card rounded-3xl p-6 text-center reveal group" style="transition-delay:0.2s">
-          <div class="relative inline-block mb-4">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-3xl text-white font-black mx-auto shadow-lg">FR</div>
-            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></span>
-          </div>
-          <h4 class="font-bold text-gray-900 dark:text-white mb-0.5">Fatou Rostand</h4>
-          <p class="text-sky-600 dark:text-sky-400 text-xs font-medium mb-3">Développeuse Mobile</p>
-          <div class="stars mb-3 flex justify-center gap-0.5">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5 justify-center mb-4">
-            <span class="tech-tag">Flutter</span>
-            <span class="tech-tag">Firebase</span>
-          </div>
-          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-sky-400 border-t border-sky-100 dark:border-sky-800 pt-3">
-            <span><i class="fa-solid fa-check-circle text-green-400 mr-1"></i>38 missions</span>
-            <span class="font-semibold text-sky-600 dark:text-sky-300">16 000 XAF/h</span>
-          </div>
-        </div>
+        {% endfor %}
       </div>
     </div>
 
     <div class="text-center mt-10 reveal">
-      <a href="#" class="btn-sky px-8 py-3.5 text-sm shadow-lg shadow-sky-200/50 dark:shadow-sky-900/50">
+      <a href="{% url 'contracts:contract_list' %}" class="btn-sky px-8 py-3.5 text-sm shadow-lg shadow-sky-200/50 dark:shadow-sky-900/50">
         <i class="fa-solid fa-users"></i>Voir tous les freelancers
       </a>
     </div>
@@ -1293,24 +1256,10 @@
     </div>
 
     <div class="glass-card rounded-3xl p-8 sm:p-10 reveal">
-      <form id="mission-post-form" class="space-y-6" novalidate>
+      <form id="mission-post-form" method="POST" action="{% url 'accounts:home' %}#mission-form" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="mission">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <!-- Nom -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
-              <i class="fa-solid fa-user text-sky-500 mr-1.5"></i>Votre nom complet
-            </label>
-            <input type="text" name="name" placeholder="Ex: Paul Moutongo" class="mission-input" required/>
-          </div>
-          <!-- Email -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
-              <i class="fa-solid fa-envelope text-sky-500 mr-1.5"></i>Adresse email
-            </label>
-            <input type="email" name="email" placeholder="paul@entreprise.cm" class="mission-input" required/>
-          </div>
-        </div>
-
         <!-- Titre -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
@@ -1318,30 +1267,12 @@
           </label>
           <input type="text" name="title" placeholder="Ex: Développer une application mobile de livraison" class="mission-input" required/>
         </div>
-
-        <!-- Catégorie + Budget -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
-              <i class="fa-solid fa-grid-2 text-sky-500 mr-1.5"></i>Catégorie
-            </label>
-            <select name="category" class="mission-input appearance-none cursor-pointer">
-              <option value="">— Choisir —</option>
-              <option>Développement Web</option>
-              <option>Développement Mobile</option>
-              <option>Design UI/UX</option>
-              <option>DevOps & Cloud</option>
-              <option>Cybersécurité</option>
-              <option>Intégration IA</option>
-              <option>Marketing Digital</option>
-              <option>Autre</option>
-            </select>
-          </div>
+          <!-- Budget -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-sky-300 mb-2">
               <i class="fa-solid fa-coins text-sky-500 mr-1.5"></i>Budget estimé (XAF)
             </label>
-            <input type="text" name="budget" placeholder="Ex: 150 000 – 300 000" class="mission-input"/>
+            <input type="number" step="0.01" name="budget" placeholder="Ex: 150000" class="mission-input" required/>
           </div>
         </div>
 
@@ -1879,10 +1810,8 @@ document.querySelectorAll('.faq-trigger').forEach(btn => {
   });
 });
 
-// ── Mission Form ─────────────────────────────────────
+// ── Mission Form char counter ─────────────────────────
 const missionForm = document.getElementById('mission-post-form');
-const formSuccess = document.getElementById('form-success');
-const newMissionBtn = document.getElementById('new-mission-btn');
 const charCount = document.getElementById('char-count');
 const textarea = missionForm?.querySelector('textarea[name="description"]');
 
@@ -1892,71 +1821,6 @@ textarea?.addEventListener('input', function() {
   if (len > 900) charCount.classList.add('text-rose-500');
   else charCount.classList.remove('text-rose-500');
   if (len > 1000) this.value = this.value.slice(0, 1000);
-});
-
-// Dropzone
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('file-input');
-const fileName = document.getElementById('file-name');
-const fileLabel = document.getElementById('file-label');
-
-dropzone?.addEventListener('click', () => fileInput?.click());
-dropzone?.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-sky-500', 'bg-sky-50'); });
-dropzone?.addEventListener('dragleave', () => dropzone.classList.remove('border-sky-500', 'bg-sky-50'));
-dropzone?.addEventListener('drop', e => {
-  e.preventDefault();
-  dropzone.classList.remove('border-sky-500', 'bg-sky-50');
-  const file = e.dataTransfer.files[0];
-  if (file) showFile(file);
-});
-fileInput?.addEventListener('change', function() {
-  if (this.files[0]) showFile(this.files[0]);
-});
-function showFile(file) {
-  fileName.classList.remove('hidden');
-  fileName.classList.add('flex');
-  fileLabel.textContent = `${file.name} (${(file.size/1024).toFixed(0)} KB)`;
-}
-
-missionForm?.addEventListener('submit', function(e) {
-  e.preventDefault();
-  const btn = this.querySelector('[type="submit"]');
-  const submitText = document.getElementById('submit-text');
-  btn.disabled = true;
-  submitText.textContent = 'Publication en cours...';
-  btn.querySelector('i').className = 'fa-solid fa-spinner fa-spin';
-
-  setTimeout(() => {
-    missionForm.classList.add('hidden');
-    formSuccess.classList.remove('hidden');
-  }, 1800);
-});
-
-newMissionBtn?.addEventListener('click', () => {
-  missionForm.classList.remove('hidden');
-  formSuccess.classList.add('hidden');
-  missionForm.reset();
-  charCount.textContent = '0 / 1000';
-  fileName.classList.add('hidden');
-  const btn = missionForm.querySelector('[type="submit"]');
-  btn.disabled = false;
-  document.getElementById('submit-text').textContent = 'Publier ma mission gratuitement';
-  btn.querySelector('i').className = 'fa-solid fa-paper-plane';
-});
-
-// ── Contact Form ──────────────────────────────────────
-document.getElementById('contact-form')?.addEventListener('submit', function(e) {
-  e.preventDefault();
-  const btn = this.querySelector('[type="submit"]');
-  btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Message envoyé !';
-  btn.classList.add('bg-green-500');
-  btn.disabled = true;
-  setTimeout(() => {
-    btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Envoyer le message';
-    btn.classList.remove('bg-green-500');
-    btn.disabled = false;
-    this.reset();
-  }, 3000);
 });
 
 // ── Smooth scroll for anchor links ───────────────────
