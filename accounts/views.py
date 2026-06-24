@@ -5,10 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.utils import timezone
+from datetime import timedelta
+import json
 from .forms import FreelanceRegisterForm, ClientRegisterForm
 from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter, Wallet, Transaction
-from contracts.models import Mission, Contract
+from contracts.models import Mission, Contract, Application
 from contracts.forms import QuickMissionForm
 
 
@@ -476,3 +479,94 @@ def freelance_list_view(request):
     return render(request, 'accounts/liste_freelanceur.html', {
         'freelances_json': json.dumps(freelances_data),
     })
+
+
+@login_required
+def stat_freelancer_view(request):
+    user = request.user
+    profile = getattr(user, 'freelance_profile', None)
+    wallet = getattr(user, 'wallet', None)
+
+    # Wallet
+    balance = float(wallet.balance) if wallet else 0
+
+    # Applications
+    applications = Application.objects.filter(freelance=user)
+    total_apps = applications.count()
+    missions_completed = applications.filter(mission__status='closed').count()
+    missions_in_progress = applications.filter(mission__status='in-progress').count()
+
+    # Rating
+    rating = float(profile.rating) if profile else 4.5
+
+    # Revenue
+    txns = Transaction.objects.filter(freelance=user)
+    total_revenue = txns.filter(type='mission_payment', status='completed').aggregate(s=Sum('amount'))['s'] or 0
+    total_revenue = float(total_revenue)
+
+    # Distinct clients from completed missions
+    completed_mission_ids = applications.filter(mission__status='closed').values_list('mission_id', flat=True)
+    total_clients = Mission.objects.filter(id__in=completed_mission_ids).values('client').distinct().count()
+
+    # Transaction history
+    transaction_history = txns.order_by('-created_at')[:20]
+
+    # Monthly revenue (last 12 months)
+    now = timezone.now()
+    monthly_labels = []
+    monthly_values = []
+    for i in range(11, -1, -1):
+        month_start = (now.replace(day=1) - timedelta(days=30 * i)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if i == 0:
+            month_end = now
+        else:
+            next_month = (month_start + timedelta(days=32)).replace(day=1)
+            month_end = next_month - timedelta(seconds=1)
+        month_rev = txns.filter(
+            type='mission_payment', status='completed',
+            created_at__gte=month_start, created_at__lte=month_end
+        ).aggregate(s=Sum('amount'))['s'] or 0
+        monthly_labels.append(month_start.strftime('%b'))
+        monthly_values.append(float(month_rev))
+
+    # Mission status distribution
+    status_counts = {
+        'completed': missions_completed,
+        'in_progress': missions_in_progress,
+        'pending': applications.filter(mission__status='open').count(),
+    }
+    success_rate = round((missions_completed / total_apps * 100) if total_apps > 0 else 0)
+
+    # Period data for JS switching
+    period_data = {}
+    for period_name, days in [('week', 7), ('month', 30), ('quarter', 90), ('year', 365)]:
+        start = now - timedelta(days=days)
+        period_txns = txns.filter(created_at__gte=start)
+        period_rev = period_txns.filter(type='mission_payment', status='completed').aggregate(s=Sum('amount'))['s'] or 0
+        period_missions = applications.filter(created_at__gte=start, mission__status='closed').count()
+        period_clients = Mission.objects.filter(
+            id__in=applications.filter(created_at__gte=start, mission__status='closed').values_list('mission_id', flat=True)
+        ).values('client').distinct().count()
+        period_data[period_name] = {
+            'revenue': float(period_rev),
+            'missions': period_missions,
+            'clients': period_clients,
+            'rating': rating,
+        }
+
+    context = {
+        'balance': balance,
+        'total_revenue': total_revenue,
+        'missions_completed': missions_completed,
+        'missions_in_progress': missions_in_progress,
+        'average_rating': rating,
+        'total_clients': total_clients,
+        'total_applications': total_apps,
+        'success_rate': success_rate,
+        'status_counts_json': json.dumps(status_counts),
+        'monthly_labels_json': json.dumps(monthly_labels),
+        'monthly_values_json': json.dumps(monthly_values),
+        'period_data_json': json.dumps(period_data),
+        'transactions': transaction_history,
+    }
+    return render(request, 'accounts/stat_freelancer.html', context)

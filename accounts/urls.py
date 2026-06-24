@@ -24,5 +24,6 @@ urlpatterns = [
     path('parametre/', views.parametre_view, name='parametre'),
     path('inscription-freelance/', views.freelance_register_view, name='freelance_register_view'),
     path('freelances/', views.freelance_list_view, name='freelance_list'),
+    path('statistiques/', views.stat_freelancer_view, name='stat_freelancer'),
 ]
 

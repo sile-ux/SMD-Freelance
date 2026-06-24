@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
+from types import SimpleNamespace
 from .models import Thread, Message
 
 User = get_user_model()
@@ -155,6 +156,31 @@ def send_message_api(request, thread_id):
         }, status=201)
 
     return JsonResponse({"error": "Méthode non autorisée. Utilisez POST."}, status=405)
+
+
+@login_required
+def freelance_messages(request):
+    threads = get_user_threads(request.user)
+
+    if threads:
+        first_thread = threads[0]['thread']
+        chat_messages = first_thread.messages.all().order_by('created_at')
+        other_user = first_thread.freelance if request.user == first_thread.client else first_thread.client
+        context = {
+            'thread': first_thread,
+            'chat_messages': chat_messages,
+            'other_user': other_user,
+            'threads': threads,
+        }
+    else:
+        context = {
+            'thread': SimpleNamespace(id=0),
+            'chat_messages': [],
+            'other_user': None,
+            'threads': [],
+        }
+
+    return render(request, 'chat/chat_room-FREE.html', context)
 
 
 def get_user_threads(user):

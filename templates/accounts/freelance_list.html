@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Freelances - FreelanceHub</title>
+    
+    <!-- Police Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Lordicon -->
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+    <style>
+        /* ===== RESET ET PLEIN ÉCRAN ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Rubik', sans-serif;
+            background: #f0f4f8;
+        }
+
+        /* ===== CONTENEUR PRINCIPAL ===== */
+        .freelances-wrap {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f0f4f8;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .freelances-header {
+            background: #ffffff;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dce7f5;
+            flex-shrink: 0;
+        }
+
+        .freelances-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .freelances-header .logo h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1a365d;
+        }
+
+        .freelances-header .logo h1 span {
+            color: #4299e1;
+        }
+
+        .freelances-header .right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .freelances-header .right .date {
+            font-size: 0.82rem;
+            color: #718096;
+        }
+
+        .freelances-header .right .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 12px 4px 4px;
+            border-radius: 30px;
+            background: #f7fafc;
+            border: 1px solid #dce7f5;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .freelances-header .right .profile:hover {
+            background: #ebf8ff;
+            border-color: #bee3f8;
+        }
+
+        .freelances-header .right .profile .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4299e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .freelances-header .right .profile .name {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a365d;
+        }
+
+        /* ===== CONTENU ===== */
+        .freelances-content {
+            flex: 1;
+            overflow: hidden;
+            padding: 24px 40px 30px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== BARRE DE RECHERCHE ===== */
+        .search-section {
+            flex-shrink: 0;
+            margin-bottom: 20px;
+        }
+
+        .search-section .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .search-section .top h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        .search-section .top .count {
+            font-size: 0.85rem;
+            color: #718096;
+            background: #fff;
+            padding: 4px 16px;
+            border-radius: 20px;
+            border: 1px solid #dce7f5;
+        }
+
+        .search-bar {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 12px;
+        }
+
+        .search-bar .input-wrap {
+            position: relative;
+        }
+
+        .search-bar .input-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 10px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.9rem;
+            transition: 0.15s;
+            background: #fff;
+        }
+
+        .search-bar .input-wrap input:focus {
+            border-color: #4299e1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08);
+        }
+
+        .search-bar .input-wrap .icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .search-bar .input-wrap .icon lord-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .search-bar select {
+            padding: 12px 16px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 10px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.85rem;
+            background: #fff;
+            color: #4a5568;
+            cursor: pointer;
+            transition: 0.15s;
+            appearance: none;
+            padding-right: 36px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .search-bar select:focus {
+            border-color: #4299e1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08);
+        }
+
+        .search-bar .clear-btn {
+            padding: 12px 20px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 10px;
+            background: #fff;
+            color: #718096;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+
+        .search-bar .clear-btn:hover {
+            background: #f7fafc;
+            border-color: #bee3f8;
+        }
+
+        /* ===== LISTE DES FREELANCES ===== */
+        .freelances-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .freelances-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .freelances-list::-webkit-scrollbar-thumb {
+            background: #bee3f8;
+            border-radius: 8px;
+        }
+
+        .freelance-card {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #dce7f5;
+            padding: 20px 24px;
+            margin-bottom: 14px;
+            transition: all 0.15s;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .freelance-card:hover {
+            border-color: #bee3f8;
+            box-shadow: 0 4px 16px rgba(66, 153, 225, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .freelance-card .avatar-large {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #fff;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .freelance-card .avatar-large.freelance {
+            background: #7c6cf0;
+        }
+
+        .freelance-card .avatar-large.designer {
+            background: #4fd1c5;
+        }
+
+        .freelance-card .avatar-large.dev {
+            background: #4299e1;
+        }
+
+        .freelance-card .avatar-large.marketing {
+            background: #ed64a6;
+        }
+
+        .freelance-card .avatar-large.writer {
+            background: #f6ad55;
+        }
+
+        .freelance-card .info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .freelance-card .info .name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1a365d;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .freelance-card .info .name:hover {
+            color: #4299e1;
+        }
+
+        .freelance-card .info .title {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 400;
+        }
+
+        .freelance-card .info .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            font-size: 0.82rem;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        .freelance-card .info .meta .item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .freelance-card .info .meta .item lord-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .freelance-card .info .rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .freelance-card .info .rating .stars {
+            display: flex;
+            gap: 2px;
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+
+        .freelance-card .info .rating .stars .empty {
+            color: #dce7f5;
+        }
+
+        .freelance-card .info .rating .count {
+            font-size: 0.78rem;
+            color: #718096;
+        }
+
+        .freelance-card .info .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .freelance-card .info .tags .tag {
+            padding: 3px 14px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background: #ebf8ff;
+            color: #2b6cb0;
+        }
+
+        .freelance-card .info .tags .tag.language {
+            background: #fef3c7;
+            color: #975a16;
+        }
+
+        .freelance-card .info .tags .tag.domain {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .freelance-card .info .tags .tag.category {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .freelance-card .right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .freelance-card .right .rate {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4299e1;
+        }
+
+        .freelance-card .right .status {
+            padding: 3px 14px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .freelance-card .right .status.available {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .freelance-card .right .status.busy {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .freelance-card .right .status.unavailable {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .freelance-card .right .btn-contact {
+            padding: 6px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #4299e1;
+            color: #fff;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.15s;
+            margin-top: 4px;
+            width: 100%;
+        }
+
+        .freelance-card .right .btn-contact:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        .freelance-card .right .btn-contact.bookmarked {
+            background: #48bb78;
+        }
+
+        .freelance-card .right .btn-contact.bookmarked:hover {
+            background: #38a169;
+        }
+
+        /* ===== PAS DE RÉSULTATS ===== */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #dce7f5;
+        }
+
+        .empty-state.show {
+            display: flex;
+        }
+
+        .empty-state lord-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a365d;
+        }
+
+        .empty-state p {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .search-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .freelances-header {
+                padding: 14px 24px;
+            }
+
+            .freelances-content {
+                padding: 20px 24px 24px 24px;
+            }
+
+            .freelance-card {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .freelance-card .right {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .freelance-card .right .btn-contact {
+                width: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .freelances-header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .freelances-header .logo h1 {
+                font-size: 1.1rem;
+            }
+
+            .freelances-header .right .date {
+                display: none;
+            }
+
+            .freelances-header .right .profile .name {
+                font-size: 0.75rem;
+            }
+
+            .freelances-content {
+                padding: 14px 16px 20px 16px;
+            }
+
+            .search-section .top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .search-section .top h2 {
+                font-size: 1rem;
+            }
+
+            .search-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar .clear-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .freelance-card {
+                padding: 16px 18px;
+            }
+
+            .freelance-card .avatar-large {
+                width: 48px;
+                height: 48px;
+                font-size: 1rem;
+            }
+
+            .freelance-card .info .name {
+                font-size: 0.95rem;
+            }
+
+            .freelance-card .info .meta {
+                font-size: 0.75rem;
+                gap: 8px 14px;
+            }
+
+            .freelance-card .right .rate {
+                font-size: 1rem;
+            }
+
+            .freelance-card .right .btn-contact {
+                font-size: 0.75rem;
+                padding: 5px 16px;
+            }
+
+            .freelance-card {
+                grid-template-columns: auto 1fr;
+            }
+
+            .freelance-card .right {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .freelances-header .right .profile {
+                padding: 3px 8px 3px 3px;
+            }
+
+            .freelances-header .right .profile .avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .freelances-header .right .profile .name {
+                font-size: 0.7rem;
+            }
+
+            .freelance-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .freelance-card .avatar-large {
+                margin: 0 auto;
+            }
+
+            .freelance-card .info .meta {
+                justify-content: center;
+            }
+
+            .freelance-card .info .tags {
+                justify-content: center;
+            }
+
+            .freelance-card .info .rating {
+                justify-content: center;
+            }
+
+            .freelance-card .right {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .freelance-card .right .btn-contact {
+                width: 100%;
+                text-align: center;
+            }
+
+            .freelance-card .right .status {
+                text-align: center;
+            }
+
+            .freelance-card .right .rate {
+                text-align: center;
+            }
+        }
+
+        /* ===== ANIMATION ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .freelance-card {
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        .freelance-card:nth-child(2) { animation-delay: 0.05s; }
+        .freelance-card:nth-child(3) { animation-delay: 0.1s; }
+        .freelance-card:nth-child(4) { animation-delay: 0.15s; }
+        .freelance-card:nth-child(5) { animation-delay: 0.2s; }
+        .freelance-card:nth-child(6) { animation-delay: 0.25s; }
+    </style>
+</head>
+<body>
+
+    <div class="freelances-wrap">
+
+        <!-- ===== HEADER ===== -->
+        <header class="freelances-header">
+            <div class="logo">
+                <lord-icon
+                    src="https://cdn.lordicon.com/ktheyllq.json"
+                    trigger="loop"
+                    colors="primary:#4299e1"
+                    style="width:32px;height:32px;">
+                </lord-icon>
+                <h1>Freelance<span>Hub</span></h1>
+            </div>
+            <div class="right">
+                <span class="date" id="currentDate"></span>
+                <div class="profile" onclick="location.href='{% url 'accounts:parametre' %}'">
+                    <div class="avatar">{{ user.username|slice:":2"|upper }}</div>
+                    <span class="name">{{ user.username }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===== CONTENU ===== -->
+        <div class="freelances-content">
+
+            <!-- Recherche -->
+            <div class="search-section">
+                <div class="top">
+                    <h2>👥 Freelances disponibles</h2>
+                    <span class="count" id="freelanceCount">18 freelances</span>
+                </div>
+                <div class="search-bar">
+                    <div class="input-wrap">
+                        <span class="icon">
+                            <lord-icon src="https://cdn.lordicon.com/npwmqdcn.json" trigger="hover" colors="primary:#718096" style="width:20px;height:20px;"></lord-icon>
+                        </span>
+                        <input type="text" id="searchInput" placeholder="Rechercher par nom, compétence..." oninput="filterFreelances()">
+                    </div>
+                    <select id="filterCategory" onchange="filterFreelances()">
+                        <option value="all">📂 Toutes catégories</option>
+                        <option value="Développement Web">💻 Développement Web</option>
+                        <option value="Design">🎨 Design</option>
+                        <option value="Marketing Digital">📊 Marketing Digital</option>
+                        <option value="Rédaction">✍️ Rédaction</option>
+                        <option value="Vidéo">🎬 Vidéo</option>
+                        <option value="Traduction">🌍 Traduction</option>
+                    </select>
+                    <select id="filterLanguage" onchange="filterFreelances()">
+                        <option value="all">🗣️ Tous langages</option>
+                        <option value="Français">Français</option>
+                        <option value="Anglais">Anglais</option>
+                        <option value="Espagnol">Espagnol</option>
+                        <option value="Arabe">Arabe</option>
+                        <option value="Allemand">Allemand</option>
+                        <option value="Italien">Italien</option>
+                    </select>
+                    <select id="filterDomain" onchange="filterFreelances()">
+                        <option value="all">🏷️ Tous domaines</option>
+                        <option value="Tech">💻 Tech</option>
+                        <option value="Créatif">🎨 Créatif</option>
+                        <option value="Business">📈 Business</option>
+                        <option value="Communication">📢 Communication</option>
+                        <option value="Formation">📚 Formation</option>
+                    </select>
+                    <button class="clear-btn" onclick="clearFilters()">✕ Réinitialiser</button>
+                </div>
+            </div>
+
+            <!-- Liste -->
+            <div class="freelances-list" id="freelancesList">
+                {% for f in freelances %}
+                <div class="freelance-card" data-name="{{ f.user.username }}" data-title="{{ f.title }}" data-category="{% if f.specialty %}{{ f.specialty }}{% else %}{{ f.skill_list.0 }}{% endif %}" data-skills="{{ f.skills|lower }}" data-rating="{{ f.rating }}">
+                    <div class="avatar-large {% cycle 'dev' 'designer' 'marketing' 'writer' as avatar_class %}">{{ f.user.username|slice:":2"|upper }}</div>
+                    <div class="info">
+                        <div class="name" onclick="viewFreelance({{ f.user.id }})">{{ f.user.username }}</div>
+                        <div class="title">{{ f.title }}</div>
+                        <div class="meta">
+                            <span class="item">
+                                <lord-icon src="https://cdn.lordicon.com/dmoahkky.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
+                                {% if f.specialty %}{{ f.specialty }}{% else %}{{ f.skill_list.0 }}{% endif %}
+                            </span>
+                            <span class="item">
+                                <lord-icon src="https://cdn.lordicon.com/mgmnoojh.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
+                                {{ f.get_experience_level_display }}
+                            </span>
+                            <span class="item">
+                                <lord-icon src="https://cdn.lordicon.com/hfiwfwiw.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
+                                {% if f.hourly_rate %}{{ f.hourly_rate|floatformat:0 }} XAF/h{% endif %}
+                            </span>
+                        </div>
+                        <div class="rating">
+                            <span class="stars">
+                                {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= f.full_stars %}
+                                <span>★</span>
+                                {% else %}
+                                <span class="empty">★</span>
+                                {% endif %}
+                                {% endfor %}
+                            </span>
+                            <span class="count">({{ f.rating }})</span>
+                        </div>
+                        <div class="tags">
+                            {% for skill in f.skill_list %}
+                            <span class="tag">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div class="rate">{{ f.hourly_rate|floatformat:0 }} <span style="font-size:0.7rem;font-weight:400;color:#718096;">XAF/h</span></div>
+                        <span class="status {% if f.online_status == 'online' %}available{% else %}busy{% endif %}">
+                            {% if f.online_status == 'online' %}🟢 Disponible{% else %}🟡 Hors ligne{% endif %}
+                        </span>
+                        <button class="btn-contact" onclick="contactFreelance({{ f.user.id }})">
+                            💬 Contacter
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state show" id="emptyState">
+                    <lord-icon src="https://cdn.lordicon.com/hcifhzzs.json" trigger="loop" colors="primary:#4299e1"></lord-icon>
+                    <h3>Aucun freelance trouvé</h3>
+                    <p>Essayez de modifier vos filtres de recherche</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- État vide (JS) -->
+            <div class="empty-state" id="emptyStateJs">
+                <lord-icon src="https://cdn.lordicon.com/hcifhzzs.json" trigger="loop" colors="primary:#4299e1"></lord-icon>
+                <h3>Aucun freelance trouvé</h3>
+                <p>Essayez de modifier vos filtres de recherche</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ===== FILTRES =====
+        function filterFreelances() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const category = document.getElementById('filterCategory').value;
+            const domain = document.getElementById('filterDomain').value;
+
+            const cards = document.querySelectorAll('.freelance-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                let match = true;
+
+                if (search) {
+                    const name = card.dataset.name?.toLowerCase() || '';
+                    const title = card.dataset.title?.toLowerCase() || '';
+                    const skills = card.dataset.skills?.toLowerCase() || '';
+                    match = name.includes(search) || title.includes(search) || skills.includes(search);
+                }
+
+                if (match && category !== 'all') {
+                    const cat = card.dataset.category?.toLowerCase() || '';
+                    match = cat.includes(category.toLowerCase());
+                }
+
+                if (match && domain !== 'all') {
+                    const rating = parseFloat(card.dataset.rating) || 0;
+                    if (domain === 'Tech') match = rating >= 4.5;
+                    else if (domain === 'Créatif') match = rating >= 4.0 && rating < 4.5;
+                    else if (domain === 'Business') match = rating >= 4.0;
+                }
+
+                if (match) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const empty = document.getElementById('emptyStateJs');
+            const count = document.getElementById('freelanceCount');
+            if (visibleCount === 0) {
+                empty.classList.add('show');
+                count.textContent = '0 freelance';
+            } else {
+                empty.classList.remove('show');
+                count.textContent = visibleCount + ' freelance' + (visibleCount > 1 ? 's' : '');
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterCategory').value = 'all';
+            document.getElementById('filterDomain').value = 'all';
+            filterFreelances();
+        }
+
+        // ===== ACTIONS =====
+        function contactFreelance(userId) {
+            window.location.href = '/chat/with/' + userId + '/';
+        }
+
+        function viewFreelance(userId) {
+            window.location.href = '/contracts/liste/';
+        }
+
+        // ===== DATE =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const d = new Date();
+            document.getElementById('currentDate').textContent = '📅 ' + d.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            filterFreelances();
+        });
+    </script>
+
+</body>
+</html>

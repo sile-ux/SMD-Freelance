@@ -319,10 +319,10 @@
                 <a href="{% url 'accounts:home' %}" class="menu-item"><i class="fas fa-home"></i> Accueil</a>
                 <a href="{% url 'accounts:dashboard' %}" class="menu-item active"><i class="fas fa-briefcase"></i> Missions</a>
                 <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
-                <a href="{% url 'chat:latest_chat' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
+                <a href="{% url 'chat:freelance_messages' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
 
                 <div class="menu-label">Suivi</div>
-                <a href="#stats-section" class="menu-item" onclick="document.querySelector('.stat-card').scrollIntoView({behavior:'smooth'}); return false;"><i class="fas fa-chart-line"></i> Statistiques</a>
+                <a href="{% url 'accounts:stat_freelancer' %}" class="menu-item"><i class="fas fa-chart-line"></i> Statistiques</a>
             </div>
 
             <div class="sidebar-bottom">

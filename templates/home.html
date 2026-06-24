@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
@@ -419,12 +420,11 @@
 <section id="hero" class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
   
   <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover -z-20">
-    <source src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-4174-large.mp4" type="video/mp4">
+    <source src="{% static 'The 7 Keys to Creative Collaboration.mp4' %}" type="video/mp4">
+    Votre navigateur ne supporte pas la lecture de vidéos.
   </video>
 
-  <div class="absolute inset-0 bg-slate-900/70 -z-10 mix-blend-multiply"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent -z-10"></div>
-
+  <div class="absolute inset-0 bg-black/30 -z-10"></div>
   <div class="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
     <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6 animate-fade-in-up">
       Votre Partenaire <span class="text-[#0EA5E9]">Freelance</span> d'Excellence
@@ -444,7 +444,10 @@
 </section>
 
 <!-- ═══════════════════════════════════════ COMMENT ÇA MARCHE ═══════════════════════════════════════ -->
-<section id="how" class="py-20 lg:py-28 bg-sky-50 dark:bg-slate-900">
+<section id="how" class="relative py-20 lg:py-28 bg-sky-50 dark:bg-slate-900 overflow-hidden">
+  <div class="absolute inset-0 -z-10">
+    <img src="{% static 'how-it-works-bg.webp' %}" alt="" class="w-full h-full object-cover opacity-15 dark:opacity-10">
+  </div>
   <div class="max-w-7xl mx-auto px-4 sm:px-6">
     <div class="text-center mb-16 reveal">
       <div class="section-eyebrow mb-4"><i class="fa-solid fa-map-signs"></i>Comment ça marche</div>
@@ -509,110 +512,142 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Card 1 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.05s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-brands fa-python text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Développement Web</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Applications web robustes avec Django, React et les dernières technologies.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">Python</span>
-          <span class="tech-tag">Django</span>
-          <span class="tech-tag">React</span>
-        </div>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.1s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-mobile-screen-button text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Développement Mobile</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Apps iOS et Android performantes avec intégration Mobile Money.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">Flutter</span>
-          <span class="tech-tag">React Native</span>
+      <!-- Card 1 - Web -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.05s">
+        <img src="{% static 'devweb.avif' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-brands fa-python text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Développement Web</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">Applications web robustes avec Django, React et les dernières technologies.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">Python</span>
+            <span class="tech-tag">Django</span>
+            <span class="tech-tag">React</span>
+          </div>
         </div>
       </div>
 
-      <!-- Card 3 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.15s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-palette text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Design UI/UX</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Interfaces élégantes centrées sur l'expérience utilisateur et la conversion.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">Figma</span>
-          <span class="tech-tag">Prototypage</span>
-        </div>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.2s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-cloud text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">DevOps & Cloud</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">CI/CD, déploiement AWS/Azure, infrastructure scalable et sécurisée.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">AWS</span>
-          <span class="tech-tag">Docker</span>
-          <span class="tech-tag">CI/CD</span>
+      <!-- Card 2 - Mobile -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.1s">
+        <img src="{% static 'mobile.webp' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-mobile-screen-button text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Développement Mobile</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">Apps iOS et Android performantes avec intégration Mobile Money.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">Flutter</span>
+            <span class="tech-tag">React Native</span>
+          </div>
         </div>
       </div>
 
-      <!-- Card 5 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.25s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-shield-halved text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Cybersécurité</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Audits, pentesting et solutions de sécurité pour protéger vos actifs digitaux.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">Pentest</span>
-          <span class="tech-tag">Audit</span>
-        </div>
-      </div>
-
-      <!-- Card 6 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.3s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-robot text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Intégration IA</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Chatbots, automatisation et APIs d'intelligence artificielle dans vos produits.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">GPT API</span>
-          <span class="tech-tag">LangChain</span>
+      <!-- Card 3 - Design -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.15s">
+        <img src="{% static 'guide-ux-ui-design-1.jpg' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-palette text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Design UI/UX</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">Interfaces élégantes centrées sur l'expérience utilisateur et la conversion.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">Figma</span>
+            <span class="tech-tag">Prototypage</span>
+          </div>
         </div>
       </div>
 
-      <!-- Card 7 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.35s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-network-wired text-2xl text-sky-600 dark:text-sky-300"></i>
-        </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Réseaux & Infra</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">Administration réseau, VPN, firewall et infrastructure d'entreprise.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">Cisco</span>
-          <span class="tech-tag">Linux</span>
+      <!-- Card 4 - Cloud -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.2s">
+        <img src="{% static 'cloud.jpg' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-cloud text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">DevOps & Cloud</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">CI/CD, déploiement AWS/Azure, infrastructure scalable et sécurisée.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">AWS</span>
+            <span class="tech-tag">Docker</span>
+            <span class="tech-tag">CI/CD</span>
+          </div>
         </div>
       </div>
 
-      <!-- Card 8 -->
-      <div class="glass-card rounded-3xl p-6 reveal group" style="transition-delay:0.4s">
-        <div class="icon-ring w-14 h-14 mb-5">
-          <i class="fa-solid fa-chart-line text-2xl text-sky-600 dark:text-sky-300"></i>
+      <!-- Card 5 - Cyber -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.25s">
+        <img src="{% static 'cybersec.jpg' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-shield-halved text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Cybersécurité</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">Audits, pentesting et solutions de sécurité pour protéger vos actifs digitaux.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">Pentest</span>
+            <span class="tech-tag">Audit</span>
+          </div>
         </div>
-        <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Marketing Digital</h3>
-        <p class="text-gray-500 dark:text-sky-400 text-sm mb-4 leading-relaxed">SEO, publicité ciblée et stratégie de croissance digitale pour votre entreprise.</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span class="tech-tag">SEO</span>
-          <span class="tech-tag">Ads</span>
-          <span class="tech-tag">Analytics</span>
+      </div>
+
+      <!-- Card 6 - IA -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.3s">
+        <img src="{% static 'ecom.png' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-robot text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Intégration IA</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">Chatbots, automatisation et APIs d'intelligence artificielle dans vos produits.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">GPT API</span>
+            <span class="tech-tag">LangChain</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 7 - Réseaux -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.35s">
+        <img src="{% static 'reseau.avif' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-network-wired text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Réseaux & Infra</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">Administration réseau, VPN, firewall et infrastructure d'entreprise.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">Cisco</span>
+            <span class="tech-tag">Linux</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 8 - Marketing -->
+      <div class="relative glass-card rounded-3xl p-6 reveal group overflow-hidden" style="transition-delay:0.4s">
+        <img src="{% static 'marketing-digital.webp' %}" alt="" class="absolute inset-0 w-full h-full object-cover -z-10">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent -z-10"></div>
+        <div class="relative z-10">
+          <div class="icon-ring w-14 h-14 mb-5">
+            <i class="fa-solid fa-chart-line text-2xl text-sky-300"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Marketing Digital</h3>
+          <p class="text-sky-100 text-sm mb-4 leading-relaxed">SEO, publicité ciblée et stratégie de croissance digitale pour votre entreprise.</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="tech-tag">SEO</span>
+            <span class="tech-tag">Ads</span>
+            <span class="tech-tag">Analytics</span>
+          </div>
         </div>
       </div>
     </div>
@@ -715,8 +750,11 @@
             </div>
           </div>
         </div>
-        <div class="bg-gradient-to-br from-sky-500 to-cyan-600 p-10 flex items-center justify-center min-h-64">
-          <div class="text-center text-white">
+        <div class="relative p-10 flex items-center justify-center min-h-64 overflow-hidden">
+          <div class="absolute inset-0">
+            <img src="{% static 'ecom.png' %}" alt="" class="w-full h-full object-cover">
+          </div>
+          <div class="relative z-10 text-center text-white">
             <i class="fa-solid fa-laptop-code text-7xl mb-4 opacity-80"></i>
             <p class="text-lg font-bold opacity-90">Application E-commerce</p>
             <p class="text-sm opacity-70">Django + Mobile Money + Analytics</p>
@@ -727,7 +765,10 @@
 
     <!-- Grid stories -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="glass-card rounded-3xl p-7 reveal group" style="transition-delay:0.1s">
+      <div class="glass-card rounded-3xl p-7 reveal group relative overflow-hidden" style="transition-delay:0.1s">
+        <div class="absolute inset-0 -z-10">
+          <img src="{% static 'livraison.webp' %}" alt="" class="w-full h-full object-cover opacity-90">
+        </div>
         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-cyan-500 flex items-center justify-center mb-5 shadow-md">
           <i class="fa-solid fa-mobile-screen text-white text-xl"></i>
         </div>
@@ -739,7 +780,10 @@
         <div class="stars flex gap-0.5"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
       </div>
 
-      <div class="glass-card rounded-3xl p-7 reveal group" style="transition-delay:0.15s">
+      <div class="glass-card rounded-3xl p-7 reveal group relative overflow-hidden" style="transition-delay:0.15s">
+        <div class="absolute inset-0 -z-10">
+          <img src="{% static 'campuscam.avif' %}" alt="" class="w-full h-full object-cover opacity-90">
+        </div>
         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center mb-5 shadow-md">
           <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
         </div>
@@ -751,7 +795,10 @@
         <div class="stars flex gap-0.5"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
       </div>
 
-      <div class="glass-card rounded-3xl p-7 reveal group" style="transition-delay:0.2s">
+      <div class="glass-card rounded-3xl p-7 reveal group relative overflow-hidden" style="transition-delay:0.2s">
+        <div class="absolute inset-0 -z-10">
+          <img src="{% static 'hemeley.avif' %}" alt="" class="w-full h-full object-cover opacity-90">
+        </div>
         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center mb-5 shadow-md">
           <i class="fa-solid fa-utensils text-white text-xl"></i>
         </div>
