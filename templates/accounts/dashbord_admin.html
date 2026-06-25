@@ -12,6 +12,10 @@
     
     <!-- Lordicon -->
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <script>
+        window.CSRF_TOKEN = '{{ csrf_token }}';
+        window.BADGES = {{ sidebar_badges|default:'{"users":0,"pending_freelances":0,"pending_payments":0,"open_disputes":0,"missions":0}' }};
+    </script>
 
     <style>
         /* ===== RESET ET PLEIN ÉCRAN ===== */
@@ -1077,7 +1081,7 @@
                         <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Utilisateurs
-                    <span class="badge">247</span>
+                    <span class="badge" id="badge-users">{{ sidebar_badges.users|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-item" data-section="freelancers">
@@ -1085,7 +1089,7 @@
                         <lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Valider Freelances
-                    <span class="badge danger">5</span>
+                    <span class="badge danger" id="badge-freelances">{{ sidebar_badges.pending_freelances|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-item" data-section="payments">
@@ -1093,7 +1097,7 @@
                         <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Paiements
-                    <span class="badge success">12</span>
+                    <span class="badge success" id="badge-payments">{{ sidebar_badges.pending_payments|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-item" data-section="disputes">
@@ -1101,7 +1105,7 @@
                         <lord-icon src="https://cdn.lordicon.com/mhczqzrn.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Litiges
-                    <span class="badge danger">3</span>
+                    <span class="badge danger" id="badge-disputes">{{ sidebar_badges.open_disputes|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-item" data-section="missions">
@@ -1109,7 +1113,7 @@
                         <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Missions
-                    <span class="badge">18</span>
+                    <span class="badge" id="badge-missions">{{ sidebar_badges.missions|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-label">Gestion</div>
@@ -1131,10 +1135,10 @@
 
             <div class="sidebar-footer">
                 <div class="profile">
-                    <div class="avatar">AD</div>
+                    <div class="avatar">{{ admin_user.username|first|upper }}{{ admin_user.last_name|first|upper }}</div>
                     <div class="info">
-                        <div class="name">Admin Principal</div>
-                        <div class="role">Super Administrateur</div>
+                        <div class="name">{{ admin_user.get_full_name|default:admin_user.username }}</div>
+                        <div class="role">{{ admin_user.get_role_display|default:'Administrateur' }}</div>
                         <div class="status">En ligne</div>
                     </div>
                 </div>
@@ -1175,9 +1179,9 @@
                                 <span class="icon-box">
                                     <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
                                 </span>
-                                <span class="change up">▲ +12%</span>
+                                <span class="change {{ user_trend }}">{% if user_trend == 'up' %}▲{% else %}▼{% endif %} {{ user_change }}%</span>
                             </div>
-                            <div class="value">247</div>
+                            <div class="value">{{ total_users }}</div>
                             <div class="label">Utilisateurs totaux</div>
                         </div>
                         <div class="stat-card">
@@ -1185,9 +1189,9 @@
                                 <span class="icon-box">
                                     <lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
                                 </span>
-                                <span class="change up">▲ +8%</span>
+                                <span class="change {{ freelance_trend }}">{% if freelance_trend == 'up' %}▲{% else %}▼{% endif %} {{ freelance_change }}%</span>
                             </div>
-                            <div class="value">156</div>
+                            <div class="value">{{ active_freelances }}</div>
                             <div class="label">Freelances actifs</div>
                         </div>
                         <div class="stat-card">
@@ -1195,9 +1199,9 @@
                                 <span class="icon-box">
                                     <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
                                 </span>
-                                <span class="change up">▲ +23%</span>
+                                <span class="change {{ revenue_trend }}">{% if revenue_trend == 'up' %}▲{% else %}▼{% endif %} {{ revenue_change }}%</span>
                             </div>
-                            <div class="value">€48 392</div>
+                            <div class="value">€{{ monthly_revenue|floatformat:0|intcomma }}</div>
                             <div class="label">Revenus du mois</div>
                         </div>
                         <div class="stat-card">
@@ -1205,12 +1209,14 @@
                                 <span class="icon-box">
                                     <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
                                 </span>
-                                <span class="change down">▼ -2%</span>
+                                <span class="change {{ mission_trend }}">{% if mission_trend == 'up' %}▲{% else %}▼{% endif %} {{ mission_change }}%</span>
                             </div>
-                            <div class="value">18</div>
+                            <div class="value">{{ active_missions }}</div>
                             <div class="label">Missions en cours</div>
                         </div>
                     </div>
+
+                    {% load humanize %}
 
                     <!-- Utilisateurs récents -->
                     <div class="section-head">
@@ -1233,90 +1239,33 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for u in recent_users %}
                                 <tr>
                                     <td>
                                         <div class="user-cell">
-                                            <span class="av freelance">JD</span>
+                                            <span class="av {% if u.role == 'ADMIN' %}admin{% elif u.role == 'FREELANCE' %}freelance{% else %}client{% endif %}">{{ u.username|slice:":2"|upper }}</span>
                                             <div>
-                                                <div class="name">Jean Dupont</div>
-                                                <div class="email">jean.dupont@email.com</div>
+                                                <div class="name">{{ u.get_full_name|default:u.username }}</div>
+                                                <div class="email">{{ u.email }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>Freelance</td>
-                                    <td><span class="badge-status active">Actif</span></td>
-                                    <td><span class="badge-status online">En ligne</span></td>
+                                    <td>{{ u.get_role_display }}</td>
+                                    <td><span class="badge-status {% if u.is_active %}active{% else %}suspended{% endif %}">{% if u.is_active %}Actif{% else %}Suspendu{% endif %}</span></td>
+                                    <td><span class="badge-status {% if u.last_login %}{% if u.last_login|timesince < '5 minutes' %}online{% else %}offline{% endif %}{% else %}offline{% endif %}">{% if u.last_login %}{% if u.last_login|timesince < '5 minutes' %}En ligne{% else %}Hors ligne{% endif %}{% else %}Hors ligne{% endif %}</span></td>
                                     <td>
                                         <div class="row-actions">
-                                            <button class="chat-btn" onclick="openModal('contact','Jean Dupont')">💬</button>
-                                            <button class="check-btn" onclick="validateUser('Jean Dupont')">✅</button>
-                                            <button class="block-btn" onclick="suspendUser('Jean Dupont')">⛔</button>
+                                            <button class="chat-btn" onclick="openModal('contact','{{ u.username }}')">💬</button>
+                                            {% if u.freelance_profile and not u.freelance_profile.is_verified %}
+                                            <button class="check-btn" onclick="apiAction('validate_freelance', {{ u.id }})">✅</button>
+                                            {% endif %}
+                                            <button class="block-btn" onclick="apiAction('suspend_user', {{ u.id }})">⛔</button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div class="user-cell">
-                                            <span class="av client">ML</span>
-                                            <div>
-                                                <div class="name">Marie Laurent</div>
-                                                <div class="email">marie.laurent@email.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Client</td>
-                                    <td><span class="badge-status active">Actif</span></td>
-                                    <td><span class="badge-status offline">Hors ligne</span></td>
-                                    <td>
-                                        <div class="row-actions">
-                                            <button class="chat-btn" onclick="openModal('contact','Marie Laurent')">💬</button>
-                                            <button class="check-btn" onclick="validateUser('Marie Laurent')">✅</button>
-                                            <button class="block-btn" onclick="suspendUser('Marie Laurent')">⛔</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="user-cell">
-                                            <span class="av freelance">PR</span>
-                                            <div>
-                                                <div class="name">Pierre Richard</div>
-                                                <div class="email">pierre.richard@email.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Freelance</td>
-                                    <td><span class="badge-status pending">En attente</span></td>
-                                    <td><span class="badge-status offline">Hors ligne</span></td>
-                                    <td>
-                                        <div class="row-actions">
-                                            <button class="chat-btn" onclick="openModal('contact','Pierre Richard')">💬</button>
-                                            <button class="check-btn" onclick="validateFreelance('Pierre Richard')">✅</button>
-                                            <button class="block-btn" onclick="suspendUser('Pierre Richard')">⛔</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="user-cell">
-                                            <span class="av client">SB</span>
-                                            <div>
-                                                <div class="name">Sophie Bernard</div>
-                                                <div class="email">sophie.bernard@email.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Client</td>
-                                    <td><span class="badge-status active">Actif</span></td>
-                                    <td><span class="badge-status online">En ligne</span></td>
-                                    <td>
-                                        <div class="row-actions">
-                                            <button class="chat-btn" onclick="openModal('contact','Sophie Bernard')">💬</button>
-                                            <button class="check-btn" onclick="validateUser('Sophie Bernard')">✅</button>
-                                            <button class="block-btn" onclick="suspendUser('Sophie Bernard')">⛔</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" style="text-align:center;padding:30px;color:#718096;">Aucun utilisateur</td></tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -1330,30 +1279,24 @@
                     </div>
 
                     <div class="disputes-grid">
+                        {% for d in disputes|slice:":2" %}
                         <div class="dispute-card">
                             <div class="head">
-                                <span class="id">#LIT-2024-001</span>
-                                <span class="status open">🟠 Ouvert</span>
+                                <span class="id">#LIT-{{ d.created_at.year }}-{{ d.id|stringformat:"03d" }}</span>
+                                <span class="status {{ d.status }}">{% if d.status == 'open' %}🟠 Ouvert{% elif d.status == 'in_progress' %}🟡 En cours{% else %}✅ Résolu{% endif %}</span>
                             </div>
-                            <div class="parties">👤 Jean Dupont (Freelance) vs 👤 Marie Laurent (Client)</div>
-                            <div class="reason">📝 Non-paiement du projet - Montant: €2 500</div>
+                            <div class="parties">👤 {{ d.freelance.username }} (Freelance) vs 👤 {{ d.client.username }} (Client)</div>
+                            <div class="reason">📝 {{ d.reason|truncatechars:60 }}</div>
                             <div class="actions">
-                                <button class="btn-primary" onclick="resolveDispute('LIT-2024-001')">✅ Résoudre</button>
-                                <button class="btn-outline" onclick="openModal('contact','Parties du litige')">💬 Contacter</button>
+                                <button class="btn-primary" onclick="apiAction('resolve_dispute', {{ d.id }})">✅ Résoudre</button>
+                                <button class="btn-outline" onclick="openModal('contact')">💬 Contacter</button>
                             </div>
                         </div>
-                        <div class="dispute-card">
-                            <div class="head">
-                                <span class="id">#LIT-2024-002</span>
-                                <span class="status in-progress">🟡 En cours</span>
-                            </div>
-                            <div class="parties">👤 Pierre Richard (Freelance) vs 👤 Sophie Bernard (Client)</div>
-                            <div class="reason">📝 Livraison non conforme aux spécifications</div>
-                            <div class="actions">
-                                <button class="btn-primary" onclick="resolveDispute('LIT-2024-002')">✅ Résoudre</button>
-                                <button class="btn-outline" onclick="openModal('contact','Parties du litige')">💬 Contacter</button>
-                            </div>
+                        {% empty %}
+                        <div class="dispute-card" style="grid-column:1/-1;text-align:center;padding:40px;color:#718096;">
+                            <p>Aucun litige en cours</p>
                         </div>
+                        {% endfor %}
                     </div>
 
                     <!-- Paiements -->
@@ -1366,15 +1309,15 @@
 
                     <div class="payments-grid">
                         <div class="payment-card">
-                            <div class="amount">€12 450</div>
+                            <div class="amount">€{{ monthly_payments|floatformat:0|intcomma }}</div>
                             <div class="label">Ce mois-ci</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€8 230</div>
+                            <div class="amount">€{{ pending_payments_amount|floatformat:0|intcomma }}</div>
                             <div class="label">En attente</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€3 200</div>
+                            <div class="amount">{{ processing_payments }}</div>
                             <div class="label">En cours de traitement</div>
                         </div>
                     </div>
@@ -1413,7 +1356,7 @@
                     <div class="section-head">
                         <h3>✅ Validation des comptes freelance</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="validateAll()">📋 Valider tout</button>
+                            <button class="btn-primary" onclick="apiAction('validate_all_freelances')">📋 Valider tout</button>
                         </div>
                     </div>
                     <div class="table-wrap">
@@ -1423,51 +1366,33 @@
                                     <th>Freelance</th>
                                     <th>Compétences</th>
                                     <th>Statut</th>
-                                    <th>Documents</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for f in pending_freelance_list %}
                                 <tr>
                                     <td>
                                         <div class="user-cell">
-                                            <span class="av freelance">PR</span>
+                                            <span class="av freelance">{{ f.user.username|slice:":2"|upper }}</span>
                                             <div>
-                                                <div class="name">Pierre Richard</div>
-                                                <div class="email">pierre.richard@email.com</div>
+                                                <div class="name">{{ f.user.get_full_name|default:f.user.username }}</div>
+                                                <div class="email">{{ f.user.email }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>💻 Développeur Web</td>
+                                    <td>{{ f.skills|truncatechars:40 }}</td>
                                     <td><span class="badge-status pending">En attente</span></td>
-                                    <td>📄 3 documents</td>
                                     <td>
                                         <div class="row-actions">
-                                            <button class="check-btn" onclick="validateFreelance('Pierre Richard')">✅ Valider</button>
-                                            <button class="chat-btn" onclick="openModal('contact','Pierre Richard')">💬</button>
+                                            <button class="check-btn" onclick="apiAction('validate_freelance', {{ f.user.id }})">✅ Valider</button>
+                                            <button class="chat-btn" onclick="openModal('contact','{{ f.user.username }}')">💬</button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div class="user-cell">
-                                            <span class="av freelance">AL</span>
-                                            <div>
-                                                <div class="name">Alice Lambert</div>
-                                                <div class="email">alice.lambert@email.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>🎨 Designer UI/UX</td>
-                                    <td><span class="badge-status pending">En attente</span></td>
-                                    <td>📄 2 documents</td>
-                                    <td>
-                                        <div class="row-actions">
-                                            <button class="check-btn" onclick="validateFreelance('Alice Lambert')">✅ Valider</button>
-                                            <button class="chat-btn" onclick="openModal('contact','Alice Lambert')">💬</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" style="text-align:center;padding:30px;color:#718096;">Aucun freelance en attente</td></tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -1483,15 +1408,15 @@
                     </div>
                     <div class="payments-grid">
                         <div class="payment-card">
-                            <div class="amount">€48 392</div>
+                            <div class="amount">€{{ total_revenue|floatformat:0|intcomma }}</div>
                             <div class="label">Total des paiements</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€12 450</div>
+                            <div class="amount">€{{ monthly_payments|floatformat:0|intcomma }}</div>
                             <div class="label">Ce mois-ci</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€8 230</div>
+                            <div class="amount">€{{ pending_payments_amount|floatformat:0|intcomma }}</div>
                             <div class="label">En attente de validation</div>
                         </div>
                     </div>
@@ -1525,7 +1450,7 @@
                     </div>
                     <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
                         <p style="color:#718096;text-align:center;font-size:0.95rem;">
-                            📋 18 missions actives · 12 en attente · 6 terminées
+                            📋 {{ mission_counts.active }} missions actives · {{ mission_counts.pending }} en attente · {{ mission_counts.completed }} terminées
                         </p>
                     </div>
                 </div>
@@ -1595,14 +1520,40 @@
         document.addEventListener('DOMContentLoaded', function() {
             const d = new Date();
             document.getElementById('currentDate').textContent = '📅 ' + d.toLocaleDateString('fr-FR', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
             });
-            loadUsers();
-            loadDisputes();
+            fetchUsers();
+            fetchDisputes();
         });
+
+        // ===== CSRF =====
+        function getCSRF() { return window.CSRF_TOKEN || ''; }
+
+        // ===== API CALL =====
+        async function apiAction(action, id) {
+            const payload = { action: action };
+            if (id) payload.user_id = id;
+            if (action === 'resolve_dispute') payload.dispute_id = id;
+
+            if (!confirm('Confirmer cette action ?')) return;
+
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + (data.message || 'Erreur'));
+                }
+            } catch (e) {
+                alert('❌ Erreur de connexion');
+            }
+        }
 
         // ===== SIDEBAR =====
         function toggleSidebar() {
@@ -1633,194 +1584,141 @@
             document.getElementById('page-' + section).classList.add('active');
 
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            document.querySelector(`.menu-item[data-section="${section}"]`).classList.add('active');
+            const menuItem = document.querySelector(`.menu-item[data-section="${section}"]`);
+            if (menuItem) menuItem.classList.add('active');
 
             const titles = {
-                dashboard: '📊 Tableau de bord',
-                users: '👥 Utilisateurs',
-                freelancers: '✅ Validation Freelances',
-                payments: '💰 Paiements',
-                disputes: '⚖️ Litiges',
-                missions: '📋 Missions',
-                documents: '📄 Documents',
-                settings: '⚙️ Paramètres'
+                dashboard: '📊 Tableau de bord', users: '👥 Utilisateurs',
+                freelancers: '✅ Validation Freelances', payments: '💰 Paiements',
+                disputes: '⚖️ Litiges', missions: '📋 Missions',
+                documents: '📄 Documents', settings: '⚙️ Paramètres'
             };
             document.getElementById('pageTitle').textContent = titles[section] || 'Tableau de bord';
-            document.getElementById('pagePath').textContent = section === 'dashboard' ? 'Vue d\'ensemble' : 'Gestion';
+            document.getElementById('pagePath').textContent = section === 'dashboard' ? "Vue d'ensemble" : 'Gestion';
         }
 
-        // ===== LOAD USERS =====
-        function loadUsers() {
-            const users = [
-                { name: 'Jean Dupont', email: 'jean.dupont@email.com', role: 'Freelance', status: 'active', online: 'online', date: '15/06/2024' },
-                { name: 'Marie Laurent', email: 'marie.laurent@email.com', role: 'Client', status: 'active', online: 'offline', date: '14/06/2024' },
-                { name: 'Pierre Richard', email: 'pierre.richard@email.com', role: 'Freelance', status: 'pending', online: 'offline', date: '12/06/2024' },
-                { name: 'Sophie Bernard', email: 'sophie.bernard@email.com', role: 'Client', status: 'active', online: 'online', date: '10/06/2024' },
-                { name: 'Alice Lambert', email: 'alice.lambert@email.com', role: 'Freelance', status: 'pending', online: 'offline', date: '08/06/2024' },
-                { name: 'Thomas Martin', email: 'thomas.martin@email.com', role: 'Client', status: 'suspended', online: 'offline', date: '05/06/2024' },
-                { name: 'Julie Petit', email: 'julie.petit@email.com', role: 'Freelance', status: 'active', online: 'online', date: '03/06/2024' },
-            ];
-
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '';
-            users.forEach(u => {
-                const avClass = u.role === 'Freelance' ? 'freelance' : u.role === 'Admin' ? 'admin' : 'client';
-                const statusClass = u.status === 'active' ? 'active' : u.status === 'pending' ? 'pending' : 'suspended';
-                const statusLabel = u.status === 'active' ? 'Actif' : u.status === 'pending' ? 'En attente' : 'Suspendu';
-                const onlineClass = u.online === 'online' ? 'online' : 'offline';
-                const onlineLabel = u.online === 'online' ? 'En ligne' : 'Hors ligne';
-                const initials = u.name.split(' ').map(n => n[0]).join('');
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>
-                            <div class="user-cell">
-                                <span class="av ${avClass}">${initials}</span>
-                                <div>
-                                    <div class="name">${u.name}</div>
-                                    <div class="email">${u.email}</div>
+        // ===== FETCH USERS (page Utilisateurs) =====
+        async function fetchUsers() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_data' %}?type=users");
+                const data = await resp.json();
+                const tbody = document.getElementById('usersTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                (data.users || []).forEach(u => {
+                    const statusClass = u.status === 'active' ? 'active' : 'suspended';
+                    const statusLabel = u.status === 'active' ? 'Actif' : 'Suspendu';
+                    const onlineClass = u.online === 'online' ? 'online' : 'offline';
+                    const onlineLabel = u.online === 'online' ? 'En ligne' : 'Hors ligne';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><div class="user-cell"><span class="av ${u.avClass}">${u.initials}</span><div><div class="name">${u.name}</div><div class="email">${u.email}</div></div></div></td>
+                            <td>${u.role}</td>
+                            <td><span class="badge-status ${statusClass}">${statusLabel}</span></td>
+                            <td><span class="badge-status ${onlineClass}">${onlineLabel}</span></td>
+                            <td>${u.date}</td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="chat-btn" onclick="openModal('contact','${u.name}')">💬</button>
+                                    ${!u.is_verified && u.role_raw === 'FREELANCE' ? `<button class="check-btn" onclick="apiAction('validate_freelance', ${u.id})">✅</button>` : ''}
+                                    <button class="block-btn" onclick="apiAction('suspend_user', ${u.id})">⛔</button>
                                 </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) { console.error('Erreur chargement utilisateurs', e); }
+        }
+
+        // ===== FETCH DISPUTES (page Litiges) =====
+        async function fetchDisputes() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_data' %}?type=disputes");
+                const data = await resp.json();
+                const container = document.getElementById('disputesContainer');
+                if (!container) return;
+                container.innerHTML = '';
+                (data.disputes || []).forEach(d => {
+                    container.innerHTML += `
+                        <div class="dispute-card">
+                            <div class="head"><span class="id">#${d.ref}</span><span class="status ${d.status}">${d.status_label}</span></div>
+                            <div class="parties">👤 ${d.freelance} (Freelance) vs 👤 ${d.client} (Client)</div>
+                            <div class="reason">📝 ${d.reason}</div>
+                            <div class="actions">
+                                ${d.status !== 'resolved' ? `<button class="btn-primary" onclick="apiAction('resolve_dispute', ${d.id})">✅ Résoudre</button>` : ''}
+                                <button class="btn-outline" onclick="openModal('contact')">💬 Contacter</button>
                             </div>
-                        </td>
-                        <td>${u.role}</td>
-                        <td><span class="badge-status ${statusClass}">${statusLabel}</span></td>
-                        <td><span class="badge-status ${onlineClass}">${onlineLabel}</span></td>
-                        <td>${u.date}</td>
-                        <td>
-                            <div class="row-actions">
-                                <button class="chat-btn" onclick="openModal('contact','${u.name}')">💬</button>
-                                ${u.status === 'pending' ? `<button class="check-btn" onclick="validateFreelance('${u.name}')">✅</button>` : ''}
-                                <button class="block-btn" onclick="suspendUser('${u.name}')">⛔</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        // ===== LOAD DISPUTES =====
-        function loadDisputes() {
-            const disputes = [
-                { id: 'LIT-2024-001', status: 'open', freelance: 'Jean Dupont', client: 'Marie Laurent', reason: 'Non-paiement du projet - Montant: €2 500' },
-                { id: 'LIT-2024-002', status: 'in-progress', freelance: 'Pierre Richard', client: 'Sophie Bernard', reason: 'Livraison non conforme aux spécifications' },
-                { id: 'LIT-2024-003', status: 'open', freelance: 'Alice Lambert', client: 'Thomas Martin', reason: 'Retard de livraison de 2 semaines' },
-            ];
-
-            const container = document.getElementById('disputesContainer');
-            container.innerHTML = '';
-            disputes.forEach(d => {
-                const statusLabel = d.status === 'open' ? '🟠 Ouvert' : d.status === 'in-progress' ? '🟡 En cours' : '✅ Résolu';
-                container.innerHTML += `
-                    <div class="dispute-card">
-                        <div class="head">
-                            <span class="id">#${d.id}</span>
-                            <span class="status ${d.status}">${statusLabel}</span>
                         </div>
-                        <div class="parties">👤 ${d.freelance} (Freelance) vs 👤 ${d.client} (Client)</div>
-                        <div class="reason">📝 ${d.reason}</div>
-                        <div class="actions">
-                            <button class="btn-primary" onclick="resolveDispute('${d.id}')">✅ Résoudre</button>
-                            <button class="btn-outline" onclick="openModal('contact','Parties du litige')">💬 Contacter</button>
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            } catch (e) { console.error('Erreur chargement litiges', e); }
         }
 
-        // ===== ACTIONS =====
-        function validateUser(name) {
-            if (confirm('✅ Valider le compte de ' + name + ' ?')) {
-                alert('✅ Le compte de ' + name + ' a été validé avec succès !');
-            }
-        }
-
-        function validateFreelance(name) {
-            if (confirm('✅ Valider le compte freelance de ' + name + ' ?')) {
-                alert('✅ Le compte freelance de ' + name + ' a été validé ! Il peut maintenant accepter des missions.');
-            }
-        }
-
-        function suspendUser(name) {
-            if (confirm('⛔ Êtes-vous sûr de vouloir suspendre ' + name + ' ?')) {
-                alert('⛔ ' + name + ' a été suspendu.');
-            }
-        }
-
-        function validateAll() {
-            if (confirm('✅ Valider tous les comptes freelance en attente ?')) {
-                alert('✅ Tous les comptes freelance ont été validés !');
-            }
-        }
-
-        function resolveDispute(id) {
-            if (confirm('✅ Résoudre le litige ' + id + ' ?')) {
-                alert('✅ Le litige ' + id + ' a été résolu. Les deux parties ont été informées.');
+        // ===== LOGOUT =====
+        function confirmLogout() {
+            if (confirm('🚪 Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                window.location.href = "{% url 'accounts:logout' %}";
             }
         }
 
         function showNotifs() {
-            alert('🔔 Vous avez 3 notifications non lues :\n\n' +
-                  '1. Nouveau litige #LIT-2024-003\n' +
-                  '2. Pierre Richard demande une validation de compte\n' +
-                  '3. Paiement de €1 200 reçu');
-        }
-
-        function confirmLogout() {
-            if (confirm('🚪 Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                alert('👋 Déconnexion réussie !');
-            }
+            alert('🔔 Notifications\n\nConsultez le tableau de bord pour les dernières mises à jour.');
         }
 
         // ===== MODAL =====
+        let modalType = '';
+
         function openModal(type, recipient) {
+            modalType = type;
             const overlay = document.getElementById('modalOverlay');
             const title = document.getElementById('modalTitle');
             const body = document.getElementById('modalBody');
-            const fileField = document.getElementById('fileField');
 
-            document.getElementById('modalRecipient').value = recipient || '';
-            document.getElementById('modalSubject').value = '';
-            document.getElementById('modalMessage').value = '';
-            fileField.style.display = 'none';
-
+            const fields = [];
             if (type === 'contact') {
                 title.textContent = '💬 Contacter un utilisateur';
-                body.innerHTML = `
-                    <div class="field"><label>Destinataire</label><input type="text" id="modalRecipient" value="${recipient || ''}" placeholder="Nom de l'utilisateur"></div>
-                    <div class="field"><label>Sujet</label><input type="text" id="modalSubject" placeholder="Sujet du message"></div>
-                    <div class="field"><label>Message</label><textarea id="modalMessage" placeholder="Votre message..."></textarea></div>
-                `;
+                fields.push({ label: 'Destinataire', type: 'text', id: 'modalRecipient', value: recipient || '' });
+                fields.push({ label: 'Sujet', type: 'text', id: 'modalSubject' });
+                fields.push({ label: 'Message', type: 'textarea', id: 'modalMessage' });
             } else if (type === 'document') {
                 title.textContent = '📄 Envoyer un document';
-                body.innerHTML = `
-                    <div class="field"><label>Destinataire</label><input type="text" id="modalRecipient" placeholder="Nom de l'utilisateur"></div>
-                    <div class="field"><label>Sujet</label><input type="text" id="modalSubject" placeholder="Sujet du document"></div>
-                    <div class="field"><label>Message</label><textarea id="modalMessage" placeholder="Message accompagnant le document..."></textarea></div>
-                    <div class="field" id="fileField"><label>Joindre un fichier (PDF)</label><input type="file" accept=".pdf"></div>
-                `;
-                document.getElementById('fileField').style.display = 'block';
+                fields.push({ label: 'Destinataire', type: 'text', id: 'modalRecipient' });
+                fields.push({ label: 'Sujet', type: 'text', id: 'modalSubject' });
+                fields.push({ label: 'Message', type: 'textarea', id: 'modalMessage' });
+                fields.push({ label: 'Fichier (PDF)', type: 'file', id: 'modalFile' });
             } else if (type === 'payment') {
-                title.textContent = '📊 Générer un rapport de paiements';
-                body.innerHTML = `
-                    <div class="field"><label>Période</label><select><option>Ce mois-ci</option><option>Mois dernier</option><option>3 derniers mois</option><option>Année en cours</option><option>Personnalisé</option></select></div>
-                    <div class="field"><label>Format</label><select><option>PDF</option><option>Excel</option><option>CSV</option></select></div>
-                `;
+                title.textContent = '📊 Générer un rapport';
+                fields.push({ label: 'Période', type: 'select', id: 'modalPeriod', options: ['Ce mois-ci', 'Mois dernier', '3 derniers mois', 'Année en cours'] });
+                fields.push({ label: 'Format', type: 'select', id: 'modalFormat', options: ['PDF', 'Excel', 'CSV'] });
             } else if (type === 'dispute') {
                 title.textContent = '➕ Nouveau litige';
-                body.innerHTML = `
-                    <div class="field"><label>Freelance concerné</label><input type="text" placeholder="Nom du freelance"></div>
-                    <div class="field"><label>Client concerné</label><input type="text" placeholder="Nom du client"></div>
-                    <div class="field"><label>Raison du litige</label><textarea placeholder="Décrivez le litige..."></textarea></div>
-                `;
+                fields.push({ label: 'ID Freelance', type: 'number', id: 'modalFreelanceId' });
+                fields.push({ label: 'ID Client', type: 'number', id: 'modalClientId' });
+                fields.push({ label: 'Raison', type: 'textarea', id: 'modalReason' });
+                fields.push({ label: 'Montant (€)', type: 'number', id: 'modalAmount' });
             } else if (type === 'mission') {
                 title.textContent = '➕ Nouvelle mission';
-                body.innerHTML = `
-                    <div class="field"><label>Titre de la mission</label><input type="text" placeholder="Titre de la mission"></div>
-                    <div class="field"><label>Freelance</label><input type="text" placeholder="Nom du freelance"></div>
-                    <div class="field"><label>Client</label><input type="text" placeholder="Nom du client"></div>
-                    <div class="field"><label>Montant</label><input type="text" placeholder="€"></div>
-                `;
+                fields.push({ label: 'Titre', type: 'text', id: 'modalTitle' });
+                fields.push({ label: 'Description', type: 'textarea', id: 'modalDescription' });
+                fields.push({ label: 'Budget (€)', type: 'number', id: 'modalBudget' });
+            } else {
+                title.textContent = 'Action';
+                fields.push({ label: 'Message', type: 'textarea', id: 'modalMessage' });
             }
+
+            body.innerHTML = fields.map(f => {
+                let input = '';
+                if (f.type === 'textarea') {
+                    input = `<textarea id="${f.id}" placeholder="${f.label}..."></textarea>`;
+                } else if (f.type === 'select') {
+                    input = `<select id="${f.id}">${(f.options || []).map(o => `<option>${o}</option>`).join('')}</select>`;
+                } else if (f.type === 'file') {
+                    input = `<input type="file" id="${f.id}" accept=".pdf">`;
+                } else {
+                    input = `<input type="${f.type}" id="${f.id}" placeholder="${f.label}..." ${f.value ? `value="${f.value}"` : ''}>`;
+                }
+                return `<div class="field"><label>${f.label}</label>${input}</div>`;
+            }).join('');
 
             overlay.classList.add('active');
         }
@@ -1829,22 +1727,59 @@
             document.getElementById('modalOverlay').classList.remove('active');
         }
 
-        function submitModal() {
-            const recipient = document.getElementById('modalRecipient')?.value || 'Utilisateur';
-            const subject = document.getElementById('modalSubject')?.value || 'Sans sujet';
-            const message = document.getElementById('modalMessage')?.value || 'Pas de message';
-            
-            alert('✅ Message envoyé à ' + recipient + ' !\n\nSujet: ' + subject + '\nMessage: ' + message);
-            closeModal();
+        async function submitModal() {
+            if (modalType === 'contact') {
+                const recipient = document.getElementById('modalRecipient')?.value || '';
+                const subject = document.getElementById('modalSubject')?.value || '';
+                const message = document.getElementById('modalMessage')?.value || '';
+                try {
+                    const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                        body: JSON.stringify({ action: 'contact_user', recipient, subject, message })
+                    });
+                    const data = await resp.json();
+                    if (data.success) { alert('✅ ' + data.message); closeModal(); }
+                    else { alert('❌ ' + (data.message || 'Erreur')); }
+                } catch (e) { alert('❌ Erreur'); }
+            } else if (modalType === 'dispute') {
+                const freelance_id = document.getElementById('modalFreelanceId')?.value;
+                const client_id = document.getElementById('modalClientId')?.value;
+                const reason = document.getElementById('modalReason')?.value;
+                const amount = document.getElementById('modalAmount')?.value || 0;
+                try {
+                    const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                        body: JSON.stringify({ action: 'create_dispute', freelance_id, client_id, reason, amount })
+                    });
+                    const data = await resp.json();
+                    if (data.success) { alert('✅ ' + data.message); closeModal(); location.reload(); }
+                    else { alert('❌ ' + (data.message || 'Erreur')); }
+                } catch (e) { alert('❌ Erreur'); }
+            } else if (modalType === 'mission') {
+                const title = document.getElementById('modalTitle')?.value;
+                const description = document.getElementById('modalDescription')?.value;
+                const budget = document.getElementById('modalBudget')?.value || 0;
+                try {
+                    const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                        body: JSON.stringify({ action: 'create_mission', title, description, budget })
+                    });
+                    const data = await resp.json();
+                    if (data.success) { alert('✅ ' + data.message); closeModal(); location.reload(); }
+                    else { alert('❌ ' + (data.message || 'Erreur')); }
+                } catch (e) { alert('❌ Erreur'); }
+            } else {
+                alert('✅ Action simulée (mode démo)');
+                closeModal();
+            }
         }
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-                closeSidebar();
-            }
+            if (e.key === 'Escape') { closeModal(); closeSidebar(); }
         });
-
         document.getElementById('modalOverlay').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });

@@ -14,16 +14,21 @@ urlpatterns = [
     path('accounts/login/', views.user_login, name='login'),
     path('accounts/logout/', views.user_logout, name='logout'),
     path('accounts/dashboard/', views.dashboard, name='dashboard'),
+    path('accounts/dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('inscription/', views.choice_register, name='choice_register'),
     path('register/freelance/', views.freelance_register_view, name='register_freelance'),
     path('inscription/client/', views.register_client, name='register_client'),
     path('connexion/', views.user_login, name='login'),
     path('deconnexion/', views.user_logout, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
     path('transaction/', views.transaction_view, name='transaction'),
     path('parametre/', views.parametre_view, name='parametre'),
     path('inscription-freelance/', views.freelance_register_view, name='freelance_register_view'),
     path('freelances/', views.freelance_list_view, name='freelance_list'),
     path('statistiques/', views.stat_freelancer_view, name='stat_freelancer'),
+    # Admin dashboard API
+    path('dashboard/admin/api/data/', views.admin_api_data, name='admin_api_data'),
+    path('dashboard/admin/api/action/', views.admin_api_action, name='admin_api_action'),
 ]
 

@@ -10,7 +10,7 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 from .forms import FreelanceRegisterForm, ClientRegisterForm
-from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter, Wallet, Transaction
+from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter, Wallet, Transaction, Dispute
 from contracts.models import Mission, Contract, Application
 from contracts.forms import QuickMissionForm
 
@@ -191,7 +191,7 @@ def user_logout(request):
 def dashboard(request):
     user = request.user
     if user.is_superuser or user.role == User.Role.ADMIN.value:
-        return redirect('/admin/')
+        return redirect('accounts:admin_dashboard')
     elif user.role == User.Role.FREELANCE.value:
         from contracts.models import Mission, Application
         from django.db.models import Count
@@ -224,6 +224,134 @@ def dashboard(request):
             'client_missions': client_missions,
         })
     return redirect('accounts:choice_register')  # AJOUTÉ : namespace 'accounts:'
+
+
+@login_required
+def admin_dashboard(request):
+    user = request.user
+    if not (user.is_superuser or user.role == User.Role.ADMIN.value):
+        messages.error(request, "Accès réservé aux administrateurs.")
+        return redirect('accounts:dashboard')
+
+    from django.db.models import Sum, Count, Q
+    from django.utils import timezone
+    from datetime import timedelta
+
+    now = timezone.now()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # Stats
+    total_users = User.objects.count()
+    active_freelances = FreelanceProfile.objects.filter(is_verified=True).count()
+    total_freelances = FreelanceProfile.objects.count()
+    pending_freelances = FreelanceProfile.objects.filter(is_verified=False).count()
+    total_clients = ClientProfile.objects.count()
+    active_missions = Mission.objects.filter(status='open').count()
+    pending_missions = Mission.objects.filter(status='pending').count()
+    completed_missions = Mission.objects.filter(status='completed').count()
+    total_missions = Mission.objects.count()
+
+    # Revenus
+    monthly_revenue = Transaction.objects.filter(
+        created_at__gte=month_start, status='completed'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    total_revenue = Transaction.objects.filter(status='completed').aggregate(
+        total=Sum('amount'))['total'] or 0
+    pending_payments = Transaction.objects.filter(status='pending').aggregate(
+        total=Sum('amount'))['total'] or 0
+
+    # Paiements du mois (pour la section paiements)
+    monthly_payments = monthly_revenue
+    pending_payments_amount = pending_payments
+    processing_payments = Transaction.objects.filter(status='pending').count()
+
+    # Utilisateurs récents
+    recent_users = User.objects.order_by('-last_login')[:8]
+
+    # Freelances en attente
+    pending_freelance_list = FreelanceProfile.objects.filter(is_verified=False).select_related('user')[:20]
+
+    # Litiges
+    disputes = Dispute.objects.all()[:10]
+    open_disputes = disputes.filter(status='open').count()
+    in_progress_disputes = disputes.filter(status='in_progress').count()
+
+    # Missions count
+    mission_counts = {
+        'total': total_missions,
+        'active': active_missions,
+        'pending': pending_missions,
+        'completed': completed_missions,
+    }
+
+    # Calcul des tendances (pour les badges up/down)
+    last_month_start = (month_start - timedelta(days=1)).replace(day=1)
+    prev_users = User.objects.filter(date_joined__lt=month_start, date_joined__gte=last_month_start).count()
+    if prev_users > 0:
+        user_change = int((total_users - prev_users) / prev_users * 100)
+    else:
+        user_change = 0
+    user_trend = 'up' if user_change >= 0 else 'down'
+
+    prev_freelances = FreelanceProfile.objects.filter(create_at__lt=month_start, create_at__gte=last_month_start).count()
+    if prev_freelances > 0:
+        freelance_change = int((total_freelances - prev_freelances) / prev_freelances * 100)
+    else:
+        freelance_change = 0
+    freelance_trend = 'up' if freelance_change >= 0 else 'down'
+
+    prev_revenue = Transaction.objects.filter(
+        created_at__lt=month_start, created_at__gte=last_month_start, status='completed'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    if prev_revenue > 0:
+        revenue_change = int((monthly_revenue - prev_revenue) / prev_revenue * 100)
+    else:
+        revenue_change = 0
+    revenue_trend = 'up' if revenue_change >= 0 else 'down'
+
+    prev_missions = Mission.objects.filter(created_at__lt=month_start, created_at__gte=last_month_start).count()
+    if prev_missions > 0:
+        mission_change = int((total_missions - prev_missions) / prev_missions * 100)
+    else:
+        mission_change = 0
+    mission_trend = 'up' if mission_change >= 0 else 'down'
+
+    # Badges pour la sidebar
+    sidebar_badges = {
+        'users': total_users,
+        'pending_freelances': pending_freelances,
+        'pending_payments': Transaction.objects.filter(status='pending').count(),
+        'open_disputes': open_disputes + in_progress_disputes,
+        'missions': active_missions,
+    }
+
+    context = {
+        'admin_user': user,
+        'total_users': total_users,
+        'active_freelances': active_freelances,
+        'monthly_revenue': monthly_revenue,
+        'active_missions': active_missions,
+        'recent_users': recent_users,
+        'pending_freelance_list': pending_freelance_list,
+        'disputes': disputes,
+        'total_revenue': total_revenue,
+        'monthly_payments': monthly_payments,
+        'pending_payments_amount': pending_payments_amount,
+        'processing_payments': processing_payments,
+        'mission_counts': mission_counts,
+        'sidebar_badges': sidebar_badges,
+        'user_change': abs(user_change),
+        'user_trend': user_trend,
+        'freelance_change': abs(freelance_change),
+        'freelance_trend': freelance_trend,
+        'revenue_change': abs(revenue_change),
+        'revenue_trend': revenue_trend,
+        'mission_change': abs(mission_change),
+        'mission_trend': mission_trend,
+        'freelance_count': total_freelances,
+        'client_count': total_clients,
+    }
+    return render(request, 'accounts/dashbord_admin.html', context)
 
 
 @login_required
@@ -570,3 +698,186 @@ def stat_freelancer_view(request):
         'transactions': transaction_history,
     }
     return render(request, 'accounts/stat_freelancer.html', context)
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@login_required
+def admin_api_data(request):
+    """Endpoint JSON pour les données dynamiques du dashboard admin"""
+    if not (request.user.is_superuser or request.user.role == User.Role.ADMIN.value):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    from django.db.models import Sum, Count
+    from django.utils import timezone
+    now = timezone.now()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    data_type = request.GET.get('type', '')
+
+    if data_type == 'users':
+        users = User.objects.all().order_by('-date_joined')
+        users_data = []
+        for u in users:
+            profile = getattr(u, 'freelance_profile', None) or getattr(u, 'client_profile', None)
+            role_map = {'ADMIN': 'Admin', 'FREELANCE': 'Freelance', 'CLIENT': 'Client'}
+            initials = (u.first_name or u.username)[:2].upper()
+            av_class = 'admin' if u.role == 'ADMIN' else 'freelance' if u.role == 'FREELANCE' else 'client'
+            online = 'online' if (u.last_login and (now - u.last_login).seconds < 300) else 'offline'
+            users_data.append({
+                'id': u.id,
+                'name': u.get_full_name() or u.username,
+                'username': u.username,
+                'email': u.email,
+                'role': role_map.get(u.role, 'Client'),
+                'role_raw': u.role,
+                'status': 'active' if u.is_active else 'suspended',
+                'online': online,
+                'date': u.date_joined.strftime('%d/%m/%Y'),
+                'initials': initials,
+                'avClass': av_class,
+                'is_verified': profile.is_verified if hasattr(profile, 'is_verified') else True,
+            })
+        return JsonResponse({'users': users_data})
+
+    if data_type == 'freelances_pending':
+        freelances = FreelanceProfile.objects.filter(is_verified=False).select_related('user')
+        data = []
+        for f in freelances:
+            initials = (f.user.first_name or f.user.username)[:2].upper()
+            data.append({
+                'id': f.id,
+                'user_id': f.user.id,
+                'name': f.user.get_full_name() or f.user.username,
+                'email': f.user.email,
+                'skills': f.skills,
+                'initials': initials,
+                'doc_count': 3,
+            })
+        return JsonResponse({'freelances': data})
+
+    if data_type == 'disputes':
+        disputes_list = Dispute.objects.select_related('freelance', 'client').all()
+        data = []
+        for d in disputes_list:
+            status_map = {'open': '🟠 Ouvert', 'in_progress': '🟡 En cours', 'resolved': '✅ Résolu'}
+            data.append({
+                'id': d.id,
+                'ref': f"LIT-{d.created_at.year}-{str(d.id).zfill(3)}",
+                'status': d.status,
+                'status_label': status_map.get(d.status, d.status),
+                'freelance': d.freelance.username,
+                'client': d.client.username,
+                'reason': d.reason[:80],
+                'amount': float(d.amount),
+                'created_at': d.created_at.strftime('%d/%m/%Y'),
+            })
+        return JsonResponse({'disputes': data})
+
+    if data_type == 'stats':
+        total_users = User.objects.count()
+        active_freelances = FreelanceProfile.objects.filter(is_verified=True).count()
+        monthly_revenue = Transaction.objects.filter(
+            created_at__gte=month_start, status='completed'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        active_missions = Mission.objects.filter(status='open').count()
+        return JsonResponse({
+            'total_users': total_users,
+            'active_freelances': active_freelances,
+            'monthly_revenue': float(monthly_revenue),
+            'active_missions': active_missions,
+        })
+
+    return JsonResponse({'error': 'Invalid type'}, status=400)
+
+
+@login_required
+@csrf_exempt
+def admin_api_action(request):
+    """Endpoint pour les actions admin (validate, suspend, resolve, etc.)"""
+    if not (request.user.is_superuser or request.user.role == User.Role.ADMIN.value):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    import json
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        data = request.POST
+
+    action = data.get('action', '')
+
+    if action == 'validate_freelance':
+        user_id = data.get('user_id')
+        try:
+            profile = FreelanceProfile.objects.get(user_id=user_id)
+            profile.is_verified = True
+            profile.save()
+            return JsonResponse({'success': True, 'message': 'Freelance validé avec succès'})
+        except FreelanceProfile.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Freelance introuvable'}, status=404)
+
+    if action == 'validate_all_freelances':
+        count = FreelanceProfile.objects.filter(is_verified=False).update(is_verified=True)
+        return JsonResponse({'success': True, 'message': f'{count} freelance(s) validé(s)'})
+
+    if action == 'suspend_user':
+        user_id = data.get('user_id')
+        try:
+            u = User.objects.get(id=user_id)
+            u.is_active = not u.is_active
+            u.save()
+            status = 'suspendu' if not u.is_active else 'réactivé'
+            return JsonResponse({'success': True, 'message': f'Utilisateur {status} avec succès'})
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Utilisateur introuvable'}, status=404)
+
+    if action == 'resolve_dispute':
+        dispute_id = data.get('dispute_id')
+        try:
+            d = Dispute.objects.get(id=dispute_id)
+            d.status = 'resolved'
+            d.resolved_at = timezone.now()
+            d.resolved_by = request.user
+            d.save()
+            return JsonResponse({'success': True, 'message': 'Litige résolu'})
+        except Dispute.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Litige introuvable'}, status=404)
+
+    if action == 'contact_user':
+        ContactMessage.objects.create(
+            name=request.user.username,
+            email=request.user.email,
+            subject=data.get('subject', 'Message depuis l\'admin'),
+            message=data.get('message', ''),
+        )
+        return JsonResponse({'success': True, 'message': 'Message envoyé'})
+
+    if action == 'create_mission':
+        Mission.objects.create(
+            client=request.user,
+            title=data.get('title', 'Mission'),
+            description=data.get('description', ''),
+            budget=data.get('budget', 0),
+            status='open',
+        )
+        return JsonResponse({'success': True, 'message': 'Mission créée'})
+
+    if action == 'create_dispute':
+        try:
+            freelance = User.objects.get(id=data.get('freelance_id'))
+            client = User.objects.get(id=data.get('client_id'))
+            Dispute.objects.create(
+                freelance=freelance,
+                client=client,
+                reason=data.get('reason', ''),
+                amount=data.get('amount', 0),
+            )
+            return JsonResponse({'success': True, 'message': 'Litige créé'})
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Utilisateur introuvable'}, status=404)
+
+    return JsonResponse({'error': 'Action inconnue'}, status=400)

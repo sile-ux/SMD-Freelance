@@ -25,24 +25,7 @@ def latest_chat(request):
 @login_required
 def my_threads(request):
     """Affiche la liste des discussions de l'utilisateur connecté"""
-    if request.user.role == User.Role.FREELANCE.value:
-        threads = request.user.freelance_threads.all()
-    else:
-        threads = request.user.client_threads.all()
-
-    thread_data = []
-    for thread in threads:
-        last_msg = thread.messages.order_by('-created_at').first()
-        unread = thread.messages.filter(is_read=False).exclude(sender=request.user).count()
-        other_user = thread.freelance if request.user == thread.client else thread.client
-        thread_data.append({
-            'thread': thread,
-            'last_message': last_msg,
-            'unread_count': unread,
-            'other_user': other_user,
-        })
-
-    return render(request, 'chat/thread_list.html', {'threads': thread_data})
+    return redirect('chat:freelance_messages')
 
 
 @login_required
@@ -228,4 +211,4 @@ def chat_room(request, thread_id):
         'other_user': other_user,
         'threads': threads,
     }
-    return render(request, 'chat/chat_room.html', context)
+    return render(request, 'chat/chat_room-FREE.html', context)

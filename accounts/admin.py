@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib import messages
-from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter
+from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter, Dispute
 
 
 # Action personnalisée pour valider les profils en masse
@@ -62,3 +62,4 @@ admin.site.register(ClientProfile)
 admin.site.register(FreelanceProfile, FreelanceProfileAdmin)
 admin.site.register(ContactMessage, ContactMessageAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)
+admin.site.register(Dispute)

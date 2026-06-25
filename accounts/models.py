@@ -185,3 +185,26 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.reference} — {self.get_type_display()} — {self.amount} CFA"
+
+
+class Dispute(models.Model):
+    STATUS_CHOICES = (
+        ('open', 'Ouvert'),
+        ('in_progress', 'En cours'),
+        ('resolved', 'Résolu'),
+    )
+    freelance = models.ForeignKey(User, on_delete=models.CASCADE, related_name='disputes_as_freelance')
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='disputes_as_client')
+    mission = models.ForeignKey('contracts.Mission', on_delete=models.SET_NULL, null=True, blank=True)
+    reason = models.TextField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='disputes_resolved')
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Litige {self.freelance.username} vs {self.client.username} — {self.get_status_display()}"
