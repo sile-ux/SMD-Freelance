@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discussion - CMD-FREELANCE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Rubik', sans-serif; background: #f0f2f5; }
         .chat-container { width: 100vw; height: 100vh; display: grid; grid-template-columns: 320px 1fr; grid-template-rows: 1fr; background: #f0f2f5; }
         .chat-sidebar { background: white; border-right: 1px solid #e4e6eb; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .sidebar-header { padding: 20px 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: 1px solid #e4e6eb; flex-shrink: 0; }
@@ -141,7 +144,24 @@
             <div class="chat-messages" id="chatMessages">
                 {% for msg in chat_messages %}
                 <div class="message {% if msg.sender == user %}sent{% else %}received{% endif %}">
-                    <div class="bubble">{{ msg.text }}</div>
+                    <div class="bubble">
+                        {% if msg.text %}{{ msg.text }}{% endif %}
+                        {% if msg.image %}
+                        <div style="margin-top: {{ msg.text|yesno:'8,0' }}px;">
+                            <a href="{{ msg.image.url }}" target="_blank">
+                                <img src="{{ msg.image.url }}" alt="Image" style="max-width: 100%; max-height: 300px; border-radius: 12px; display: block;">
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if msg.file %}
+                        <div style="margin-top: {{ msg.text|yesno:'8,0' }}px;">
+                            <a href="{{ msg.file.url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; background: {% if msg.sender == user %}rgba(255,255,255,0.2){% else %}#f0f2f5{% endif %}; border-radius: 12px; text-decoration: none; color: inherit; font-size: 0.85rem;">
+                                <span>📎</span>
+                                <span>{{ msg.file.name|cut:'chat_files/' }}</span>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
                     <div class="time">{{ msg.created_at|date:"H:i" }}</div>
                 </div>
                 {% empty %}
@@ -154,13 +174,18 @@
             </div>
 
             <!-- Zone de saisie -->
-            <form class="chat-input" method="post" action="{% url 'chat:chat_room' thread.id %}">
+            <form class="chat-input" method="post" action="{% url 'chat:chat_room' thread.id %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="input-wrapper">
-                    <textarea name="text" id="messageInput" rows="1" placeholder="Écrivez votre message..." required></textarea>
+                    <textarea name="text" id="messageInput" rows="1" placeholder="Écrivez votre message..."></textarea>
+                    <label for="fileInput" style="cursor: pointer; padding: 8px; font-size: 1.2rem; color: #65676b; flex-shrink: 0;" title="Joindre un fichier">📎</label>
+                    <input type="file" name="file" id="fileInput" style="display: none;" onchange="updateFileLabel(event)">
                 </div>
                 <button type="submit" class="send-btn">Envoyer</button>
             </form>
+            <div id="filePreview" style="padding: 0 25px 10px; font-size: 0.8rem; color: #65676b; display: none;">
+                📎 Fichier: <span id="fileName"></span> <span onclick="clearFile()" style="cursor: pointer; color: #e74c3c; margin-left: 8px;">✕</span>
+            </div>
         </div>
     </div>
 
@@ -188,6 +213,23 @@
                 item.style.display = name.includes(q) || last.includes(q) ? 'flex' : 'none';
             });
         });
+
+        // ===== GESTION FICHIER =====
+        function updateFileLabel(event) {
+            const input = event.target;
+            const preview = document.getElementById('filePreview');
+            const label = document.getElementById('fileName');
+            if (input.files && input.files[0]) {
+                label.textContent = input.files[0].name;
+                preview.style.display = 'block';
+            } else {
+                clearFile();
+            }
+        }
+        function clearFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+        }
     </script>
 </body>
 </html>

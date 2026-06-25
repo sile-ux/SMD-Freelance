@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,7 +15,8 @@
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <script>
         window.CSRF_TOKEN = '{{ csrf_token }}';
-        window.BADGES = {{ sidebar_badges|default:'{"users":0,"pending_freelances":0,"pending_payments":0,"open_disputes":0,"missions":0}' }};
+        window.BADGES = {{ sidebar_badges|default:'{"users":0,"pending_freelances":0,"pending_payments":0,"open_disputes":0,"missions":0,"notifications":0}' }};
+window.UNREAD_COUNT = {{ unread_count|default:0 }};
     </script>
 
     <style>
@@ -912,6 +914,104 @@
             display: block;
         }
 
+        /* ===== SETTINGS ===== */
+        .settings-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #dce7f5;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(66,153,225,0.06);
+        }
+        .settings-card-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid #dce7f5;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a365d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f7fafc;
+        }
+        .settings-card-body {
+            padding: 20px 22px;
+        }
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width:700px) {
+            .field-row { grid-template-columns: 1fr; }
+        }
+        .field-row .field { margin-bottom: 0; }
+        #settingsForm .field { margin-bottom: 14px; }
+        #settingsForm .field:last-child { margin-bottom: 0; }
+        #settingsForm .field label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.82rem;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+        #settingsForm .field input,
+        #settingsForm .field textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 8px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.88rem;
+            transition: 0.15s;
+            background: #f7fafc;
+        }
+        #settingsForm .field input:focus,
+        #settingsForm .field textarea:focus {
+            border-color: #4299e1;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(66,153,225,0.12);
+        }
+        #settingsForm .toggle-row {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: #1a365d;
+            user-select: none;
+        }
+        .toggle-label span:first-child { flex: 1; }
+        .toggle-label input[type="checkbox"] { display: none; }
+        .toggle-slider {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            transition: 0.25s;
+            flex-shrink: 0;
+        }
+        .toggle-slider::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .toggle-label input:checked + .toggle-slider { background: #4299e1; }
+        .toggle-label input:checked + .toggle-slider::after { transform: translateX(20px); }
+
         /* ===== MODAL ===== */
         .modal-overlay {
             display: none;
@@ -1108,12 +1208,20 @@
                     <span class="badge danger" id="badge-disputes">{{ sidebar_badges.open_disputes|default:'0' }}</span>
                 </div>
                 
-                <div class="menu-item" data-section="missions">
+                <a href="{% url 'contracts:contract_list' %}" class="menu-item" data-section="missions">
                     <span class="icon-wrap">
                         <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Missions
                     <span class="badge" id="badge-missions">{{ sidebar_badges.missions|default:'0' }}</span>
+                </a>
+                
+                <div class="menu-item" data-section="notifications">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Notifications
+                    <span class="badge warning" id="badge-notifications">{{ sidebar_badges.notifications|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-label">Gestion</div>
@@ -1154,7 +1262,7 @@
                     <button class="mobile-toggle" onclick="toggleSidebar()">
                         <lord-icon src="https://cdn.lordicon.com/xtvkovgo.json" trigger="click" colors="primary:#4299e1" style="width:30px;height:30px;"></lord-icon>
                     </button>
-                    <h2 id="pageTitle">📊 Tableau de bord</h2>
+                    <h2 id="pageTitle">Tableau de bord</h2>
                     <span class="path" id="pagePath">Vue d'ensemble</span>
                 </div>
                 <div class="right">
@@ -1163,7 +1271,10 @@
                         <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#718096" style="width:26px;height:26px;"></lord-icon>
                         <span class="dot"></span>
                     </div>
-                    <button class="logout" onclick="confirmLogout()">🚪 Déconnexion</button>
+                    <button class="logout" onclick="confirmLogout()">Déconnexion</button>
+                    <form id="logoutForm" method="POST" action="{% url 'accounts:logout' %}" style="display:none;">
+                        {% csrf_token %}
+                    </form>
                 </div>
             </div>
 
@@ -1201,7 +1312,7 @@
                                 </span>
                                 <span class="change {{ revenue_trend }}">{% if revenue_trend == 'up' %}▲{% else %}▼{% endif %} {{ revenue_change }}%</span>
                             </div>
-                            <div class="value">€{{ monthly_revenue|floatformat:0|intcomma }}</div>
+                            <div class="value">{{ monthly_revenue|floatformat:0|intcomma }} FCFA</div>
                             <div class="label">Revenus du mois</div>
                         </div>
                         <div class="stat-card">
@@ -1216,14 +1327,12 @@
                         </div>
                     </div>
 
-                    {% load humanize %}
-
                     <!-- Utilisateurs récents -->
                     <div class="section-head">
-                        <h3>👤 Utilisateurs récemment actifs</h3>
+                        <h3>Utilisateurs récemment actifs</h3>
                         <div class="actions">
                             <button class="btn-primary" onclick="switchSection('users')">Voir tous</button>
-                            <button class="btn-outline" onclick="openModal('contact')">📧 Contacter</button>
+                            <button class="btn-outline" onclick="openModal('contact')">Contacter</button>
                         </div>
                     </div>
 
@@ -1255,11 +1364,11 @@
                                     <td><span class="badge-status {% if u.last_login %}{% if u.last_login|timesince < '5 minutes' %}online{% else %}offline{% endif %}{% else %}offline{% endif %}">{% if u.last_login %}{% if u.last_login|timesince < '5 minutes' %}En ligne{% else %}Hors ligne{% endif %}{% else %}Hors ligne{% endif %}</span></td>
                                     <td>
                                         <div class="row-actions">
-                                            <button class="chat-btn" onclick="openModal('contact','{{ u.username }}')">💬</button>
+                                            <button class="chat-btn" onclick="openModal('contact','{{ u.username }}')">Contacter</button>
                                             {% if u.freelance_profile and not u.freelance_profile.is_verified %}
-                                            <button class="check-btn" onclick="apiAction('validate_freelance', {{ u.id }})">✅</button>
+                                            <button class="check-btn" onclick="apiAction('validate_freelance', {{ u.id }})">Valider</button>
                                             {% endif %}
-                                            <button class="block-btn" onclick="apiAction('suspend_user', {{ u.id }})">⛔</button>
+                                            <button class="block-btn" onclick="apiAction('suspend_user', {{ u.id }})">Suspendre</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1272,7 +1381,7 @@
 
                     <!-- Litiges -->
                     <div class="section-head">
-                        <h3>⚖️ Litiges en cours</h3>
+                        <h3>Litiges en cours</h3>
                         <div class="actions">
                             <button class="btn-primary" onclick="switchSection('disputes')">Gérer les litiges</button>
                         </div>
@@ -1283,13 +1392,16 @@
                         <div class="dispute-card">
                             <div class="head">
                                 <span class="id">#LIT-{{ d.created_at.year }}-{{ d.id|stringformat:"03d" }}</span>
-                                <span class="status {{ d.status }}">{% if d.status == 'open' %}🟠 Ouvert{% elif d.status == 'in_progress' %}🟡 En cours{% else %}✅ Résolu{% endif %}</span>
+                                <span class="status {{ d.status }}">{% if d.status == 'open' %}Ouvert{% elif d.status == 'in_progress' %}En cours{% else %}Résolu{% endif %}</span>
                             </div>
-                            <div class="parties">👤 {{ d.freelance.username }} (Freelance) vs 👤 {{ d.client.username }} (Client)</div>
-                            <div class="reason">📝 {{ d.reason|truncatechars:60 }}</div>
+                            <div class="parties">{{ d.freelance.username }} (Freelance) vs {{ d.client.username }} (Client)</div>
+                            <div class="reason">{{ d.reason|truncatechars:60 }}</div>
                             <div class="actions">
-                                <button class="btn-primary" onclick="apiAction('resolve_dispute', {{ d.id }})">✅ Résoudre</button>
-                                <button class="btn-outline" onclick="openModal('contact')">💬 Contacter</button>
+                                <button class="btn-primary" onclick="apiAction('resolve_dispute', {{ d.id }})">Résoudre</button>
+                            <button class="btn-outline" onclick="openModal('contact')">
+                                <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Contacter
+                            </button>
                             </div>
                         </div>
                         {% empty %}
@@ -1301,7 +1413,7 @@
 
                     <!-- Paiements -->
                     <div class="section-head">
-                        <h3>💰 Paiements récents</h3>
+                        <h3>Paiements recents</h3>
                         <div class="actions">
                             <button class="btn-primary" onclick="switchSection('payments')">Voir tous</button>
                         </div>
@@ -1309,11 +1421,11 @@
 
                     <div class="payments-grid">
                         <div class="payment-card">
-                            <div class="amount">€{{ monthly_payments|floatformat:0|intcomma }}</div>
+                            <div class="amount">{{ monthly_payments|floatformat:0|intcomma }} FCFA</div>
                             <div class="label">Ce mois-ci</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€{{ pending_payments_amount|floatformat:0|intcomma }}</div>
+                            <div class="amount">{{ pending_payments_amount|floatformat:0|intcomma }} FCFA</div>
                             <div class="label">En attente</div>
                         </div>
                         <div class="payment-card">
@@ -1326,10 +1438,16 @@
                 <!-- ===== UTILISATEURS ===== -->
                 <div class="section-page" id="page-users">
                     <div class="section-head">
-                        <h3>👥 Tous les utilisateurs</h3>
+                        <h3>Tous les utilisateurs</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="openModal('contact')">📧 Envoyer un message</button>
-                            <button class="btn-outline" onclick="openModal('document')">📄 Envoyer un document</button>
+                            <button class="btn-primary" onclick="openModal('contact')">
+                                <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Envoyer un message
+                            </button>
+                            <button class="btn-outline" onclick="openModal('document')">
+                                <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#4299e1" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Envoyer un document
+                            </button>
                         </div>
                     </div>
                     <div class="table-wrap">
@@ -1354,9 +1472,12 @@
                 <!-- ===== VALIDATION FREELANCES ===== -->
                 <div class="section-page" id="page-freelancers">
                     <div class="section-head">
-                        <h3>✅ Validation des comptes freelance</h3>
+                        <h3>Validation des comptes freelance</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="apiAction('validate_all_freelances')">📋 Valider tout</button>
+                            <button class="btn-primary" onclick="apiAction('validate_all_freelances')">
+                                <lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Valider tout
+                            </button>
                         </div>
                     </div>
                     <div class="table-wrap">
@@ -1385,8 +1506,8 @@
                                     <td><span class="badge-status pending">En attente</span></td>
                                     <td>
                                         <div class="row-actions">
-                                            <button class="check-btn" onclick="apiAction('validate_freelance', {{ f.user.id }})">✅ Valider</button>
-                                            <button class="chat-btn" onclick="openModal('contact','{{ f.user.username }}')">💬</button>
+                                            <button class="check-btn" onclick="apiAction('validate_freelance', {{ f.user.id }})">Valider</button>
+                                            <button class="chat-btn" onclick="openModal('contact','{{ f.user.username }}')">Contacter</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1401,28 +1522,31 @@
                 <!-- ===== PAIEMENTS ===== -->
                 <div class="section-page" id="page-payments">
                     <div class="section-head">
-                        <h3>💰 Gestion des paiements</h3>
+                        <h3>Gestion des paiements</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="openModal('payment')">📊 Générer un rapport</button>
+                            <button class="btn-primary" onclick="openModal('payment')">
+                                <lord-icon src="https://cdn.lordicon.com/msfukujo.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Generer un rapport
+                            </button>
                         </div>
                     </div>
                     <div class="payments-grid">
                         <div class="payment-card">
-                            <div class="amount">€{{ total_revenue|floatformat:0|intcomma }}</div>
+                            <div class="amount">{{ total_revenue|floatformat:0|intcomma }} FCFA</div>
                             <div class="label">Total des paiements</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€{{ monthly_payments|floatformat:0|intcomma }}</div>
+                            <div class="amount">{{ monthly_payments|floatformat:0|intcomma }} FCFA</div>
                             <div class="label">Ce mois-ci</div>
                         </div>
                         <div class="payment-card">
-                            <div class="amount">€{{ pending_payments_amount|floatformat:0|intcomma }}</div>
+                            <div class="amount">{{ pending_payments_amount|floatformat:0|intcomma }} FCFA</div>
                             <div class="label">En attente de validation</div>
                         </div>
                     </div>
                     <div style="margin-top:18px;background:#fff;padding:22px;border-radius:12px;border:1px solid #dce7f5;">
                         <p style="color:#718096;font-size:0.9rem;text-align:center;">
-                            📊 Les paiements sont traités via Stripe. Consultez les transactions détaillées.
+                            Les paiements sont traités via Stripe. Consultez les transactions detaillees.
                         </p>
                     </div>
                 </div>
@@ -1430,9 +1554,12 @@
                 <!-- ===== LITIGES ===== -->
                 <div class="section-page" id="page-disputes">
                     <div class="section-head">
-                        <h3>⚖️ Gestion des litiges</h3>
+                        <h3>Gestion des litiges</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="openModal('dispute')">➕ Nouveau litige</button>
+                            <button class="btn-primary" onclick="openModal('dispute')">
+                                <lord-icon src="https://cdn.lordicon.com/mhczqzrn.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Nouveau litige
+                            </button>
                         </div>
                     </div>
                     <div class="disputes-grid" id="disputesContainer">
@@ -1443,29 +1570,123 @@
                 <!-- ===== MISSIONS ===== -->
                 <div class="section-page" id="page-missions">
                     <div class="section-head">
-                        <h3>📋 Missions en cours</h3>
+                        <h3>Missions en cours</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="openModal('mission')">➕ Nouvelle mission</button>
+                            <button class="btn-primary" onclick="openModal('mission')">
+                                <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Nouvelle mission
+                            </button>
                         </div>
                     </div>
                     <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
                         <p style="color:#718096;text-align:center;font-size:0.95rem;">
-                            📋 {{ mission_counts.active }} missions actives · {{ mission_counts.pending }} en attente · {{ mission_counts.completed }} terminées
+                            {{ mission_counts.active }} missions actives · {{ mission_counts.pending }} en attente · {{ mission_counts.completed }} terminées
                         </p>
+                    </div>
+                </div>
+
+                <!-- ===== NOTIFICATIONS ===== -->
+                <div class="section-page" id="page-notifications">
+                    <div class="section-head">
+                        <h3>Notifications</h3>
+                        <div class="actions">
+                            <button class="btn-outline" onclick="clearNotifications();this.textContent='✅ Marquées comme lues';this.disabled=true;">Tout marquer comme lu</button>
+                        </div>
+                    </div>
+                    <div id="notificationsContainer">
+                        <!-- Messages non lus -->
+                        {% if unread_count > 0 %}
+                        <div class="dispute-card" style="margin-bottom:12px;">
+                            <div class="head">
+                                <span class="id" style="display:flex;align-items:center;gap:8px;">
+                                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" colors="primary:#4299e1" style="width:20px;height:20px;"></lord-icon>
+                                    Messages non lus
+                                </span>
+                                <span class="badge danger">{{ unread_count }}</span>
+                            </div>
+                            <div class="parties" style="margin-top:8px;">Vous avez <strong>{{ unread_count }}</strong> message{% if unread_count > 1 %}s{% endif %} non lu{% if unread_count > 1 %}s{% endif %} dans le chat.</div>
+                            <div class="actions" style="margin-top:10px;">
+                                <a href="{% url 'chat:latest_chat' %}" class="btn-primary" style="display:inline-block;padding:7px 18px;border-radius:8px;text-decoration:none;font-size:0.82rem;">Voir les messages</a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Freelances en attente -->
+                        {% if sidebar_badges.pending_freelances > 0 %}
+                        <div class="dispute-card" style="margin-bottom:12px;">
+                            <div class="head">
+                                <span class="id" style="display:flex;align-items:center;gap:8px;">
+                                    <lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#f6ad55" style="width:20px;height:20px;"></lord-icon>
+                                    Nouvelles inscriptions freelance
+                                </span>
+                                <span class="badge warning">{{ sidebar_badges.pending_freelances }}</span>
+                            </div>
+                            <div class="parties" style="margin-top:8px;"><strong>{{ sidebar_badges.pending_freelances }}</strong> freelance{% if sidebar_badges.pending_freelances > 1 %}s{% endif %} en attente de validation.</div>
+                            <div class="actions" style="margin-top:10px;">
+                                <button class="btn-primary" onclick="switchSection('freelancers')" style="padding:7px 18px;border-radius:8px;border:none;cursor:pointer;font-size:0.82rem;">Valider maintenant</button>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Paiements en attente -->
+                        {% if sidebar_badges.pending_payments > 0 %}
+                        <div class="dispute-card" style="margin-bottom:12px;">
+                            <div class="head">
+                                <span class="id" style="display:flex;align-items:center;gap:8px;">
+                                    <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#48bb78" style="width:20px;height:20px;"></lord-icon>
+                                    Paiements en attente
+                                </span>
+                                <span class="badge success">{{ sidebar_badges.pending_payments }}</span>
+                            </div>
+                            <div class="parties" style="margin-top:8px;"><strong>{{ pending_payments_amount|floatformat:0|intcomma }} FCFA</strong> en attente de traitement ({{ sidebar_badges.pending_payments }} transaction{% if sidebar_badges.pending_payments > 1 %}s{% endif %}).</div>
+                            <div class="actions" style="margin-top:10px;">
+                                <button class="btn-primary" onclick="switchSection('payments')" style="padding:7px 18px;border-radius:8px;border:none;cursor:pointer;font-size:0.82rem;">Voir les paiements</button>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Litiges ouverts -->
+                        {% if sidebar_badges.open_disputes > 0 %}
+                        <div class="dispute-card" style="margin-bottom:12px;">
+                            <div class="head">
+                                <span class="id" style="display:flex;align-items:center;gap:8px;">
+                                    <lord-icon src="https://cdn.lordicon.com/mhczqzrn.json" trigger="hover" colors="primary:#e53e3e" style="width:20px;height:20px;"></lord-icon>
+                                    Litiges ouverts
+                                </span>
+                                <span class="badge danger">{{ sidebar_badges.open_disputes }}</span>
+                            </div>
+                            <div class="parties" style="margin-top:8px;"><strong>{{ sidebar_badges.open_disputes }}</strong> litige{% if sidebar_badges.open_disputes > 1 %}s{% endif %} nécessitant votre attention.</div>
+                            <div class="actions" style="margin-top:10px;">
+                                <button class="btn-primary" onclick="switchSection('disputes')" style="padding:7px 18px;border-radius:8px;border:none;cursor:pointer;font-size:0.82rem;">Gérer les litiges</button>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Aucune notification -->
+                        {% if unread_count == 0 and sidebar_badges.pending_freelances == 0 and sidebar_badges.pending_payments == 0 and sidebar_badges.open_disputes == 0 %}
+                        <div style="background:#fff;padding:48px 24px;border-radius:12px;border:1px solid #dce7f5;text-align:center;color:#718096;">
+                            <p style="font-size:2rem;margin-bottom:12px;">🔔</p>
+                            <p style="font-size:1rem;">Aucune notification</p>
+                            <p style="font-size:0.85rem;margin-top:4px;">Tout est à jour !</p>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- ===== DOCUMENTS ===== -->
                 <div class="section-page" id="page-documents">
                     <div class="section-head">
-                        <h3>📄 Gestion des documents</h3>
+                        <h3>Gestion des documents</h3>
                         <div class="actions">
-                            <button class="btn-primary" onclick="openModal('document')">📤 Envoyer un document</button>
+                            <button class="btn-primary" onclick="openModal('document')">
+                                <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                Envoyer un document
+                            </button>
                         </div>
                     </div>
                     <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
                         <p style="color:#718096;text-align:center;font-size:0.95rem;">
-                            📄 Gérez tous les documents partagés sur la plateforme.
+                            Gérez tous les documents partagés sur la plateforme.
                         </p>
                     </div>
                 </div>
@@ -1473,12 +1694,169 @@
                 <!-- ===== PARAMÈTRES ===== -->
                 <div class="section-page" id="page-settings">
                     <div class="section-head">
-                        <h3>⚙️ Paramètres</h3>
+                        <h3>Paramètres de la plateforme</h3>
+                        <div class="actions">
+                            <button class="btn-primary" onclick="saveSettings()">💾 Enregistrer</button>
+                        </div>
                     </div>
-                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
-                        <p style="color:#718096;text-align:center;font-size:0.95rem;">
-                            ⚙️ Configuration de la plateforme, sécurité et préférences.
-                        </p>
+
+                    <div id="settingsForm" style="display:flex;flex-direction:column;gap:16px;max-width:800px;">
+
+                        <!-- Général -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/ktheyllq.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                Général
+                            </div>
+                            <div class="settings-card-body">
+                                <div class="field-row">
+                                    <div class="field">
+                                        <label>Nom du site</label>
+                                        <input type="text" id="set-site_name" placeholder="CMD-FREELANCE">
+                                    </div>
+                                    <div class="field">
+                                        <label>Devise par défaut</label>
+                                        <input type="text" id="set-default_currency" placeholder="FCFA">
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Description du site</label>
+                                    <textarea id="set-site_description" rows="2" placeholder="Description..."></textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Email support</label>
+                                    <input type="email" id="set-support_email" placeholder="support@cmd-freelance.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Commissions & Finances -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#48bb78" style="width:22px;height:22px;"></lord-icon>
+                                Commissions & Finances
+                            </div>
+                            <div class="settings-card-body">
+                                <div class="field-row">
+                                    <div class="field">
+                                        <label>Commission plateforme (%)</label>
+                                        <input type="number" id="set-commission_rate" step="0.01" min="0" max="100" placeholder="10">
+                                    </div>
+                                    <div class="field">
+                                        <label>Retrait minimum (FCFA)</label>
+                                        <input type="number" id="set-min_payout" step="1000" min="0" placeholder="5000">
+                                    </div>
+                                    <div class="field">
+                                        <label>Retrait maximum (FCFA)</label>
+                                        <input type="number" id="set-max_payout" step="10000" min="0" placeholder="5000000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inscriptions & Modération -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#f6ad55" style="width:22px;height:22px;"></lord-icon>
+                                Inscriptions & Modération
+                            </div>
+                            <div class="settings-card-body">
+                                <div class="toggle-row">
+                                    <label class="toggle-label">
+                                        <span>Activer les inscriptions</span>
+                                        <input type="checkbox" id="set-enable_registrations">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <label class="toggle-label">
+                                        <span>Valider automatiquement les freelances</span>
+                                        <input type="checkbox" id="set-auto_validate_freelances">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <label class="toggle-label">
+                                        <span>Mode maintenance</span>
+                                        <input type="checkbox" id="set-maintenance_mode">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notifications Admin -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" colors="primary:#9f7aea" style="width:22px;height:22px;"></lord-icon>
+                                Notifications Admin
+                            </div>
+                            <div class="settings-card-body">
+                                <div class="toggle-row">
+                                    <label class="toggle-label">
+                                        <span>Nouvelle inscription</span>
+                                        <input type="checkbox" id="set-notif_new_user">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <label class="toggle-label">
+                                        <span>Nouvelle mission</span>
+                                        <input type="checkbox" id="set-notif_new_mission">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <label class="toggle-label">
+                                        <span>Paiement reçu</span>
+                                        <input type="checkbox" id="set-notif_payment">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <label class="toggle-label">
+                                        <span>Nouveau litige</span>
+                                        <input type="checkbox" id="set-notif_dispute">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Réseaux sociaux -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                Réseaux sociaux
+                            </div>
+                            <div class="settings-card-body">
+                                <div class="field">
+                                    <label>Facebook URL</label>
+                                    <input type="url" id="set-facebook_url" placeholder="https://facebook.com/...">
+                                </div>
+                                <div class="field">
+                                    <label>Twitter URL</label>
+                                    <input type="url" id="set-twitter_url" placeholder="https://twitter.com/...">
+                                </div>
+                                <div class="field">
+                                    <label>LinkedIn URL</label>
+                                    <input type="url" id="set-linkedin_url" placeholder="https://linkedin.com/...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/wzrgrlfk.json" trigger="hover" colors="primary:#718096" style="width:22px;height:22px;"></lord-icon>
+                                SEO
+                            </div>
+                            <div class="settings-card-body">
+                                <div class="field">
+                                    <label>Mots-clés (meta keywords)</label>
+                                    <input type="text" id="set-meta_keywords" placeholder="freelance, missions, ...">
+                                </div>
+                                <div class="field">
+                                    <label>Meta description</label>
+                                    <textarea id="set-meta_description" rows="2" placeholder="Description pour les moteurs de recherche..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:12px;justify-content:flex-end;padding:8px 0 24px;">
+                            <button class="btn-outline" onclick="loadSettings()" style="padding:10px 24px;border-radius:8px;cursor:pointer;font-size:0.9rem;">Annuler</button>
+                            <button class="btn-primary" onclick="saveSettings()" style="padding:10px 24px;border-radius:8px;border:none;cursor:pointer;font-size:0.9rem;">💾 Enregistrer les paramètres</button>
+                        </div>
                     </div>
                 </div>
 
@@ -1588,13 +1966,17 @@
             if (menuItem) menuItem.classList.add('active');
 
             const titles = {
-                dashboard: '📊 Tableau de bord', users: '👥 Utilisateurs',
-                freelancers: '✅ Validation Freelances', payments: '💰 Paiements',
-                disputes: '⚖️ Litiges', missions: '📋 Missions',
-                documents: '📄 Documents', settings: '⚙️ Paramètres'
+                dashboard: 'Tableau de bord', users: 'Utilisateurs',
+                freelancers: 'Validation Freelances', payments: 'Paiements',
+                disputes: 'Litiges', missions: 'Missions',
+                notifications: 'Notifications',
+                documents: 'Documents', settings: 'Parametres'
             };
             document.getElementById('pageTitle').textContent = titles[section] || 'Tableau de bord';
             document.getElementById('pagePath').textContent = section === 'dashboard' ? "Vue d'ensemble" : 'Gestion';
+
+            if (section === 'settings') loadSettings();
+            if (section === 'notifications') clearNotifications();
         }
 
         // ===== FETCH USERS (page Utilisateurs) =====
@@ -1619,9 +2001,9 @@
                             <td>${u.date}</td>
                             <td>
                                 <div class="row-actions">
-                                    <button class="chat-btn" onclick="openModal('contact','${u.name}')">💬</button>
-                                    ${!u.is_verified && u.role_raw === 'FREELANCE' ? `<button class="check-btn" onclick="apiAction('validate_freelance', ${u.id})">✅</button>` : ''}
-                                    <button class="block-btn" onclick="apiAction('suspend_user', ${u.id})">⛔</button>
+                                    <button class="chat-btn" onclick="openModal('contact','${u.name}')">Contacter</button>
+                                    ${!u.is_verified && u.role_raw === 'FREELANCE' ? `<button class="check-btn" onclick="apiAction('validate_freelance', ${u.id})">Valider</button>` : ''}
+                                    <button class="block-btn" onclick="apiAction('suspend_user', ${u.id})">Suspendre</button>
                                 </div>
                             </td>
                         </tr>
@@ -1642,11 +2024,11 @@
                     container.innerHTML += `
                         <div class="dispute-card">
                             <div class="head"><span class="id">#${d.ref}</span><span class="status ${d.status}">${d.status_label}</span></div>
-                            <div class="parties">👤 ${d.freelance} (Freelance) vs 👤 ${d.client} (Client)</div>
-                            <div class="reason">📝 ${d.reason}</div>
+                            <div class="parties">${d.freelance} (Freelance) vs ${d.client} (Client)</div>
+                            <div class="reason">${d.reason}</div>
                             <div class="actions">
-                                ${d.status !== 'resolved' ? `<button class="btn-primary" onclick="apiAction('resolve_dispute', ${d.id})">✅ Résoudre</button>` : ''}
-                                <button class="btn-outline" onclick="openModal('contact')">💬 Contacter</button>
+                                ${d.status !== 'resolved' ? `<button class="btn-primary" onclick="apiAction('resolve_dispute', ${d.id})">Résoudre</button>` : ''}
+                                <button class="btn-outline" onclick="openModal('contact')">Contacter</button>
                             </div>
                         </div>
                     `;
@@ -1656,13 +2038,80 @@
 
         // ===== LOGOUT =====
         function confirmLogout() {
-            if (confirm('🚪 Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                window.location.href = "{% url 'accounts:logout' %}";
+            if (confirm('Etes-vous sûr de vouloir vous déconnecter ?')) {
+                document.getElementById('logoutForm').submit();
+            }
+        }
+
+        // ===== SETTINGS =====
+        async function loadSettings() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_data' %}?type=settings");
+                const data = await resp.json();
+                Object.keys(data).forEach(key => {
+                    const el = document.getElementById('set-' + key);
+                    if (!el) return;
+                    if (el.type === 'checkbox') {
+                        el.checked = !!data[key];
+                    } else {
+                        el.value = data[key] ?? '';
+                    }
+                });
+            } catch (e) { console.error('Erreur chargement paramètres', e); }
+        }
+
+        async function saveSettings() {
+            const payload = { action: 'save_settings' };
+            document.querySelectorAll('#settingsForm [id^="set-"]').forEach(el => {
+                const key = el.id.replace('set-', '');
+                if (el.type === 'checkbox') {
+                    payload[key] = el.checked;
+                } else {
+                    payload[key] = el.value;
+                }
+            });
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                if (data.success) { alert('✅ ' + data.message); }
+                else { alert('❌ ' + (data.message || 'Erreur')); }
+            } catch (e) { alert('❌ Erreur de connexion'); }
+        }
+
+        function clearNotifications() {
+            fetch("{% url 'accounts:admin_api_action' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                body: JSON.stringify({ action: 'mark_all_read' })
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    const badge = document.getElementById('badge-notifications');
+                    const oldVal = parseInt(badge.textContent) || 0;
+                    const newVal = Math.max(0, oldVal - (window.UNREAD_COUNT || 0));
+                    badge.textContent = newVal;
+                    badge.style.display = newVal > 0 ? 'inline' : 'none';
+                    const dot = document.querySelector('.notif .dot');
+                    if (dot && newVal === 0) dot.style.display = 'none';
+                    window.UNREAD_COUNT = 0;
+                }
+            }).catch(() => {});
+        }
+
+        function markAllRead() {
+            if (confirm('Marquer toutes les notifications comme lues ?')) {
+                clearNotifications();
             }
         }
 
         function showNotifs() {
-            alert('🔔 Notifications\n\nConsultez le tableau de bord pour les dernières mises à jour.');
+            clearNotifications();
+            const dot = document.querySelector('.notif .dot');
+            if (dot) dot.style.display = 'none';
+            switchSection('notifications');
         }
 
         // ===== MODAL =====
@@ -1676,31 +2125,31 @@
 
             const fields = [];
             if (type === 'contact') {
-                title.textContent = '💬 Contacter un utilisateur';
+                title.textContent = 'Contacter un utilisateur';
                 fields.push({ label: 'Destinataire', type: 'text', id: 'modalRecipient', value: recipient || '' });
                 fields.push({ label: 'Sujet', type: 'text', id: 'modalSubject' });
                 fields.push({ label: 'Message', type: 'textarea', id: 'modalMessage' });
             } else if (type === 'document') {
-                title.textContent = '📄 Envoyer un document';
+                title.textContent = 'Envoyer un document';
                 fields.push({ label: 'Destinataire', type: 'text', id: 'modalRecipient' });
                 fields.push({ label: 'Sujet', type: 'text', id: 'modalSubject' });
                 fields.push({ label: 'Message', type: 'textarea', id: 'modalMessage' });
                 fields.push({ label: 'Fichier (PDF)', type: 'file', id: 'modalFile' });
             } else if (type === 'payment') {
-                title.textContent = '📊 Générer un rapport';
+                title.textContent = 'Generer un rapport';
                 fields.push({ label: 'Période', type: 'select', id: 'modalPeriod', options: ['Ce mois-ci', 'Mois dernier', '3 derniers mois', 'Année en cours'] });
                 fields.push({ label: 'Format', type: 'select', id: 'modalFormat', options: ['PDF', 'Excel', 'CSV'] });
             } else if (type === 'dispute') {
-                title.textContent = '➕ Nouveau litige';
+                title.textContent = 'Nouveau litige';
                 fields.push({ label: 'ID Freelance', type: 'number', id: 'modalFreelanceId' });
                 fields.push({ label: 'ID Client', type: 'number', id: 'modalClientId' });
                 fields.push({ label: 'Raison', type: 'textarea', id: 'modalReason' });
-                fields.push({ label: 'Montant (€)', type: 'number', id: 'modalAmount' });
+                fields.push({ label: 'Montant (FCFA)', type: 'number', id: 'modalAmount' });
             } else if (type === 'mission') {
-                title.textContent = '➕ Nouvelle mission';
+                title.textContent = 'Nouvelle mission';
                 fields.push({ label: 'Titre', type: 'text', id: 'modalTitle' });
                 fields.push({ label: 'Description', type: 'textarea', id: 'modalDescription' });
-                fields.push({ label: 'Budget (€)', type: 'number', id: 'modalBudget' });
+                fields.push({ label: 'Budget (FCFA)', type: 'number', id: 'modalBudget' });
             } else {
                 title.textContent = 'Action';
                 fields.push({ label: 'Message', type: 'textarea', id: 'modalMessage' });
@@ -1740,6 +2189,45 @@
                     });
                     const data = await resp.json();
                     if (data.success) { alert('✅ ' + data.message); closeModal(); }
+                    else { alert('❌ ' + (data.message || 'Erreur')); }
+                } catch (e) { alert('❌ Erreur'); }
+            } else if (modalType === 'document') {
+                const recipient = document.getElementById('modalRecipient')?.value || '';
+                const subject = document.getElementById('modalSubject')?.value || '';
+                const message = document.getElementById('modalMessage')?.value || '';
+                const file = document.getElementById('modalFile')?.files?.[0];
+                if (!file) { alert('❌ Veuillez sélectionner un fichier'); return; }
+                const formData = new FormData();
+                formData.append('action', 'upload_document');
+                formData.append('recipient', recipient);
+                formData.append('subject', subject);
+                formData.append('message', message);
+                formData.append('file', file);
+                try {
+                    const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': getCSRF() },
+                        body: formData
+                    });
+                    const data = await resp.json();
+                    if (data.success) { alert('✅ ' + data.message); closeModal(); }
+                    else { alert('❌ ' + (data.message || 'Erreur')); }
+                } catch (e) { alert('❌ Erreur'); }
+            } else if (modalType === 'payment') {
+                const period = document.getElementById('modalPeriod')?.value || 'Ce mois-ci';
+                const format = document.getElementById('modalFormat')?.value || 'PDF';
+                try {
+                    const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                        body: JSON.stringify({ action: 'generate_report', period, format })
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                        const r = data.report;
+                        alert(`✅ Rapport ${r.period} généré\n\nTransactions: ${r.total_transactions}\nTotal: ${Number(r.total_amount).toLocaleString('fr-FR')} FCFA\nComplété: ${Number(r.completed_amount).toLocaleString('fr-FR')} FCFA\nEn attente: ${Number(r.pending_amount).toLocaleString('fr-FR')} FCFA`);
+                        closeModal();
+                    }
                     else { alert('❌ ' + (data.message || 'Erreur')); }
                 } catch (e) { alert('❌ Erreur'); }
             } else if (modalType === 'dispute') {

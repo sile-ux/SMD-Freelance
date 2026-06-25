@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 
 from .models import Mission, Application, Contract
 from .forms import QuickMissionForm
+from .templatetags.contracts_extras import to_fcfa
 User = get_user_model()
 
 
@@ -31,11 +32,12 @@ def contract_list_view(request):
             'duration': m.duration,
             'payment_type': m.payment_type,
             'currency': m.currency,
+            'budget_fcfa': to_fcfa(m.budget, m.currency),
             'extra_info': m.extra_info or '',
         })
 
     return render(request, 'contracts/contract_list.html', {
-        'missions_json': json.dumps(missions_data),
+        'missions_json': missions_data,
         'missions': missions,
         'contracts': contracts,
     })
@@ -102,6 +104,28 @@ def create_contract_view(request):
     return render(request, 'contracts/create-contract.html', {'form': form})
 
 
+def mission_detail_view(request, pk):
+    mission = get_object_or_404(Mission, pk=pk)
+
+    user = request.user
+    unread_count = 0
+    if user.is_authenticated:
+        from chat.models import Thread, Message
+        if user.role == User.Role.FREELANCE.value:
+            user_threads = user.freelance_threads.all()
+        else:
+            user_threads = user.client_threads.all()
+        unread_count = sum(
+            t.messages.filter(is_read=False).exclude(sender=user).count()
+            for t in user_threads
+        )
+
+    return render(request, 'contracts/mission_detail.html', {
+        'mission': mission,
+        'unread_count': unread_count,
+    })
+
+
 @login_required
 def apply_to_mission_view(request, mission_id):
     mission = get_object_or_404(Mission, id=mission_id)
@@ -118,13 +142,73 @@ def apply_to_mission_view(request, mission_id):
         messages.error(request, "Vous ne pouvez pas postuler à votre propre mission.")
         return redirect('accounts:home')
 
-    already_applied = Application.objects.filter(mission=mission, freelancer=request.user).exists()
+    # Vérification que le freelance est approuvé par l'admin
+    if not (hasattr(request.user, 'freelance_profile') and request.user.freelance_profile.is_verified):
+        try:
+            from chat.models import Thread, Message
+            admin = User.objects.filter(is_superuser=True, is_staff=True).first()
+            if admin:
+                if admin.role == User.Role.FREELANCE.value:
+                    thread, _ = Thread.objects.get_or_create(client=request.user, freelance=admin)
+                else:
+                    thread, _ = Thread.objects.get_or_create(client=admin, freelance=request.user)
+                Message.objects.create(
+                    thread=thread,
+                    sender=admin,
+                    text=f"Bonjour {request.user.username}, votre compte freelance est en cours de validation "
+                         f"par l'administration. Veuillez attendre d'être vérifié avant de postuler aux missions."
+                )
+        except Exception:
+            pass
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': 'Votre compte doit être vérifié par l\'administration avant de pouvoir postuler.'})
+        messages.error(request, "Votre compte doit être vérifié par l'administration avant de pouvoir postuler.")
+        return redirect('accounts:home')
+
+    already_applied = Application.objects.filter(mission=mission, freelance=request.user).exists()
     if already_applied:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'warning', 'message': 'Vous avez déjà postulé.'})
         messages.warning(request, "Vous avez déjà candidaté à cette offre.")
     else:
-        Application.objects.create(mission=mission, freelancer=request.user)
+        Application.objects.create(mission=mission, freelance=request.user)
+
+        # Messages automatiques si le freelance est vérifié
+        try:
+            if (hasattr(request.user, 'freelance_profile') and
+                request.user.freelance_profile.is_verified):
+
+                from chat.models import Thread, Message
+
+                thread, _ = Thread.objects.get_or_create(
+                    client=mission.client,
+                    freelance=request.user
+                )
+
+                profile = request.user.freelance_profile
+                skills = ', '.join(profile.skill_list[:5]) if profile.skill_list else 'Non renseignées'
+
+                # Message du freelance au client
+                Message.objects.create(
+                    thread=thread,
+                    sender=request.user,
+                    text=f"Bonjour, je viens de postuler à votre mission « {mission.title} ». "
+                         f"Voici mon profil : {request.user.username} | {profile.title or 'Freelance'} "
+                         f"({to_fcfa(profile.hourly_rate, 'EUR'):,.0f} FCFA/h) — Compétences : {skills}. "
+                         f"N'hésitez pas à me contacter pour plus d'informations."
+                )
+
+                # Message de confirmation au freelance
+                Message.objects.create(
+                    thread=thread,
+                    sender=mission.client,
+                    text=f"Bonjour {request.user.username}, votre candidature pour la mission "
+                         f"« {mission.title} » a bien été reçue. Le client vous recontactera "
+                         f"si votre profil est retenu."
+                )
+        except Exception:
+            pass  # Ne pas bloquer la candidature si l'envoi automatique échoue
+
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'success', 'message': 'Candidature envoyée !'})
         messages.success(request, f"Candidature envoyée pour '{mission.title}' !")

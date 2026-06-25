@@ -13,4 +13,5 @@ urlpatterns = [
     path('publier-offre/', views.create_contract_view, name='create_contract'),
     path('postuler/<int:mission_id>/', views.apply_to_mission_view, name='apply_to_mission'),
     path('liste/', views.contract_list_view, name='contract_list'),
+    path('<int:pk>/', views.mission_detail_view, name='mission_detail'),
 ]

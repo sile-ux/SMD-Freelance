@@ -208,3 +208,70 @@ class Dispute(models.Model):
 
     def __str__(self):
         return f"Litige {self.freelance.username} vs {self.client.username} — {self.get_status_display()}"
+
+
+class Document(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_documents')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_documents')
+    subject = models.CharField(max_length=200, blank=True)
+    message = models.TextField(blank=True)
+    file = models.FileField(upload_to='documents/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Document de {self.sender.username} à {self.recipient.username} — {self.file.name}"
+
+
+class PlatformSettings(models.Model):
+    # Général
+    site_name = models.CharField(max_length=100, default='CMD-FREELANCE')
+    site_description = models.TextField(blank=True, default='Plateforme de mise en relation freelances et clients')
+    support_email = models.EmailField(default='support@cmd-freelance.com')
+    default_currency = models.CharField(max_length=10, default='FCFA')
+
+    # Commissions & Finances
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.00,
+        help_text='Commission plateforme en %')
+    min_payout = models.DecimalField(max_digits=12, decimal_places=2, default=5000,
+        help_text='Montant minimum de retrait (FCFA)')
+    max_payout = models.DecimalField(max_digits=12, decimal_places=2, default=5000000,
+        help_text='Montant maximum de retrait (FCFA)')
+
+    # Inscriptions & Modération
+    enable_registrations = models.BooleanField(default=True, verbose_name='Activer les inscriptions')
+    auto_validate_freelances = models.BooleanField(default=False,
+        verbose_name='Valider automatiquement les freelances')
+    maintenance_mode = models.BooleanField(default=False, verbose_name='Mode maintenance')
+
+    # Notifications admin
+    notif_new_user = models.BooleanField(default=True, verbose_name='Nouvelle inscription')
+    notif_new_mission = models.BooleanField(default=True, verbose_name='Nouvelle mission')
+    notif_payment = models.BooleanField(default=True, verbose_name='Paiement reçu')
+    notif_dispute = models.BooleanField(default=True, verbose_name='Nouveau litige')
+
+    # Réseaux sociaux
+    facebook_url = models.URLField(blank=True, default='')
+    twitter_url = models.URLField(blank=True, default='')
+    linkedin_url = models.URLField(blank=True, default='')
+
+    # SEO
+    meta_keywords = models.CharField(max_length=300, blank=True, default='')
+    meta_description = models.TextField(blank=True, default='')
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Paramètres plateforme'
+        verbose_name_plural = 'Paramètres plateforme'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_instance(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return f"Paramètres plateforme — {self.site_name}"

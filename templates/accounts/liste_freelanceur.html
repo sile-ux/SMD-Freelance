@@ -859,7 +859,7 @@
                         </div>
                     </div>
                     <div class="right">
-                        <div class="rate">${f.rate}€ <span style="font-size:0.7rem;font-weight:400;color:#718096;">/h</span></div>
+                        <div class="rate">${Number(f.rate_fcfa).toLocaleString('fr-FR')} FCFA <span style="font-size:0.7rem;font-weight:400;color:#718096;">/h</span></div>
                         <span class="status ${statusClass}">${statusMap[f.status]}</span>
                         <button class="btn-contact" onclick="contactFreelance(${f.id})">
                             💬 Contacter
@@ -925,7 +925,7 @@
             if (!freelance) return;
 
             {% if user.is_authenticated %}
-            window.location.href = '{% url "chat:start_thread" 0 %}'.replace('/0', '/' + id + '/');
+            window.location.href = '{% url "chat:start_thread" 0 %}'.replace('/0/', '/' + id + '/');
             {% else %}
             window.location.href = '{% url "accounts:login" %}';
             {% endif %}
@@ -942,7 +942,7 @@
                   `${freelance.name}\n` +
                   `${freelance.title}\n` +
                   `Catégorie : ${freelance.category}\n` +
-                  `Tarif : ${freelance.rate}€/h\n` +
+                   `Tarif : ${Number(freelance.rate_fcfa).toLocaleString('fr-FR')} FCFA/h\n` +
                   `Note : ${stars} (${freelance.reviews} avis)\n` +
                   `Statut : ${freelance.status === 'available' ? 'Disponible' : freelance.status === 'busy' ? 'En mission' : 'Indisponible'}\n` +
                   `Compétences : ${skills}\n\n` +

@@ -1,3 +1,4 @@
+{% load contracts_extras %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -50,6 +51,7 @@
         .sidebar .menu-item i { width: 20px; color: #718096; font-size: 1rem; text-align: center; }
         .sidebar .menu-item.active { background: #ebf8ff; color: #4299e1; font-weight: 600; }
         .sidebar .menu-item.active i { color: #4299e1; }
+        .sidebar .menu-item .badge { margin-left: auto; background: #bee3f8; color: #2b6cb0; padding: 1px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: 600; }
 
         .sidebar .sidebar-bottom {
             border-top: 1px solid #dce7f5; padding: 12px 14px 20px;
@@ -317,9 +319,12 @@
             <div class="menu-group">
                 <div class="menu-label">Navigation</div>
                 <a href="{% url 'accounts:home' %}" class="menu-item"><i class="fas fa-home"></i> Accueil</a>
-                <a href="{% url 'accounts:dashboard' %}" class="menu-item active"><i class="fas fa-briefcase"></i> Missions</a>
-                <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
-                <a href="{% url 'chat:freelance_messages' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
+                <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-briefcase"></i> Missions</a>
+                <a href="{% url 'accounts:freelance_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
+                <a href="{% url 'chat:freelance_messages' %}" class="menu-item">
+                    <i class="fas fa-envelope"></i> Messages
+                    {% if unread_count %}<span class="badge">{{ unread_count }}</span>{% endif %}
+                </a>
 
                 <div class="menu-label">Suivi</div>
                 <a href="{% url 'accounts:stat_freelancer' %}" class="menu-item"><i class="fas fa-chart-line"></i> Statistiques</a>
@@ -395,7 +400,7 @@
                         {% for mission in missions %}
                         <div class="mission-card" data-title="{{ mission.title|lower }}" data-skills="{{ mission.skills_required|lower }}">
                             <div class="left">
-                                <div class="title" onclick="viewMission({{ mission.id }}, '{{ mission.title|escapejs }}', '{{ mission.description|escapejs }}', '{{ mission.client.username|default:"Anonyme" }}', {{ mission.budget }}, '{{ mission.urgency }}', '{{ mission.skills_required|escapejs }}', '{{ mission.created_at|date:"Y-m-d" }}')">{{ mission.title }}</div>
+                                 <div class="title" onclick="viewMission({{ mission.id }}, '{{ mission.title|escapejs }}', '{{ mission.description|escapejs }}', '{{ mission.client.username|default:"Anonyme" }}', {{ mission.budget|fcfa_value:mission.currency }}, '{{ mission.urgency }}', '{{ mission.skills_required|escapejs }}', '{{ mission.created_at|date:"Y-m-d" }}')">{{ mission.title }}</div>
                                 <div class="meta">
                                     <span><i class="fas fa-user"></i>{{ mission.client.username|default:"Anonyme" }}</span>
                                     <span><i class="fas fa-tag"></i>{{ mission.category|default:"Général" }}</span>
@@ -411,9 +416,9 @@
                                 <div class="desc">{{ mission.description }}</div>
                             </div>
                             <div class="right">
-                                <div class="budget">{{ mission.budget|floatformat:0 }} <small>{{ mission.currency|default:"EUR" }}</small></div>
+                                <div class="budget">{{ mission.budget|fcfa:mission.currency }}</div>
                                 <button class="btn btn-apply" onclick="applyMission(this, {{ mission.id }})">Postuler</button>
-                                <button class="btn btn-detail" onclick="viewMission({{ mission.id }}, '{{ mission.title|escapejs }}', '{{ mission.description|escapejs }}', '{{ mission.client.username|default:"Anonyme" }}', {{ mission.budget }}, '{{ mission.urgency }}', '{{ mission.skills_required|escapejs }}', '{{ mission.created_at|date:"Y-m-d" }}')">Détails</button>
+                                 <button class="btn btn-detail" onclick="viewMission({{ mission.id }}, '{{ mission.title|escapejs }}', '{{ mission.description|escapejs }}', '{{ mission.client.username|default:"Anonyme" }}', {{ mission.budget|fcfa_value:mission.currency }}, '{{ mission.urgency }}', '{{ mission.skills_required|escapejs }}', '{{ mission.created_at|date:"Y-m-d" }}')">Détails</button>
                             </div>
                         </div>
                         {% empty %}
@@ -432,7 +437,7 @@
                         <div class="app-card">
                             <div class="info">
                                 <div class="title">{{ app.mission.title }}</div>
-                                <div class="sub">Postulée le {{ app.created_at|date:"d/m/Y" }} — Budget: {{ app.mission.budget|floatformat:0 }} {{ app.mission.currency|default:"EUR" }}</div>
+                                <div class="sub">Postulée le {{ app.created_at|date:"d/m/Y" }} — Budget: {{ app.mission.budget|fcfa:app.mission.currency }}</div>
                             </div>
                             <div class="actions">
                                 <span class="status-badge pending">En attente</span>
@@ -487,7 +492,7 @@
             if (!confirm('Envoyer votre candidature pour cette mission ?')) return;
             btn.textContent = 'Envoi...'; btn.disabled = true;
 
-            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0', '/' + id + '/'), {
+            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0/', '/' + id + '/'), {
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCSRF(), 'X-Requested-With': 'XMLHttpRequest' },
             })
@@ -511,7 +516,7 @@
             document.getElementById('modalBody').innerHTML = `
                 <p style="margin-bottom:12px;">${desc}</p>
                 <div class="row"><span class="lbl">Client</span><span class="val">${client}</span></div>
-                <div class="row"><span class="lbl">Budget</span><span class="val">${budget} EUR</span></div>
+                <div class="row"><span class="lbl">Budget</span><span class="val">${Number(budget).toLocaleString('fr-FR')} FCFA</span></div>
                 <div class="row"><span class="lbl">Urgence</span><span class="val">${uMap[urgency] || urgency}</span></div>
                 <div class="row"><span class="lbl">Date</span><span class="val">${date}</span></div>
                 <div class="row"><span class="lbl">Compétences</span><span class="val">${skills.replace(/,/g, ', ')}</span></div>

@@ -29,18 +29,17 @@ def my_threads(request):
 
 
 @login_required
-def start_or_get_thread(request, user_id): # 🔄 Changé freelance_id -> user_id
-    """API : Initialise ou récupère un salon de discussion avec un freelance"""
-    freelance = get_object_or_404(User, id=user_id)
+def start_or_get_thread(request, user_id):
+    """API : Initialise ou récupère un salon de discussion avec un utilisateur"""
+    target = get_object_or_404(User, id=user_id)
 
-    if request.user == freelance:
+    if request.user == target:
         return JsonResponse({"error": "Vous ne pouvez pas discuter avec vous-même."}, status=400)
 
-    # Récupère ou crée le salon entre le client (request.user) et le freelance
-    thread, created = Thread.objects.get_or_create(
-        client=request.user,
-        freelance=freelance
-    )
+    if target.role == User.Role.FREELANCE.value:
+        thread, created = Thread.objects.get_or_create(client=request.user, freelance=target)
+    else:
+        thread, created = Thread.objects.get_or_create(client=target, freelance=request.user)
 
     return JsonResponse({
         "status": "success",
@@ -52,24 +51,21 @@ def start_or_get_thread(request, user_id): # 🔄 Changé freelance_id -> user_i
 
 
 @login_required
-def start_thread(request, user_id): # 🔄 Changé freelance_id -> user_id pour correspondre à l'URL
+def start_thread(request, user_id):
     """
-    Crée ou récupère une discussion entre le client connecté et un freelance.
+    Crée ou récupère une discussion entre l'utilisateur connecté et un autre utilisateur.
+    L'orientation du thread (client/freelance) est déterminée par le rôle du destinataire.
     """
-    # 1. On récupère le profil du freelance ciblé via l'ID reçu dans l'URL (ex: 15)
-    freelance_user = get_object_or_404(User, id=user_id)
+    target_user = get_object_or_404(User, id=user_id)
 
-    # Sécurité : On empêche un utilisateur de s'auto-contacter
-    if request.user == freelance_user:
+    if request.user == target_user:
         return redirect('accounts:dashboard')
 
-    # 2. On passe l'instance de l'utilisateur trouvée (freelance_user)
-    thread, created = Thread.objects.get_or_create(
-        client=request.user,
-        freelance=freelance_user
-    )
+    if target_user.role == User.Role.FREELANCE.value:
+        thread, created = Thread.objects.get_or_create(client=request.user, freelance=target_user)
+    else:
+        thread, created = Thread.objects.get_or_create(client=target_user, freelance=request.user)
 
-    # 3. On redirige vers la chat room dédiée
     return redirect('chat:chat_room', thread_id=thread.id)
 
 
@@ -84,11 +80,18 @@ def thread_detail_api(request, thread_id):
 
     # Récupérer tous les messages du salon
     messages = thread.messages.all()
+
+    # Marquer les messages non lus comme lus
+    messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
     messages_data = [
         {
             "id": msg.id,
             "sender": msg.sender.username,
             "text": msg.text,
+            "image_url": msg.image.url if msg.image else None,
+            "file_url": msg.file.url if msg.file else None,
+            "file_name": msg.file.name.split('/')[-1] if msg.file else None,
             "created_at": msg.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "is_read": msg.is_read
         }
@@ -113,6 +116,9 @@ def send_message_api(request, thread_id):
         if request.user != thread.client and request.user != thread.freelance:
             return JsonResponse({"error": "Action interdite."}, status=403)
 
+        image = request.FILES.get('image')
+        file = request.FILES.get('file')
+
         # On accepte du texte classique ou du JSON en entrée
         import json
         try:
@@ -121,21 +127,26 @@ def send_message_api(request, thread_id):
         except json.JSONDecodeError:
             text = request.POST.get('text', '').strip()
 
-        if not text:
+        if not text and not image and not file:
             return JsonResponse({"error": "Le message ne peut pas être vide."}, status=400)
 
         # Création du message en base
         message = Message.objects.create(
             thread=thread,
             sender=request.user,
-            text=text
+            text=text or '',
+            image=image,
+            file=file
         )
 
         return JsonResponse({
             "status": "Message envoyé",
             "message_id": message.id,
             "sender": message.sender.username,
-            "text": message.text
+            "text": message.text,
+            "image_url": message.image.url if message.image else None,
+            "file_url": message.file.url if message.file else None,
+            "file_name": message.file.name.split('/')[-1] if message.file else None,
         }, status=201)
 
     return JsonResponse({"error": "Méthode non autorisée. Utilisez POST."}, status=405)
@@ -197,11 +208,17 @@ def chat_room(request, thread_id):
 
     if request.method == 'POST':
         text = request.POST.get('text', '').strip()
-        if text:
-            Message.objects.create(thread=thread, sender=request.user, text=text)
+        image = request.FILES.get('image')
+        file = request.FILES.get('file')
+        if text or image or file:
+            Message.objects.create(thread=thread, sender=request.user, text=text or '', image=image, file=file)
         return redirect('chat:chat_room', thread_id=thread.id)
 
     chat_messages = thread.messages.all().order_by('created_at')
+
+    # Marquer les messages non lus comme lus
+    thread.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
     other_user = thread.freelance if request.user == thread.client else thread.client
     threads = get_user_threads(request.user)
 

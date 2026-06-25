@@ -9,7 +9,8 @@ class Thread(models.Model):
     freelance = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='freelance_threads')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    
+    class Meta:
+        unique_together = ('client', 'freelance')
 
     def __str__(self):
         return f"Discussion entre {self.client.username} et {self.freelance.username}"
@@ -17,7 +18,9 @@ class Thread(models.Model):
 class Message(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(blank=True)
+    image = models.ImageField(upload_to='chat_files/', blank=True, null=True)
+    file = models.FileField(upload_to='chat_files/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 

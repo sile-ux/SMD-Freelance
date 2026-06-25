@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block title %}CMD-Freelance - Contacter un Freelancer{% endblock %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
         /* Reset & base */
@@ -11,7 +14,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Rubik', sans-serif;
         }
 
         body {
@@ -131,6 +134,17 @@
             margin-right: 12px;
             width: 24px;
             color: #00B4D8;
+        }
+
+        .sidebar .menu-item .badge {
+            display: inline-block;
+            margin-left: 8px;
+            background: #00B4D8;
+            color: #fff;
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
 
         .sidebar .language-switch {
@@ -742,9 +756,12 @@
             <a href="{% url 'accounts:home' %}" class="menu-item"><i class="fas fa-home"></i> Accueil</a>
             <a href="#search-section" class="menu-item"><i class="fas fa-search"></i> Rechercher</a>
             <a href="{% url 'contracts:create_contract' %}" class="menu-item"><i class="fas fa-file-contract"></i> Créer un contrat</a>
-            <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
+            <a href="{% url 'accounts:freelance_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
             <a href="{% url 'contracts:contract_list' %}" class="menu-item"><i class="fas fa-briefcase"></i> Contrats</a>
-            <a href="{% url 'chat:latest_chat' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
+            <a href="{% url 'chat:latest_chat' %}" class="menu-item">
+                <i class="fas fa-envelope"></i> Messages
+                {% if unread_count %}<span class="badge">{{ unread_count }}</span>{% endif %}
+            </a>
             <a href="{% url 'accounts:transaction' %}" class="menu-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
             <a href="{% url 'accounts:parametre' %}" class="menu-item"><i class="fas fa-cog"></i> Paramètres</a>
         </div>
@@ -881,9 +898,9 @@
         {% if client_missions %}
         <div style="margin-top:20px;">
             <div class="page-title" style="font-size:18px;">📋 Mes missions publiées</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:10px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:10px;">
                 {% for m in client_missions %}
-                <div style="background:#f8fafc;border-radius:12px;padding:14px;border:1px solid #eef2f7;">
+                <div style="background:#fff;border-radius:14px;padding:16px;border:1px solid #eef2f7;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
                     <div style="font-weight:700;font-size:15px;color:#1a1a2e;">{{ m.title }}</div>
                     <div style="font-size:12px;color:#6b7280;margin:4px 0 8px;">{{ m.category }} · {{ m.location }}</div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
@@ -891,8 +908,8 @@
                         <span style="background:#e3f4fa;padding:2px 10px;border-radius:10px;font-size:11px;color:#00B4D8;">{{ s }}</span>
                         {% endfor %}
                     </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-weight:700;color:#1a1a2e;">{{ m.budget }} {{ m.currency }}</span>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <span style="font-weight:700;color:#1a1a2e;">{{ m.budget|fcfa:m.currency }}</span>
                         <span style="font-size:11px;padding:3px 10px;border-radius:10px;
                             {% if m.status == 'open' %}background:#d1fae5;color:#065f46;
                             {% elif m.status == 'in-progress' %}background:#fef3c7;color:#92400e;
@@ -900,6 +917,54 @@
                             {{ m.get_status_display }}
                         </span>
                     </div>
+
+                    {% with apps=m.applications.all %}
+                    {% if apps %}
+                    <div style="border-top:1px solid #eef2f7;padding-top:10px;">
+                        <div style="font-size:12px;font-weight:600;color:#6b7280;margin-bottom:8px;">
+                            Candidatures reçues ({{ apps|length }})
+                        </div>
+                        {% for app in apps %}
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f8fafc;border-radius:8px;margin-bottom:6px;">
+                            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+                                <span style="width:30px;height:30px;border-radius:50%;background:{% cycle '#00B4D8' '#4299e1' '#48bb78' '#ed8936' '#9f7aea' %};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">
+                                    {{ app.freelance.username|make_list|first|upper }}
+                                </span>
+                                <div style="min-width:0;">
+                                    <div style="font-size:13px;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                        {{ app.freelance.username }}
+                                        {% if app.freelance.freelance_profile.title %}
+                                        <span style="font-weight:400;font-size:11px;color:#6b7280;">· {{ app.freelance.freelance_profile.title }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div style="font-size:11px;color:#6b7280;">
+                                        {% if app.proposed_rate %}{{ app.proposed_rate|fcfa:'EUR' }} · {% endif %}
+                                        <span style="
+                                            {% if app.status == 'pending' %}color:#92400e;
+                                            {% elif app.status == 'accepted' %}color:#065f46;
+                                            {% elif app.status == 'rejected' %}color:#991b1b;{% endif %}">
+                                            {{ app.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if app.status == 'pending' %}
+                            <button onclick="acceptApplication({{ app.id }})"
+                                    style="background:#00B4D8;color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+                                Accepter
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div style="border-top:1px solid #eef2f7;padding-top:10px;">
+                        <div style="font-size:12px;color:#9ca3af;text-align:center;padding:6px 0;">
+                            Aucune candidature pour le moment
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </div>
                 {% endfor %}
             </div>
@@ -915,6 +980,16 @@
     </div>
 
     <script>
+        function getCSRF() {
+            const m = document.cookie.match(/csrftoken=([^;]+)/);
+            return m ? m[1] : '';
+        }
+
+        function acceptApplication(id) {
+            if (!confirm('Accepter cette candidature ? Les autres candidatures seront refusées.')) return;
+            window.location.href = '{% url "accounts:transaction" %}?accept_application=' + id;
+        }
+
         // ============= MENU LATERAL =============
         const menuIcon = document.getElementById('menuIcon');
         const sidebar = document.getElementById('sidebar');
@@ -1234,6 +1309,22 @@
         console.log('💡 Cliquez sur les filtres pour les dérouler');
         console.log('🔍 Tapez dans la barre de recherche pour filtrer');
         console.log('📱 Cliquez sur le menu hamburger pour ouvrir le menu');
+
+        function showToast(msg, type) {
+            let t = document.getElementById('toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'toast';
+                t.style.cssText = 'position:fixed;bottom:30px;right:30px;padding:14px 24px;border-radius:10px;font-size:14px;font-weight:500;color:#fff;z-index:9999;opacity:0;transform:translateY(20px);transition:all 0.3s;max-width:400px;';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.background = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+            t.style.opacity = '1';
+            t.style.transform = 'translateY(0)';
+            clearTimeout(t._t);
+            t._t = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 3500);
+        }
     </script>
 
 </body>

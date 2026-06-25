@@ -1,3 +1,4 @@
+{% load contracts_extras %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -780,7 +781,7 @@
                             </span>
                             <span class="item">
                                 <lord-icon src="https://cdn.lordicon.com/hfiwfwiw.json" trigger="hover" colors="primary:#718096" style="width:16px;height:16px;"></lord-icon>
-                                {% if f.hourly_rate %}{{ f.hourly_rate|floatformat:0 }} XAF/h{% endif %}
+                                {% if f.hourly_rate %}{{ f.hourly_rate|fcfa:'EUR' }}{% endif %}
                             </span>
                         </div>
                         <div class="rating">
@@ -802,7 +803,7 @@
                         </div>
                     </div>
                     <div class="right">
-                        <div class="rate">{{ f.hourly_rate|floatformat:0 }} <span style="font-size:0.7rem;font-weight:400;color:#718096;">XAF/h</span></div>
+                        <div class="rate">{{ f.hourly_rate|fcfa:'EUR' }}/h</div>
                         <span class="status {% if f.online_status == 'online' %}available{% else %}busy{% endif %}">
                             {% if f.online_status == 'online' %}🟢 Disponible{% else %}🟡 Hors ligne{% endif %}
                         </span>

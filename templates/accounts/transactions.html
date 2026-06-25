@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load contracts_extras %}
 <!DOCTYPE html>
 <html lang="fr">
@@ -5,6 +6,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>CMD-Freelance - Transactions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
         /* ===== RESET & BASE ===== */
@@ -12,7 +16,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Rubik', sans-serif;
         }
 
         html,
@@ -760,6 +764,64 @@
             </div>
         </div>
 
+        {% if pending_application %}
+        <!-- ===== CONFIRMATION PAIEMENT CANDIDATURE ===== -->
+        <div class="accept-card" style="background:linear-gradient(135deg,#ebf8ff,#e0f2fe);border:2px solid #00B4D8;border-radius:16px;padding:20px;margin:16px 0;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:#00B4D8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
+                    {{ pending_application.freelance.username|make_list|first|upper }}
+                </div>
+                <div>
+                    <div style="font-size:16px;font-weight:700;color:#1a365d;">
+                        {{ pending_application.freelance.username }}
+                        {% if pending_application.freelance.freelance_profile.title %}
+                        <span style="font-weight:400;font-size:13px;color:#4a5568;">· {{ pending_application.freelance.freelance_profile.title }}</span>
+                        {% endif %}
+                    </div>
+                    <div style="font-size:13px;color:#2b6cb0;">
+                        a postulé à « {{ pending_application.mission.title }} »
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:#2d3748;margin-bottom:14px;">
+                <div><strong>Mission :</strong> {{ pending_application.mission.title }}</div>
+                <div><strong>Catégorie :</strong> {{ pending_application.mission.category }}</div>
+                <div><strong>Budget :</strong> {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }}</div>
+                <div><strong>Votre solde :</strong>
+                    {% if wallet.balance >= pending_application.mission.budget %}
+                    <span style="color:#065f46;font-weight:600;">{{ wallet.balance|intcomma }} CFA ✅</span>
+                    {% else %}
+                    <span style="color:#991b1b;font-weight:600;">{{ wallet.balance|intcomma }} CFA ❌</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if wallet.balance >= pending_application.mission.budget %}
+            <form method="post" action="{% url 'accounts:transaction' %}">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="accept_application">
+                <input type="hidden" name="application_id" value="{{ pending_application.id }}">
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" style="flex:1;background:#10b981;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
+                        ✅ Confirmer le paiement — {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }}
+                    </button>
+                    <a href="{% url 'accounts:transaction' %}" style="background:#e5e7eb;color:#374151;border:none;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+            {% else %}
+            <div style="background:#fee2e2;border-radius:10px;padding:14px;color:#991b1b;font-size:14px;font-weight:600;text-align:center;">
+                ❌ Solde insuffisant — Vous disposez de {{ wallet.balance|intcomma }} CFA sur les {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }} requis.
+                <div style="margin-top:10px;font-weight:400;">
+                    Veuillez d'abord <a href="#tab-deposit" onclick="switchTab('deposit')" style="color:#00B4D8;font-weight:600;">effectuer un dépôt</a> sur votre compte.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
         <!-- ===== ONGLETS ===== -->
         <div class="tabs">
             <button class="tab active" data-tab="deposit">
@@ -1073,6 +1135,16 @@
         // ============================================
         // ONGLETS
         // ============================================
+        function switchTab(name) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            const tab = document.querySelector(`.tab[data-tab="${name}"]`);
+            if (tab) tab.classList.add('active');
+            const content = document.getElementById('tab-' + name);
+            if (content) content.classList.add('active');
+            currentTab = name;
+            document.getElementById('successScreen').classList.remove('show');
+        }
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));

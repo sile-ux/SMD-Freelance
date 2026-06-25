@@ -10,9 +10,10 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 from .forms import FreelanceRegisterForm, ClientRegisterForm
-from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter, Wallet, Transaction, Dispute
+from .models import User, FreelanceProfile, ClientProfile, ContactMessage, Newsletter, Wallet, Transaction, Dispute, Document
 from contracts.models import Mission, Contract, Application
 from contracts.forms import QuickMissionForm
+from contracts.templatetags.contracts_extras import to_fcfa
 
 
 def home_view(request):
@@ -190,6 +191,18 @@ def user_logout(request):
 @login_required
 def dashboard(request):
     user = request.user
+
+    # Compteur de messages non lus
+    from chat.models import Thread, Message
+    if user.role == User.Role.FREELANCE.value:
+        user_threads = user.freelance_threads.all()
+    else:
+        user_threads = user.client_threads.all()
+    unread_count = sum(
+        t.messages.filter(is_read=False).exclude(sender=user).count()
+        for t in user_threads
+    )
+
     if user.is_superuser or user.role == User.Role.ADMIN.value:
         return redirect('accounts:admin_dashboard')
     elif user.role == User.Role.FREELANCE.value:
@@ -207,14 +220,21 @@ def dashboard(request):
             'mission_count': mission_count,
             'application_count': application_count,
             'urgent_count': urgent_count,
+            'unread_count': unread_count,
         })
     elif user.role == User.Role.CLIENT.value:
-        from contracts.models import Mission as ClientMission
+        from contracts.models import Mission as ClientMission, Application
+        from django.db.models import Prefetch
         freelance_count = FreelanceProfile.objects.filter(is_verified=True).count()
         contract_count = Contract.objects.filter(client=user).count()
         recent_contracts = Contract.objects.filter(client=user).order_by('-created_at')[:5]
         freelancers = FreelanceProfile.objects.filter(is_verified=True).select_related('user').order_by('-rating')[:20]
-        client_missions = ClientMission.objects.filter(client=user).order_by('-created_at')
+        client_missions = ClientMission.objects.filter(client=user).prefetch_related(
+            Prefetch('applications',
+                queryset=Application.objects.select_related(
+                    'freelance', 'freelance__freelance_profile'
+                ).order_by('-created_at'))
+        ).order_by('-created_at')
         return render(request, 'accounts/dashboard_client.html', {
             'profile': user.client_profile,
             'freelance_count': freelance_count,
@@ -222,8 +242,9 @@ def dashboard(request):
             'recent_contracts': recent_contracts,
             'freelancers': freelancers,
             'client_missions': client_missions,
+            'unread_count': unread_count,
         })
-    return redirect('accounts:choice_register')  # AJOUTÉ : namespace 'accounts:'
+    return redirect('accounts:choice_register')
 
 
 @login_required
@@ -272,9 +293,9 @@ def admin_dashboard(request):
     pending_freelance_list = FreelanceProfile.objects.filter(is_verified=False).select_related('user')[:20]
 
     # Litiges
-    disputes = Dispute.objects.all()[:10]
-    open_disputes = disputes.filter(status='open').count()
-    in_progress_disputes = disputes.filter(status='in_progress').count()
+    disputes = Dispute.objects.all().order_by('-created_at')[:10]
+    open_disputes = Dispute.objects.filter(status='open').count()
+    in_progress_disputes = Dispute.objects.filter(status='in_progress').count()
 
     # Missions count
     mission_counts = {
@@ -316,6 +337,14 @@ def admin_dashboard(request):
         mission_change = 0
     mission_trend = 'up' if mission_change >= 0 else 'down'
 
+    # Messages non lus pour l'admin
+    from chat.models import Thread, Message
+    admin_threads = user.client_threads.all()
+    unread_count = sum(
+        t.messages.filter(is_read=False).exclude(sender=user).count()
+        for t in admin_threads
+    )
+
     # Badges pour la sidebar
     sidebar_badges = {
         'users': total_users,
@@ -323,6 +352,7 @@ def admin_dashboard(request):
         'pending_payments': Transaction.objects.filter(status='pending').count(),
         'open_disputes': open_disputes + in_progress_disputes,
         'missions': active_missions,
+        'notifications': unread_count + pending_freelances + pending_payments,
     }
 
     context = {
@@ -350,6 +380,7 @@ def admin_dashboard(request):
         'mission_trend': mission_trend,
         'freelance_count': total_freelances,
         'client_count': total_clients,
+        'unread_count': unread_count,
     }
     return render(request, 'accounts/dashbord_admin.html', context)
 
@@ -363,6 +394,18 @@ def transaction_view(request):
     # Pour l'onglet Mission : contrats ouverts du client
     contracts = Contract.objects.filter(client=user, status='OPEN').order_by('-created_at') if user.role == User.Role.CLIENT.value else []
     freelancers = FreelanceProfile.objects.filter(is_verified=True).select_related('user')[:20]
+
+    # Candidature à accepter (depuis le bouton "Accepter" du dashboard)
+    pending_application = None
+    app_id = request.GET.get('accept_application') or request.POST.get('application_id')
+    if app_id:
+        try:
+            from contracts.models import Application
+            pending_application = Application.objects.select_related(
+                'mission', 'freelance', 'freelance__freelance_profile'
+            ).get(id=app_id, mission__client=user, status='pending')
+        except Application.DoesNotExist:
+            pass
 
     if request.method == 'POST':
         section = request.POST.get('section')
@@ -419,6 +462,81 @@ def transaction_view(request):
                 messages.error(request, 'Contrat introuvable.')
             return redirect('accounts:transaction')
 
+        # ── ACCEPTATION CANDIDATURE AVEC PAIEMENT ──
+        elif section == 'accept_application' and pending_application:
+            try:
+                amount = float(pending_application.mission.budget)
+                if float(wallet.balance) < amount:
+                    messages.error(
+                        request,
+                        f'Solde insuffisant. Vous disposez de {float(wallet.balance):,.0f} CFA, '
+                        f'le montant de la mission est de {amount:,.0f} CFA.'
+                    )
+                    return redirect(f'{request.path}?accept_application={pending_application.id}')
+
+                # Débiter le client
+                wallet.balance -= amount
+                wallet.save()
+
+                # Créditer l'admin (premier superuser)
+                admin_user = User.objects.filter(is_superuser=True).first()
+                if admin_user:
+                    admin_wallet, _ = Wallet.objects.get_or_create(user=admin_user)
+                    admin_wallet.balance += amount
+                    admin_wallet.save()
+
+                # Enregistrer la transaction côté client
+                Transaction.objects.create(
+                    user=user, type='mission_payment', amount=amount, fee=0,
+                    method='wallet', status='completed',
+                    freelance=pending_application.freelance,
+                    description=f"Paiement mission « {pending_application.mission.title} » — {amount:,.0f} CFA"
+                )
+                # Enregistrer la transaction côté admin
+                Transaction.objects.create(
+                    user=admin_user or user, type='transfer', amount=amount, fee=0,
+                    method='wallet', status='completed',
+                    freelance=pending_application.freelance,
+                    description=f"Réception paiement mission « {pending_application.mission.title} » — {amount:,.0f} CFA"
+                )
+
+                # Accepter la candidature
+                pending_application.status = 'accepted'
+                pending_application.save()
+
+                # Passer la mission en cours
+                mission = pending_application.mission
+                mission.status = 'in-progress'
+                mission.save()
+
+                # Refuser les autres candidatures
+                from contracts.models import Application
+                Application.objects.filter(mission=mission, status='pending').exclude(id=pending_application.id).update(status='rejected')
+
+                # Notifier le freelance
+                try:
+                    from chat.models import Thread, Message
+                    thread, _ = Thread.objects.get_or_create(
+                        client=mission.client,
+                        freelance=pending_application.freelance
+                    )
+                    Message.objects.create(
+                        thread=thread,
+                        sender=user,
+                        text=f"Félicitations ! Votre candidature pour la mission « {mission.title} » a été acceptée "
+                             f"et le paiement de {amount:,.0f} CFA a été transféré à l'administration. "
+                             f"La mission peut maintenant commencer."
+                    )
+                except Exception:
+                    pass
+
+                messages.success(request, f'Candidature acceptée et paiement de {amount:,.0f} CFA effectué. La mission est en cours.')
+                return redirect('accounts:transaction')
+
+            except (ValueError, TypeError):
+                messages.error(request, 'Erreur lors du traitement du paiement.')
+            return redirect(f'{request.path}?accept_application={pending_application.id}' if pending_application else 'accounts:transaction')
+
         # ── RETRAIT ──
         elif section == 'withdraw':
             amount = request.POST.get('amount', '0')
@@ -452,6 +570,7 @@ def transaction_view(request):
         'transactions': transactions,
         'contracts': contracts,
         'freelancers': freelancers,
+        'pending_application': pending_application,
     })
 
 
@@ -564,6 +683,21 @@ import json
 def freelance_list_view(request):
     freelances = FreelanceProfile.objects.filter(is_verified=True).select_related('user').order_by('-rating')
 
+    # Messages non lus
+    user = request.user
+    if user.is_authenticated:
+        from chat.models import Thread, Message
+        if user.role == User.Role.FREELANCE.value:
+            user_threads = user.freelance_threads.all()
+        else:
+            user_threads = user.client_threads.all()
+        unread_count = sum(
+            t.messages.filter(is_read=False).exclude(sender=user).count()
+            for t in user_threads
+        )
+    else:
+        unread_count = 0
+
     freelances_data = []
     for f in freelances:
         avatar_name = f.user.username[:2].upper() if len(f.user.username) >= 2 else (f.user.username[0].upper() if f.user.username else '?')
@@ -597,6 +731,7 @@ def freelance_list_view(request):
             'rating': float(f.rating),
             'reviews': 0,
             'rate': float(f.hourly_rate),
+            'rate_fcfa': to_fcfa(f.hourly_rate, 'EUR'),
             'status': status,
             'skills': f.skill_list,
             'avatar': avatar_name,
@@ -605,7 +740,8 @@ def freelance_list_view(request):
         })
 
     return render(request, 'accounts/liste_freelanceur.html', {
-        'freelances_json': json.dumps(freelances_data),
+        'freelances_json': freelances_data,
+        'unread_count': unread_count,
     })
 
 
@@ -789,6 +925,31 @@ def admin_api_data(request):
             'active_missions': active_missions,
         })
 
+    if data_type == 'settings':
+        from .models import PlatformSettings
+        s = PlatformSettings.get_instance()
+        return JsonResponse({
+            'site_name': s.site_name,
+            'site_description': s.site_description,
+            'support_email': s.support_email,
+            'default_currency': s.default_currency,
+            'commission_rate': float(s.commission_rate),
+            'min_payout': float(s.min_payout),
+            'max_payout': float(s.max_payout),
+            'enable_registrations': s.enable_registrations,
+            'auto_validate_freelances': s.auto_validate_freelances,
+            'maintenance_mode': s.maintenance_mode,
+            'notif_new_user': s.notif_new_user,
+            'notif_new_mission': s.notif_new_mission,
+            'notif_payment': s.notif_payment,
+            'notif_dispute': s.notif_dispute,
+            'facebook_url': s.facebook_url,
+            'twitter_url': s.twitter_url,
+            'linkedin_url': s.linkedin_url,
+            'meta_keywords': s.meta_keywords,
+            'meta_description': s.meta_description,
+        })
+
     return JsonResponse({'error': 'Invalid type'}, status=400)
 
 
@@ -848,13 +1009,36 @@ def admin_api_action(request):
             return JsonResponse({'success': False, 'message': 'Litige introuvable'}, status=404)
 
     if action == 'contact_user':
+        recipient_name = data.get('recipient', '').strip()
+        subject = data.get('subject', '').strip()
+        message_text = data.get('message', '').strip()
+
+        if not recipient_name:
+            return JsonResponse({'success': False, 'message': 'Destinataire requis'}, status=400)
+
+        try:
+            recipient = User.objects.get(username=recipient_name)
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Utilisateur introuvable'}, status=404)
+
         ContactMessage.objects.create(
             name=request.user.username,
             email=request.user.email,
-            subject=data.get('subject', 'Message depuis l\'admin'),
-            message=data.get('message', ''),
+            subject=subject or 'Message depuis l\'admin',
+            message=f"Pour {recipient_name}: {message_text}",
         )
-        return JsonResponse({'success': True, 'message': 'Message envoyé'})
+
+        from chat.models import Thread, Message
+        if recipient.role == User.Role.FREELANCE.value:
+            thread, _ = Thread.objects.get_or_create(client=request.user, freelance=recipient)
+        else:
+            thread, _ = Thread.objects.get_or_create(client=recipient, freelance=request.user)
+        Message.objects.create(
+            thread=thread, sender=request.user,
+            text=f"[Admin] {subject}: {message_text}" if subject else f"[Admin] {message_text}"
+        )
+
+        return JsonResponse({'success': True, 'message': f'Message envoyé à {recipient_name}'})
 
     if action == 'create_mission':
         Mission.objects.create(
@@ -879,5 +1063,96 @@ def admin_api_action(request):
             return JsonResponse({'success': True, 'message': 'Litige créé'})
         except User.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Utilisateur introuvable'}, status=404)
+
+    if action == 'upload_document':
+        recipient_name = data.get('recipient', '').strip()
+        subject = data.get('subject', '').strip()
+        message_text = data.get('message', '').strip()
+        uploaded_file = request.FILES.get('file')
+
+        if not recipient_name:
+            return JsonResponse({'success': False, 'message': 'Destinataire requis'}, status=400)
+        if not uploaded_file:
+            return JsonResponse({'success': False, 'message': 'Fichier requis'}, status=400)
+
+        try:
+            recipient = User.objects.get(username=recipient_name)
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Utilisateur introuvable'}, status=404)
+
+        Document.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            subject=subject,
+            message=message_text,
+            file=uploaded_file,
+        )
+
+        from chat.models import Thread, Message
+        if recipient.role == User.Role.FREELANCE.value:
+            thread, _ = Thread.objects.get_or_create(client=request.user, freelance=recipient)
+        else:
+            thread, _ = Thread.objects.get_or_create(client=recipient, freelance=request.user)
+        Message.objects.create(
+            thread=thread, sender=request.user,
+            text=f"[Admin][Document] {subject or 'Document'} envoyé à {recipient_name}"
+        )
+
+        return JsonResponse({'success': True, 'message': f'Document envoyé à {recipient_name}'})
+
+    if action == 'generate_report':
+        period = data.get('period', 'Ce mois-ci')
+        report_format = data.get('format', 'PDF')
+
+        from django.db.models import Sum
+        now = timezone.now()
+        if period == 'Ce mois-ci':
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == 'Mois dernier':
+            start_date = (now.replace(day=1) - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == '3 derniers mois':
+            start_date = (now - timedelta(days=90)).replace(hour=0, minute=0, second=0, microsecond=0)
+        else:
+            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        txns = Transaction.objects.filter(created_at__gte=start_date)
+        total = txns.aggregate(total=Sum('amount'))['total'] or 0
+        count = txns.count()
+        completed = txns.filter(status='completed').aggregate(total=Sum('amount'))['total'] or 0
+        pending = txns.filter(status='pending').aggregate(total=Sum('amount'))['total'] or 0
+
+        report_data = {
+            'period': period,
+            'format': report_format,
+            'generated_at': timezone.now().strftime('%d/%m/%Y %H:%M'),
+            'total_transactions': count,
+            'total_amount': float(total),
+            'completed_amount': float(completed),
+            'pending_amount': float(pending),
+        }
+
+        return JsonResponse({'success': True, 'message': f'Rapport {period} généré', 'report': report_data})
+
+    if action == 'mark_all_read':
+        from chat.models import Thread, Message
+        admin_threads = request.user.client_threads.all()
+        count = 0
+        for t in admin_threads:
+            cnt = t.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+            count += cnt
+        return JsonResponse({'success': True, 'message': f'{count} notification(s) marquée(s) comme lue(s)'})
+
+    if action == 'save_settings':
+        from .models import PlatformSettings
+        s = PlatformSettings.get_instance()
+        bool_fields = ['enable_registrations', 'auto_validate_freelances', 'maintenance_mode',
+                       'notif_new_user', 'notif_new_mission', 'notif_payment', 'notif_dispute']
+        for key, value in data.items():
+            if key in bool_fields:
+                setattr(s, key, value in (True, 'True', 'true', 'on', 1, '1'))
+            elif hasattr(s, key):
+                setattr(s, key, value)
+        s.save()
+        return JsonResponse({'success': True, 'message': 'Paramètres enregistrés'})
 
     return JsonResponse({'error': 'Action inconnue'}, status=400)

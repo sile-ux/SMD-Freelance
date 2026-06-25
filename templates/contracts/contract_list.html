@@ -700,10 +700,10 @@
                         </select>
                         <select id="filterBudget" onchange="filterMissions()">
                             <option value="all">Tous les budgets</option>
-                            <option value="0-500">Moins de 500€</option>
-                            <option value="500-1000">500€ - 1000€</option>
-                            <option value="1000-2000">1000€ - 2000€</option>
-                            <option value="2000+">Plus de 2000€</option>
+                            <option value="0-328000">Moins de 328 000 FCFA</option>
+                            <option value="328000-656000">328 000 - 656 000 FCFA</option>
+                            <option value="656000-1312000">656 000 - 1 312 000 FCFA</option>
+                            <option value="1312000+">Plus de 1 312 000 FCFA</option>
                         </select>
                         <button class="clear-btn" onclick="clearFilters()">Réinitialiser</button>
                         {% if user.is_authenticated and user.role == 'CLIENT' %}
@@ -733,6 +733,7 @@
     <script>
         // ===== DONNÉES DES MISSIONS (depuis le backend) =====
         const missions = JSON.parse(document.getElementById('missionsData').textContent);
+        const isAdmin = {% if user.is_authenticated and user.role == 'ADMIN' %}true{% else %}false{% endif %};
 
         // ===== RENDERING =====
         let filteredMissions = [...missions];
@@ -805,13 +806,19 @@
                         <div class="desc">${m.description}</div>
                     </div>
                     <div class="right">
-                        <div class="budget">${m.budget}€</div>
+                        <div class="budget">${Number(m.budget_fcfa).toLocaleString('fr-FR')} FCFA</div>
                         <span class="status ${statusClass}">${statusMap[m.status]}</span>
+                        ${isAdmin ? `
+                        <button class="btn-apply" onclick="viewMission(${m.id})">
+                            📋 Détails
+                        </button>
+                        ` : `
                         <button class="btn-apply ${m.status !== 'open' ? 'applied' : ''}" 
                                 onclick="${m.status === 'open' ? `applyMission(${m.id})` : 'event.stopPropagation();'}"
                                 ${m.status !== 'open' ? 'disabled' : ''}>
                             ${m.status === 'open' ? '📩 Postuler' : m.status === 'in-progress' ? '⏳ En cours' : '✅ Fini'}
                         </button>
+                        `}
                     </div>
                 `;
 
@@ -847,9 +854,9 @@
                     if (parts.length === 2) {
                         const min = parseInt(parts[0]);
                         const max = parseInt(parts[1]);
-                        match = m.budget >= min && m.budget <= max;
-                    } else if (budget === '2000+') {
-                        match = m.budget >= 2000;
+                        match = m.budget_fcfa >= min && m.budget_fcfa <= max;
+                    } else if (budget === '1312000+') {
+                        match = m.budget_fcfa >= 1312000;
                     }
                 }
 
@@ -882,9 +889,10 @@
             const mission = missions.find(m => m.id === id);
             if (!mission) return;
 
-            if (!confirm(`Postuler à la mission :\n\n"${mission.title}"\n\nClient : ${mission.client}\nBudget : ${mission.budget}€\n\nSouhaitez-vous envoyer votre candidature ?`)) return;
+            const budgetFcfa = Number(mission.budget_fcfa).toLocaleString('fr-FR');
+            if (!confirm(`Postuler à la mission :\n\n"${mission.title}"\n\nClient : ${mission.client}\nBudget : ${budgetFcfa} FCFA\n\nSouhaitez-vous envoyer votre candidature ?`)) return;
 
-            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0', '/' + id + '/'), {
+            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0/', '/' + id + '/'), {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCSRFToken(),
@@ -913,11 +921,7 @@
         }
 
         function viewMission(id) {
-            const mission = missions.find(m => m.id === id);
-            if (!mission) return;
-
-            const skills = mission.skills && mission.skills.length ? mission.skills.join(', ') : 'Non spécifiées';
-            alert(`Détails de la mission :\n\n${mission.title}\n\n${mission.description}\n\nClient : ${mission.client}\nBudget : ${mission.budget}€\nDate : ${mission.date}\nLieu : ${mission.location}\nStatut : ${mission.status}\nCompétences : ${skills}`);
+            window.location.href = '{% url "contracts:mission_detail" 0 %}'.replace('/0/', '/' + id + '/');
         }
 
         // ===== DATE =====
