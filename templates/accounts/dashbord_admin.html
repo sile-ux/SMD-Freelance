@@ -15,7 +15,7 @@
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <script>
         window.CSRF_TOKEN = '{{ csrf_token }}';
-        window.BADGES = {{ sidebar_badges|default:'{"users":0,"pending_freelances":0,"pending_payments":0,"open_disputes":0,"missions":0,"notifications":0}' }};
+        window.BADGES = {{ sidebar_badges|default:'{"users":0,"pending_freelances":0,"pending_payments":0,"open_disputes":0,"missions":0,"notifications":0,"unread_messages":0,"unread_documents":0}' }};
 window.UNREAD_COUNT = {{ unread_count|default:0 }};
     </script>
 
@@ -1139,6 +1139,10 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
         }
+
+        .doc-link { color: #4299e1; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+        .doc-link:hover { color: #2b6cb0; }
+        .doc-link:hover span { text-decoration:underline; }
     </style>
 </head>
 <body>
@@ -1216,6 +1220,14 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                     <span class="badge" id="badge-missions">{{ sidebar_badges.missions|default:'0' }}</span>
                 </a>
                 
+                <div class="menu-item" data-section="messages">
+                    <span class="icon-wrap">
+                        <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
+                    </span>
+                    Messages
+                    <span class="badge warning" id="badge-messages">{{ sidebar_badges.unread_messages|default:'0' }}</span>
+                </div>
+
                 <div class="menu-item" data-section="notifications">
                     <span class="icon-wrap">
                         <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
@@ -1231,6 +1243,7 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                         <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#4299e1" style="width:24px;height:24px;"></lord-icon>
                     </span>
                     Documents
+                    <span class="badge" id="badge-documents">{{ sidebar_badges.unread_documents|default:'0' }}</span>
                 </div>
                 
                 <div class="menu-item" data-section="settings">
@@ -1585,6 +1598,24 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                     </div>
                 </div>
 
+                <!-- ===== MESSAGES ===== -->
+                <div class="section-page" id="page-messages">
+                    <div class="section-head">
+                        <h3>Messages reçus</h3>
+                        <div class="actions">
+                            <a href="{% url 'chat:latest_chat' %}" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:10px;background:#4299e1;color:#fff;font-family:'Rubik',sans-serif;font-weight:500;font-size:0.88rem;">
+                                <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;"></lord-icon>
+                                Voir la conversation
+                            </a>
+                        </div>
+                    </div>
+                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
+                        <div id="messagesContainer">
+                            <p style="color:#718096;text-align:center;font-size:0.95rem;">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ===== NOTIFICATIONS ===== -->
                 <div class="section-page" id="page-notifications">
                     <div class="section-head">
@@ -1684,10 +1715,59 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                             </button>
                         </div>
                     </div>
-                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
-                        <p style="color:#718096;text-align:center;font-size:0.95rem;">
-                            Gérez tous les documents partagés sur la plateforme.
-                        </p>
+
+                    <div style="display:flex;flex-direction:column;gap:20px;">
+
+                        <!-- CVs des freelances -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/ktheyllq.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                CV reçus
+                                <span class="badge badge-count" id="cvsCount" style="margin-left:8px;background:#bee3f8;color:#2b6cb0;border-radius:20px;padding:2px 12px;font-size:0.75rem;">0</span>
+                            </div>
+                            <div class="table-wrap" style="margin-top:12px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Freelance</th>
+                                            <th>Email</th>
+                                            <th>Compétences</th>
+                                            <th>Fichier</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cvsTableBody">
+                                        <tr><td colspan="5" style="text-align:center;color:#718096;padding:24px;">Chargement...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Documents partagés -->
+                        <div class="settings-card">
+                            <div class="settings-card-header">
+                                <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;"></lord-icon>
+                                Documents partagés
+                                <span class="badge badge-count" id="docsCount" style="margin-left:8px;background:#bee3f8;color:#2b6cb0;border-radius:20px;padding:2px 12px;font-size:0.75rem;">0</span>
+                            </div>
+                            <div class="table-wrap" style="margin-top:12px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Sujet</th>
+                                            <th>Expéditeur</th>
+                                            <th>Destinataire</th>
+                                            <th>Fichier</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="docsTableBody">
+                                        <tr><td colspan="5" style="text-align:center;color:#718096;padding:24px;">Chargement...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -1969,6 +2049,7 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                 dashboard: 'Tableau de bord', users: 'Utilisateurs',
                 freelancers: 'Validation Freelances', payments: 'Paiements',
                 disputes: 'Litiges', missions: 'Missions',
+                messages: 'Messages',
                 notifications: 'Notifications',
                 documents: 'Documents', settings: 'Parametres'
             };
@@ -1977,6 +2058,8 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
 
             if (section === 'settings') loadSettings();
             if (section === 'notifications') clearNotifications();
+            if (section === 'messages') { clearNotifications(); fetchMessages(); }
+            if (section === 'documents') { fetchDocuments(); markDocumentsRead(); }
         }
 
         // ===== FETCH USERS (page Utilisateurs) =====
@@ -2034,6 +2117,121 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                     `;
                 });
             } catch (e) { console.error('Erreur chargement litiges', e); }
+        }
+
+        // ===== FETCH DOCUMENTS (page Documents) =====
+        async function fetchDocuments() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_data' %}?type=documents");
+                const data = await resp.json();
+
+                // CVs
+                const cvsBody = document.getElementById('cvsTableBody');
+                if (cvsBody) {
+                    cvsBody.innerHTML = '';
+                    (data.cvs || []).forEach(cv => {
+                        const fileIcon = cv.file_url.toLowerCase().endsWith('.pdf')
+                            ? 'https://cdn.lordicon.com/nocovbne.json'
+                            : 'https://cdn.lordicon.com/gqzfhudw.json';
+                        cvsBody.innerHTML += `
+                            <tr>
+                                <td><div class="user-cell"><div class="av freelance">${(cv.freelance || '??').substring(0,2).toUpperCase()}</div><div><div class="name">${cv.freelance}</div></div></div></td>
+                                <td>${cv.freelance_email || '-'}</td>
+                                <td style="font-size:0.8rem;color:#4a5568;">${cv.skills || '-'}</td>
+                                <td>
+                                    <a href="${cv.file_url}" target="_blank" class="doc-link" title="Ouvrir ${cv.file_name}">
+                                        <lord-icon src="${fileIcon}" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                        <span style="text-decoration:underline;">${cv.file_name}</span>
+                                    </a>
+                                </td>
+                                <td style="white-space:nowrap;font-size:0.82rem;">${cv.created_at}</td>
+                            </tr>
+                        `;
+                    });
+                    if ((data.cvs || []).length === 0) {
+                        cvsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#718096;padding:24px;">Aucun CV reçu pour le moment.</td></tr>';
+                    }
+                }
+                document.getElementById('cvsCount').textContent = (data.cvs || []).length;
+
+                // Documents partagés
+                const docsBody = document.getElementById('docsTableBody');
+                if (docsBody) {
+                    docsBody.innerHTML = '';
+                    (data.documents || []).forEach(d => {
+                        const fileIcon = d.file_url.toLowerCase().endsWith('.pdf')
+                            ? 'https://cdn.lordicon.com/nocovbne.json'
+                            : 'https://cdn.lordicon.com/gqzfhudw.json';
+                        docsBody.innerHTML += `
+                            <tr>
+                                <td><strong>${d.title}</strong>${d.message ? `<br><span style="font-size:0.75rem;color:#718096;">${d.message}</span>` : ''}</td>
+                                <td>${d.sender}</td>
+                                <td>${d.recipient}</td>
+                                <td>
+                                    <a href="${d.file_url}" target="_blank" class="doc-link" title="Ouvrir ${d.file_name}">
+                                        <lord-icon src="${fileIcon}" trigger="hover" colors="primary:#4299e1" style="width:22px;height:22px;vertical-align:middle;display:inline-block;"></lord-icon>
+                                        <span style="text-decoration:underline;">${d.file_name}</span>
+                                    </a>
+                                </td>
+                                <td style="white-space:nowrap;font-size:0.82rem;">${d.created_at}</td>
+                            </tr>
+                        `;
+                    });
+                    if ((data.documents || []).length === 0) {
+                        docsBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#718096;padding:24px;">Aucun document partagé pour le moment.</td></tr>';
+                    }
+                }
+                document.getElementById('docsCount').textContent = (data.documents || []).length;
+            } catch (e) { console.error('Erreur chargement documents', e); }
+        }
+
+        // ===== MARK DOCUMENTS AS READ =====
+        async function markDocumentsRead() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                    body: JSON.stringify({ action: 'mark_documents_read' })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    const badge = document.getElementById('badge-documents');
+                    if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
+                }
+            } catch (e) { console.error('Erreur marquage documents', e); }
+        }
+
+        // ===== FETCH MESSAGES =====
+        async function fetchMessages() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_data' %}?type=messages");
+                const data = await resp.json();
+                const container = document.getElementById('messagesContainer');
+                if (!container) return;
+                container.innerHTML = '';
+                (data.messages || []).forEach(m => {
+                    container.innerHTML += `
+                        <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #edf2f7;">
+                            <div class="av ${m.avClass || 'admin'}" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.85rem;background:#ebf8ff;color:#4299e1;">${m.initials || '?'}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <strong style="font-size:0.9rem;color:#1a365d;">${m.sender_name}</strong>
+                                    <span style="font-size:0.72rem;color:#718096;">${m.created_at}</span>
+                                </div>
+                                <p style="font-size:0.82rem;color:#4a5568;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.text}</p>
+                            </div>
+                            <a href="${m.chat_url || '#'}" class="doc-link" style="flex-shrink:0;" title="Répondre">
+                                <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#4299e1" style="width:20px;height:20px;"></lord-icon>
+                            </a>
+                        </div>
+                    `;
+                });
+                if ((data.messages || []).length === 0) {
+                    container.innerHTML = '<p style="color:#718096;text-align:center;font-size:0.95rem;">Aucun message non lu.</p>';
+                }
+                const badge = document.getElementById('badge-messages');
+                if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
+            } catch (e) { console.error('Erreur chargement messages', e); }
         }
 
         // ===== LOGOUT =====

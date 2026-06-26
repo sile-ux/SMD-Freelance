@@ -318,7 +318,7 @@
                 <div class="menu-label">Navigation</div>
                 <a href="{% url 'accounts:home' %}" class="menu-item"><i class="fas fa-home"></i> Accueil</a>
                 <a href="{% url 'contracts:contract_list' %}" class="menu-item active"><i class="fas fa-briefcase"></i> Missions</a>
-                <a href="{% url 'contracts:liste_freelanceur' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
+                <a href="{% url 'accounts:freelance_list' %}" class="menu-item"><i class="fas fa-user-tie"></i> Freelancers</a>
                 <a href="{% url 'chat:latest_chat' %}" class="menu-item"><i class="fas fa-envelope"></i> Messages</a>
 
                 <div class="menu-label">Suivi</div>
@@ -487,7 +487,7 @@
             if (!confirm('Envoyer votre candidature pour cette mission ?')) return;
             btn.textContent = 'Envoi...'; btn.disabled = true;
 
-            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0', '/' + id + '/'), {
+            fetch('{% url "contracts:apply_to_mission" 0 %}'.replace('/0/', '/' + id + '/'), {
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCSRF(), 'X-Requested-With': 'XMLHttpRequest' },
             })

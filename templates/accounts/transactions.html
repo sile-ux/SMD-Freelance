@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <style>
         /* ===== RESET & BASE ===== */
         * {
@@ -124,96 +125,71 @@
 
         /* ===== SOLDE ===== */
         .balance-card {
-            background: linear-gradient(135deg, #00B4D8, #0096C7);
-            border-radius: 16px;
-            padding: 14px 20px;
-            margin: 0 20px 16px 20px;
+            background: #00B4D8;
+            border-radius: 10px;
+            padding: 6px 12px;
+            margin: 0 16px 8px 16px;
             color: #fff;
             flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: inline-block;
+            min-width: 80px;
+            width: auto;
+            max-width: 100%;
         }
 
         .balance-card .balance-info .balance-label {
-            font-size: 12px;
+            font-size: 13px;
             opacity: 0.8;
+            white-space: nowrap;
         }
 
         .balance-card .balance-info .balance-amount {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
+            white-space: nowrap;
         }
 
-        .balance-card .balance-info .balance-sub {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 2px;
-        }
-
-        .balance-card .balance-action button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .balance-card .balance-action button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* ===== ONGLETS ===== */
-        .tabs {
+        /* ===== CARTES ACTIONS ===== */
+        .action-cards {
             display: flex;
-            gap: 4px;
-            padding: 0 20px 12px 20px;
+            gap: 8px;
+            padding: 0 16px 8px 16px;
             flex-shrink: 0;
-            border-bottom: 1px solid #f0f4f8;
         }
 
-        .tab {
+        .action-card {
             flex: 1;
             padding: 10px 8px;
-            border: none;
-            background: transparent;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
             font-size: 13px;
             font-weight: 600;
-            color: #6b7280;
-            cursor: pointer;
-            border-radius: 12px 12px 0 0;
-            transition: all 0.3s;
-            position: relative;
-            text-align: center;
-        }
-
-        .tab:hover {
             color: #1a1a2e;
-            background: #f8fafc;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            width: auto;
         }
 
-        .tab.active {
-            color: #00B4D8;
+        .action-card:hover {
+            border-color: #00B4D8;
+            background: #f0faff;
+        }
+
+        .action-card.active {
+            border-color: #00B4D8;
             background: #e3f4fa;
+            color: #00B4D8;
         }
 
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 20%;
-            right: 20%;
-            height: 3px;
-            background: #00B4D8;
-            border-radius: 3px 3px 0 0;
-        }
-
-        .tab i {
-            margin-right: 6px;
+        .action-card lord-icon {
+            display: block;
         }
 
         /* ===== ZONE DE CONTENU SCROLLABLE ===== */
@@ -264,14 +240,14 @@
         }
 
         .section-title {
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 600;
             color: #1a1a2e;
             margin-bottom: 10px;
         }
 
         .section-desc {
-            font-size: 13px;
+            font-size: 14px;
             color: #6b7280;
             margin-bottom: 14px;
         }
@@ -475,9 +451,7 @@
         }
 
         .success-screen .success-icon {
-            font-size: 60px;
-            color: #22c55e;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .success-screen .success-title {
@@ -588,15 +562,16 @@
             transform: translateX(-50%) translateY(100px);
             background: #1a1a2e;
             color: #fff;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
             opacity: 0;
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             z-index: 2000;
-            max-width: 90%;
+            max-width: 85%;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            line-height: 1.4;
         }
 
         .notification.show {
@@ -671,7 +646,7 @@
                 padding: 12px;
             }
             .success-screen .success-icon {
-                font-size: 48px;
+                margin-bottom: 8px;
             }
             .success-screen .success-title {
                 font-size: 20px;
@@ -736,10 +711,10 @@
         <!-- ===== EN-TÊTE ===== -->
         <div class="header">
             <a href="{% url 'accounts:dashboard' %}" class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i></a>
-            <div class="logo">SMD-<span>Tech</span></div>
+            <div class="logo">CMD-<span>Freelance</span></div>
             <div class="header-actions">
                 <button class="menu-icon" id="menuIcon">
-                    <i class="fas fa-bars"></i>
+                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" colors="primary:#1a1a2e" style="width:24px;height:24px;"></lord-icon>
                 </button>
             </div>
         </div>
@@ -751,31 +726,25 @@
         </div>
 
         <!-- ===== SOLDE ===== -->
-        <div class="balance-card">
+        <div class="balance-card" id="balanceCard">
             <div class="balance-info">
                 <div class="balance-label">Solde disponible</div>
                 <div class="balance-amount" id="balanceAmount">{{ wallet.balance|intcomma }} CFA</div>
-                <div class="balance-sub">Dernière mise à jour : {{ wallet.updated_at|date:"d/m/Y H:i" }}</div>
-            </div>
-            <div class="balance-action">
-                <button onclick="showNotification('📊 Historique des transactions', 'info')">
-                    <i class="fas fa-history"></i>
-                </button>
             </div>
         </div>
 
         {% if pending_application %}
         <!-- ===== CONFIRMATION PAIEMENT CANDIDATURE ===== -->
-        <div class="accept-card" style="background:linear-gradient(135deg,#ebf8ff,#e0f2fe);border:2px solid #00B4D8;border-radius:16px;padding:20px;margin:16px 0;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                <div style="width:40px;height:40px;border-radius:50%;background:#00B4D8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
+        <div class="accept-card" style="background:linear-gradient(135deg,#ebf8ff,#e0f2fe);border:1.5px solid #00B4D8;border-radius:12px;padding:12px 16px;margin:10px 16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:#00B4D8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">
                     {{ pending_application.freelance.username|make_list|first|upper }}
                 </div>
                 <div>
-                    <div style="font-size:16px;font-weight:700;color:#1a365d;">
+                    <div style="font-size:15px;font-weight:700;color:#1a365d;">
                         {{ pending_application.freelance.username }}
                         {% if pending_application.freelance.freelance_profile.title %}
-                        <span style="font-weight:400;font-size:13px;color:#4a5568;">· {{ pending_application.freelance.freelance_profile.title }}</span>
+                        <span style="font-weight:400;font-size:12px;color:#4a5568;">· {{ pending_application.freelance.freelance_profile.title }}</span>
                         {% endif %}
                     </div>
                     <div style="font-size:13px;color:#2b6cb0;">
@@ -784,7 +753,7 @@
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:#2d3748;margin-bottom:14px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:13px;color:#2d3748;margin-bottom:10px;">
                 <div><strong>Mission :</strong> {{ pending_application.mission.title }}</div>
                 <div><strong>Catégorie :</strong> {{ pending_application.mission.category }}</div>
                 <div><strong>Budget :</strong> {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }}</div>
@@ -802,36 +771,37 @@
                 {% csrf_token %}
                 <input type="hidden" name="section" value="accept_application">
                 <input type="hidden" name="application_id" value="{{ pending_application.id }}">
-                <div style="display:flex;gap:10px;">
-                    <button type="submit" style="flex:1;background:#10b981;color:#fff;border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
-                        ✅ Confirmer le paiement — {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }}
+                <div style="display:flex;gap:8px;">
+                    <button type="submit" style="flex:1;background:#10b981;color:#fff;border:none;padding:10px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+                        ✅ Confirmer — {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }}
                     </button>
-                    <a href="{% url 'accounts:transaction' %}" style="background:#e5e7eb;color:#374151;border:none;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;">
+                    <a href="{% url 'accounts:transaction' %}" style="background:#e5e7eb;color:#374151;border:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;">
                         Annuler
                     </a>
                 </div>
             </form>
             {% else %}
-            <div style="background:#fee2e2;border-radius:10px;padding:14px;color:#991b1b;font-size:14px;font-weight:600;text-align:center;">
-                ❌ Solde insuffisant — Vous disposez de {{ wallet.balance|intcomma }} CFA sur les {{ pending_application.mission.budget|fcfa:pending_application.mission.currency }} requis.
-                <div style="margin-top:10px;font-weight:400;">
-                    Veuillez d'abord <a href="#tab-deposit" onclick="switchTab('deposit')" style="color:#00B4D8;font-weight:600;">effectuer un dépôt</a> sur votre compte.
-                </div>
+            <div style="background:#fee2e2;border-radius:6px;padding:6px 10px;color:#991b1b;font-size:12px;line-height:1.3;">
+                <span style="font-weight:600;">❌ Solde insuffisant</span> — <strong>{{ wallet.balance|intcomma }} CFA</strong> / <strong>{{ pending_application.mission.budget|fcfa:pending_application.mission.currency }}</strong>
+                <a href="#tab-deposit" onclick="switchTab('deposit')" style="color:#00B4D8;font-weight:600;white-space:nowrap;">Dépôt</a>
             </div>
             {% endif %}
         </div>
         {% endif %}
 
-        <!-- ===== ONGLETS ===== -->
-        <div class="tabs">
-            <button class="tab active" data-tab="deposit">
-                <i class="fas fa-arrow-down"></i> Dépôt
+        <!-- ===== CARTES ACTIONS ===== -->
+        <div class="action-cards">
+            <button class="action-card active" data-tab="deposit">
+                <lord-icon src="https://cdn.lordicon.com/kkvxgzfj.json" trigger="hover" colors="primary:#00B4D8" style="width:22px;height:22px;"></lord-icon>
+                <span>Dépôt</span>
             </button>
-            <button class="tab" data-tab="mission">
-                <i class="fas fa-briefcase"></i> Mission
+            <button class="action-card" data-tab="mission">
+                <lord-icon src="https://cdn.lordicon.com/nocovbne.json" trigger="hover" colors="primary:#6b7280" style="width:22px;height:22px;"></lord-icon>
+                <span>Mission</span>
             </button>
-            <button class="tab" data-tab="withdraw">
-                <i class="fas fa-arrow-up"></i> Retrait
+            <button class="action-card" data-tab="withdraw">
+                <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#6b7280" style="width:22px;height:22px;"></lord-icon>
+                <span>Retrait</span>
             </button>
         </div>
 
@@ -855,6 +825,7 @@
                         <option value="wave">Wave</option>
                         <option value="mtn">MTN Mobile Money</option>
                         <option value="stripe">Carte bancaire (Stripe)</option>
+                        <option value="test">🧪 TEST (simulation — crédit immédiat)</option>
                     </select>
                 </div>
 
@@ -897,12 +868,12 @@
                 </div>
 
                 <button type="submit" class="btn-primary" id="depositBtn">
-                    <span class="btn-text"><i class="fas fa-lock"></i> Déposer maintenant</span>
-                    <span class="spinner"><i class="fas fa-spinner"></i></span>
+                    <span class="btn-text"><lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#ffffff" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Déposer maintenant</span>
+                    <span class="spinner">⟳</span>
                 </button>
 
                 <div style="text-align:center;padding:12px 0 8px 0;font-size:12px;color:#6b7280;">
-                    <i class="fas fa-shield-alt" style="color:#00B4D8;"></i> Paiement sécurisé
+                    <lord-icon src="https://cdn.lordicon.com/msfukujo.json" trigger="hover" colors="primary:#00B4D8" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Paiement sécurisé
                 </div>
                 </form>
             </div>
@@ -984,16 +955,17 @@
                         <option value="orange">Orange Money</option>
                         <option value="wave">Wave</option>
                         <option value="stripe">Carte bancaire</option>
+                        <option value="test">🧪 TEST (simulation — débit immédiat)</option>
                     </select>
                 </div>
 
                 <button type="submit" class="btn-primary" id="missionBtn">
-                    <span class="btn-text"><i class="fas fa-lock"></i> Payer la mission</span>
-                    <span class="spinner"><i class="fas fa-spinner"></i></span>
+                    <span class="btn-text"><lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#ffffff" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Payer la mission</span>
+                    <span class="spinner">⟳</span>
                 </button>
 
                 <div style="text-align:center;padding:12px 0 8px 0;font-size:12px;color:#6b7280;">
-                    <i class="fas fa-shield-alt" style="color:#00B4D8;"></i> Les fonds sont sécurisés jusqu'à validation
+                    <lord-icon src="https://cdn.lordicon.com/msfukujo.json" trigger="hover" colors="primary:#00B4D8" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Les fonds sont sécurisés jusqu'à validation
                 </div>
                 </form>
             </div>
@@ -1015,6 +987,7 @@
                         <option value="wave">Wave</option>
                         <option value="mtn">MTN Mobile Money</option>
                         <option value="bank">Virement bancaire</option>
+                        <option value="test">🧪 TEST (simulation — débit immédiat)</option>
                     </select>
                 </div>
 
@@ -1057,26 +1030,26 @@
                 </div>
 
                 <button type="submit" class="btn-primary" id="withdrawBtn">
-                    <span class="btn-text"><i class="fas fa-lock"></i> Retirer maintenant</span>
-                    <span class="spinner"><i class="fas fa-spinner"></i></span>
+                    <span class="btn-text"><lord-icon src="https://cdn.lordicon.com/hiqvyypb.json" trigger="hover" colors="primary:#ffffff" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Retirer maintenant</span>
+                    <span class="spinner">⟳</span>
                 </button>
 
                 <div style="text-align:center;padding:12px 0 8px 0;font-size:12px;color:#6b7280;">
-                    <i class="fas fa-shield-alt" style="color:#00B4D8;"></i> Délai de traitement : 24-48h
+                    <lord-icon src="https://cdn.lordicon.com/msfukujo.json" trigger="hover" colors="primary:#00B4D8" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Délai de traitement : 24-48h
                 </div>
                 </form>
             </div>
 
             <!-- ===== ÉCRAN DE SUCCÈS GLOBAL ===== -->
             <div class="success-screen" id="successScreen">
-                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="success-icon"><lord-icon src="https://cdn.lordicon.com/mhczqzrn.json" trigger="loop" colors="primary:#22c55e" style="width:60px;height:60px;"></lord-icon></div>
                 <div class="success-title" id="successTitle">Opération réussie !</div>
                 <div class="success-desc" id="successDesc">Votre transaction a été effectuée avec succès.</div>
                 <div class="success-details" id="successDetails">
                     <!-- Rempli dynamiquement -->
                 </div>
                 <button class="btn-secondary" onclick="resetAll()" style="width:100%;">
-                    <i class="fas fa-redo"></i> Effectuer une nouvelle transaction
+                    <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#374151" style="width:16px;height:16px;vertical-align:middle;"></lord-icon> Effectuer une nouvelle transaction
                 </button>
             </div>
 
@@ -1085,28 +1058,7 @@
         </div>
 
         <!-- ===== BOTTOM NAVIGATION ===== -->
-        <div class="bottom-nav">
-            <a href="{% url 'contracts:contract_list' %}" class="nav-item" data-page="freelancers">
-                <i class="fas fa-user-tie"></i>
-                <span>Freelancers</span>
-                <span class="nav-dot"></span>
-            </a>
-            <a href="{% url 'accounts:dashboard' %}" class="nav-item" data-page="missions">
-                <i class="fas fa-briefcase"></i>
-                <span>Missions</span>
-                <span class="nav-dot"></span>
-            </a>
-            <a href="{% url 'accounts:transaction' %}" class="nav-item active" data-page="transactions">
-                <i class="fas fa-wallet"></i>
-                <span>Transactions</span>
-                <span class="nav-dot"></span>
-            </a>
-            <a href="{% url 'accounts:parametre' %}" class="nav-item" data-page="settings">
-                <i class="fas fa-cog"></i>
-                <span>Paramètres</span>
-                <span class="nav-dot"></span>
-            </a>
-        </div>
+       
 
     </div>
 
@@ -1136,19 +1088,33 @@
         // ONGLETS
         // ============================================
         function switchTab(name) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.action-card').forEach(t => {
+                t.classList.remove('active');
+                const icon = t.querySelector('lord-icon');
+                if (icon) icon.setAttribute('colors', 'primary:#6b7280');
+            });
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            const tab = document.querySelector(`.tab[data-tab="${name}"]`);
-            if (tab) tab.classList.add('active');
+            const card = document.querySelector(`.action-card[data-tab="${name}"]`);
+            if (card) {
+                card.classList.add('active');
+                const icon = card.querySelector('lord-icon');
+                if (icon) icon.setAttribute('colors', 'primary:#00B4D8');
+            }
             const content = document.getElementById('tab-' + name);
             if (content) content.classList.add('active');
             currentTab = name;
             document.getElementById('successScreen').classList.remove('show');
         }
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.action-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.action-card').forEach(t => {
+                    t.classList.remove('active');
+                    const icon = t.querySelector('lord-icon');
+                    if (icon) icon.setAttribute('colors', 'primary:#6b7280');
+                });
                 this.classList.add('active');
+                const icon = this.querySelector('lord-icon');
+                if (icon) icon.setAttribute('colors', 'primary:#00B4D8');
                 const tabId = this.dataset.tab;
                 currentTab = tabId;
                 document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
@@ -1219,6 +1185,7 @@
         function updateDepositRecap() {
             const method = document.getElementById('depositMethod');
             const methodName = method.options[method.selectedIndex].text;
+            const methodVal = method.value;
             document.getElementById('depositMethodLabel').textContent = methodName;
             if (depositAmount === null) {
                 document.getElementById('depositAmountLabel').textContent = '—';
@@ -1228,7 +1195,7 @@
             }
             const amount = depositAmount || 0;
             document.getElementById('depositAmountLabel').textContent = amount.toLocaleString() + ' CFA';
-            const fees = amount >= 50000 ? 0 : (amount >= 10000 ? 100 : 0);
+            const fees = methodVal === 'test' ? 0 : (amount >= 50000 ? 0 : (amount >= 10000 ? 100 : 0));
             document.getElementById('depositFees').textContent = fees + ' CFA';
             document.getElementById('depositTotal').textContent = (amount + fees).toLocaleString() + ' CFA';
         }
@@ -1261,6 +1228,8 @@
             const freelance = document.getElementById('missionFreelance');
             const fText = freelance.selectedIndex > 0 ? freelance.options[freelance.selectedIndex].text : '—';
             document.getElementById('missionFreelanceLabel').textContent = fText;
+            const method = document.getElementById('missionMethod');
+            const methodVal = method ? method.value : 'wallet';
             if (missionAmount === null) {
                 document.getElementById('missionAmountLabel').textContent = '—';
                 document.getElementById('missionFeeLabel').textContent = '—';
@@ -1269,10 +1238,11 @@
             }
             const amount = missionAmount || 0;
             document.getElementById('missionAmountLabel').textContent = amount.toLocaleString() + ' CFA';
-            const fee = Math.round(amount * 0.05);
+            const fee = methodVal === 'test' ? 0 : Math.round(amount * 0.05);
             document.getElementById('missionFeeLabel').textContent = fee.toLocaleString() + ' CFA';
             document.getElementById('missionTotal').textContent = (amount + fee).toLocaleString() + ' CFA';
         }
+        document.getElementById('missionMethod')?.addEventListener('change', updateMissionRecap);
 
         // ============================================
         // 3. RETRAIT — Mise à jour du récap
@@ -1309,6 +1279,7 @@
         function updateWithdrawRecap() {
             const method = document.getElementById('withdrawMethod');
             const methodName = method.options[method.selectedIndex].text;
+            const methodVal = method.value;
             document.getElementById('withdrawMethodLabel').textContent = methodName;
             if (withdrawAmount === null) {
                 document.getElementById('withdrawAmountLabel').textContent = '—';
@@ -1318,7 +1289,7 @@
             }
             const amount = withdrawAmount || 0;
             document.getElementById('withdrawAmountLabel').textContent = amount.toLocaleString() + ' CFA';
-            const fees = Math.round(amount * 0.015);
+            const fees = methodVal === 'test' ? 0 : Math.round(amount * 0.015);
             document.getElementById('withdrawFees').textContent = fees + ' CFA';
             document.getElementById('withdrawTotal').textContent = (amount - fees).toLocaleString() + ' CFA';
         }
@@ -1367,6 +1338,23 @@
         });
 
         // ============================================
+        // AJUSTE LA LARGEUR DE LA CARTE SOLDE
+        // ============================================
+        function ajusterCarteSolde() {
+            const card = document.getElementById('balanceCard');
+            const amount = document.getElementById('balanceAmount');
+            if (!card || !amount) return;
+            const text = amount.textContent.trim();
+            const len = text.length;
+            const base = 80;
+            const pxParCaractere = 10;
+            const w = Math.min(base + len * pxParCaractere, window.innerWidth - 64);
+            card.style.width = w + 'px';
+        }
+        ajusterCarteSolde();
+        window.addEventListener('resize', ajusterCarteSolde);
+
+        // ============================================
         // BOUTON RETOUR
         // ============================================
         document.getElementById('backBtn').addEventListener('click', function() {
@@ -1378,25 +1366,6 @@
         // ============================================
         document.getElementById('menuIcon').addEventListener('click', function() {
             showNotification('📱 Menu latéral', 'info');
-        });
-
-        // ============================================
-        // NAVIGATION BOTTOM
-        // ============================================
-        document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const page = this.dataset.page;
-                document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
-                this.classList.add('active');
-                const pageNames = {
-                    freelancers: 'Freelancers',
-                    missions: 'Missions',
-                    transactions: 'Transactions',
-                    settings: 'Paramètres'
-                };
-                showNotification(`📱 Navigation vers ${pageNames[page] || page}`, 'info');
-            });
         });
 
         // ============================================
@@ -1412,10 +1381,6 @@
             updateMissionRecap();
             updateWithdrawRecap();
         }, 100);
-
-        setTimeout(() => {
-            showNotification('💡 Sélectionnez une action dans les onglets', 'info');
-        }, 500);
     </script>
 
 </body>

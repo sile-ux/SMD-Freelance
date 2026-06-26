@@ -1,73 +1,314 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - CMD-Freelance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
 
-{% block title %}Connexion - SMD-Tech{% endblock %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block content %}
-<div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-sky-50 shadow-2xl shadow-indigo-100/60">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_18%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.1),transparent_15%)]"></div>
-    <div class="relative grid min-h-[78vh] lg:grid-cols-[1fr_1.05fr]">
-        <div class="flex items-center justify-center p-8 md:p-12">
-            <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-xl shadow-slate-200/60 backdrop-blur-sm">
-                <div class="mb-8 text-center">
-                    <span class="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-700">Bienvenue</span>
-                    <h2 class="mt-3 text-3xl font-bold text-slate-900">Ravi de vous revoir</h2>
-                    <p class="mt-2 text-sm leading-6 text-slate-500">Connectez-vous à votre espace SMD-Tech pour reprendre vos projets en main.</p>
-                </div>
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Rubik', sans-serif;
+            background: #f0f4f8;
+            overflow: hidden;
+        }
 
-                <form method="POST" class="space-y-5">
-                    {% csrf_token %}
+        .login-wrap {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ebf8ff 0%, #f0f4f8 100%);
+            padding: 20px;
+        }
 
-                    <div>
-                        <label for="username" class="mb-1 block text-sm font-semibold text-slate-700">Nom d'utilisateur</label>
-                        <input type="text" name="username" id="username" required
-                               class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200">
-                    </div>
+        .login-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #dce7f5;
+            padding: 40px 44px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 15px 50px rgba(66, 153, 225, 0.10);
+        }
 
-                    <div>
-                        <label for="password" class="mb-1 block text-sm font-semibold text-slate-700">Mot de passe</label>
-                        <input type="password" name="password" id="password" required
-                               class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200">
-                    </div>
+        .login-card .logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
 
-                    <button type="submit" class="mt-2 w-full rounded-2xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
-                        Se connecter
-                    </button>
-                </form>
+        .login-card .logo lord-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 6px;
+        }
 
-                <div class="mt-6 border-t border-slate-100 pt-6 text-center">
-                    <p class="text-sm text-slate-500">
-                        Nouveau ici ?
-                        <a href="{% url 'accounts:choice_register' %}" class="font-semibold text-indigo-600 hover:text-indigo-700">Créer un compte</a>
-                    </p>
-                </div>
+        .login-card .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1a365d;
+            letter-spacing: -0.3px;
+        }
+
+        .login-card .logo h1 span {
+            color: #4299e1;
+        }
+
+        .login-card .logo p {
+            color: #718096;
+            font-size: 0.82rem;
+            margin-top: 2px;
+        }
+
+        .login-card .title {
+            margin-bottom: 24px;
+        }
+
+        .login-card .title h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 2px;
+        }
+
+        .login-card .title .sub {
+            font-size: 0.82rem;
+            color: #718096;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a365d;
+            margin-bottom: 5px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .input-wrap .icon lord-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1.5px solid #dce7f5;
+            border-radius: 10px;
+            font-family: 'Rubik', sans-serif;
+            font-size: 0.9rem;
+            transition: 0.15s;
+            background: #fafbfc;
+        }
+
+        .input-wrap input:focus {
+            border-color: #4299e1;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08);
+        }
+
+        .input-wrap input::placeholder {
+            color: #a0aec0;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #4299e1;
+            color: #fff;
+            font-family: 'Rubik', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-login:hover {
+            background: #3182ce;
+        }
+
+        .btn-login:active {
+            transform: scale(0.98);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-msg {
+            display: none;
+            background: #fed7d7;
+            color: #e53e3e;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-msg.show {
+            display: flex;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid #edf2f7;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .footer a {
+            color: #4299e1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 28px 20px;
+                border-radius: 16px;
+            }
+
+            .login-card .logo h1 {
+                font-size: 1.2rem;
+            }
+
+            .login-card .logo lord-icon {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            animation: fadeInUp 0.4s ease forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrap">
+
+        <div class="login-card">
+
+            <!-- Logo -->
+            <div class="logo">
+                <lord-icon
+                    src="https://cdn.lordicon.com/ktheyllq.json"
+                    trigger="loop"
+                    colors="primary:#4299e1"
+                    style="width:48px;height:48px;">
+                </lord-icon>
+                <h1>CMD-<span>Freelance</span></h1>
+                <p>Plateforme de mise en relation</p>
             </div>
+
+            <div class="title">
+                <h2>Connexion</h2>
+                <div class="sub">Entrez vos identifiants</div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="error-msg show">
+                    <lord-icon src="https://cdn.lordicon.com/uwlzqzys.json" trigger="loop" colors="primary:#e53e3e" style="width:18px;height:18px;flex-shrink:0;"></lord-icon>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulaire -->
+            <form method="POST" action="{% url 'accounts:login' %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Nom d'utilisateur</label>
+                    <div class="input-wrap">
+                        <span class="icon">
+                            <lord-icon src="https://cdn.lordicon.com/npwmqdcn.json" trigger="hover" colors="primary:#718096" style="width:18px;height:18px;"></lord-icon>
+                        </span>
+                        <input type="text" name="username" placeholder="Votre nom d'utilisateur" required autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <div class="input-wrap">
+                        <span class="icon">
+                            <lord-icon src="https://cdn.lordicon.com/sspibjsl.json" trigger="hover" colors="primary:#718096" style="width:18px;height:18px;"></lord-icon>
+                        </span>
+                        <input type="password" name="password" placeholder="Votre mot de passe" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;"></lord-icon>
+                    Se connecter
+                </button>
+
+            </form>
+
+            <div class="footer">
+                Pas encore de compte ? <a href="{% url 'accounts:choice_register' %}">S'inscrire</a>
+            </div>
+
         </div>
 
-        <div class="relative hidden overflow-hidden lg:block">
-            <div class="absolute inset-0 bg-cover bg-center"
-                 style="background-image: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80');"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-slate-900/75 via-slate-800/45 to-indigo-900/35"></div>
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_12%)]"></div>
-            <div class="relative flex h-full flex-col justify-end p-10 text-white">
-                <span class="mb-3 inline-flex w-fit rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-50 backdrop-blur-sm">
-                    Freelance & Clients
-                </span>
-                <h3 class="max-w-lg text-4xl font-semibold leading-tight">Trouver les bons experts pour chaque projet</h3>
-                <p class="mt-3 max-w-md text-sm leading-6 text-slate-100/90">
-                    Une plateforme pensée pour rapprocher les talents, les idées et les résultats concrets.
-                </p>
-                <div class="mt-6 flex gap-3">
-                    <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-sm">
-                        <p class="text-xs text-slate-200">Clients satisfaits</p>
-                        <p class="text-xl font-semibold">500+</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-sm">
-                        <p class="text-xs text-slate-200">Freelances actifs</p>
-                        <p class="text-xl font-semibold">300+</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
-{% endblock %}
+
+</body>
+</html>

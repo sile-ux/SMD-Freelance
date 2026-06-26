@@ -102,21 +102,30 @@ def freelance_register_view(request):
                 with transaction.atomic():
                     user = form.save(commit=False)
                     user.role = User.Role.FREELANCE.value
+                    user.phone_number = request.POST.get('phone', '')
                     user.set_password(form.cleaned_data['password'])
                     user.save()
 
-                    FreelanceProfile.objects.create(
+                    cv_file = request.FILES.get('cv')
+                    profile = FreelanceProfile.objects.create(
                         user=user,
                         title=form.cleaned_data.get('title', 'Développeur'),
                         skills=form.cleaned_data.get('skills', ''),
                         hourly_rate=form.cleaned_data.get('hourly_rate', 0.00),
-                        bio=form.cleaned_data.get('bio', '')
+                        bio=form.cleaned_data.get('bio', ''),
+                        github_url=request.POST.get('github', ''),
+                        linkedin_url=request.POST.get('linkedin', ''),
+                        cv=cv_file if cv_file else None
                     )
-                messages.success(request, "Compte Freelancer créé ! En attente de validation admin.")
-                return redirect('accounts:login')  # AJOUTÉ : namespace 'accounts:'
+                messages.success(request, "Compte Freelancer créé avec succès ! Votre CV a été reçu. En attente de validation admin.")
+                return redirect('accounts:login')
             except Exception as e:
                 print(f"❌ ERREUR SCRIPT FREELANCE: {e}")
                 messages.error(request, "Une erreur est survenue lors de la création de votre profil.")
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = FreelanceRegisterForm()
     return render(request, 'accounts/register_freelance.html', {'form': form})
@@ -346,6 +355,7 @@ def admin_dashboard(request):
     )
 
     # Badges pour la sidebar
+    unread_documents = Document.objects.filter(recipient=user, is_read=False).count()
     sidebar_badges = {
         'users': total_users,
         'pending_freelances': pending_freelances,
@@ -353,6 +363,8 @@ def admin_dashboard(request):
         'open_disputes': open_disputes + in_progress_disputes,
         'missions': active_missions,
         'notifications': unread_count + pending_freelances + pending_payments,
+        'unread_messages': unread_count,
+        'unread_documents': unread_documents,
     }
 
     context = {
@@ -421,12 +433,22 @@ def transaction_view(request):
                     messages.error(request, 'Le montant minimum est de 100 CFA.')
                     return redirect('accounts:transaction')
                 fee = 0 if amount >= 50000 else (100 if amount >= 10000 else 0)
-                Transaction.objects.create(
-                    user=user, type='deposit', amount=amount, fee=fee,
-                    method=method, status='pending', phone=phone,
-                    description=f"Dépôt de {amount:,.0f} CFA via {dict(Transaction.METHOD_CHOICES).get(method, method)}"
-                )
-                messages.success(request, f'Demande de dépôt de {amount:,.0f} CFA enregistrée. Vous allez être redirigé vers le service de paiement.')
+                if method == 'test':
+                    wallet.balance += amount
+                    wallet.save()
+                    Transaction.objects.create(
+                        user=user, type='deposit', amount=amount, fee=0,
+                        method='test', status='completed', phone=phone,
+                        description=f"Dépôt TEST de {amount:,.0f} CFA — crédité immédiatement"
+                    )
+                    messages.success(request, f'✅ Dépôt TEST réussi ! {amount:,.0f} CFA ajoutés à votre solde.')
+                else:
+                    Transaction.objects.create(
+                        user=user, type='deposit', amount=amount, fee=fee,
+                        method=method, status='pending', phone=phone,
+                        description=f"Dépôt de {amount:,.0f} CFA via {dict(Transaction.METHOD_CHOICES).get(method, method)}"
+                    )
+                    messages.success(request, f'Demande de dépôt de {amount:,.0f} CFA enregistrée. Vous allez être redirigé vers le service de paiement.')
             except (ValueError, TypeError):
                 messages.error(request, 'Montant invalide.')
             return redirect('accounts:transaction')
@@ -444,18 +466,29 @@ def transaction_view(request):
                     return redirect('accounts:transaction')
                 fee = round(amount * 0.05)
                 total = amount + fee
-                if float(wallet.balance) < total:
+                if float(wallet.balance) < total and method != 'test':
                     messages.error(request, f'Solde insuffisant. Vous disposez de {float(wallet.balance):,.0f} CFA.')
                     return redirect('accounts:transaction')
                 contract = Contract.objects.get(id=contract_id, client=user) if contract_id else None
                 freelance_user = User.objects.get(id=freelance_id) if freelance_id else None
-                Transaction.objects.create(
-                    user=user, type='mission_payment', amount=amount, fee=fee,
-                    method=method, status='pending',
-                    contract=contract, freelance=freelance_user,
-                    description=f"Paiement mission '{contract.title if contract else 'N/A'}' — {amount:,.0f} CFA"
-                )
-                messages.success(request, f'Demande de paiement de {amount:,.0f} CFA enregistrée. En attente de confirmation.')
+                if method == 'test':
+                    wallet.balance -= amount
+                    wallet.save()
+                    Transaction.objects.create(
+                        user=user, type='mission_payment', amount=amount, fee=0,
+                        method='test', status='completed',
+                        contract=contract, freelance=freelance_user,
+                        description=f"Paiement mission TEST '{contract.title if contract else 'N/A'}' — {amount:,.0f} CFA"
+                    )
+                    messages.success(request, f'✅ Paiement TEST réussi ! {amount:,.0f} CFA débités de votre solde.')
+                else:
+                    Transaction.objects.create(
+                        user=user, type='mission_payment', amount=amount, fee=fee,
+                        method=method, status='pending',
+                        contract=contract, freelance=freelance_user,
+                        description=f"Paiement mission '{contract.title if contract else 'N/A'}' — {amount:,.0f} CFA"
+                    )
+                    messages.success(request, f'Demande de paiement de {amount:,.0f} CFA enregistrée. En attente de confirmation.')
             except (ValueError, TypeError):
                 messages.error(request, 'Montant invalide.')
             except Contract.DoesNotExist:
@@ -469,8 +502,7 @@ def transaction_view(request):
                 if float(wallet.balance) < amount:
                     messages.error(
                         request,
-                        f'Solde insuffisant. Vous disposez de {float(wallet.balance):,.0f} CFA, '
-                        f'le montant de la mission est de {amount:,.0f} CFA.'
+                        f'Solde insuffisant : {float(wallet.balance):,.0f} CFA / {amount:,.0f} CFA.'
                     )
                     return redirect(f'{request.path}?accept_application={pending_application.id}')
 
@@ -555,12 +587,22 @@ def transaction_view(request):
                 if not account or len(account) < 5:
                     messages.error(request, 'Veuillez saisir un numéro de compte valide.')
                     return redirect('accounts:transaction')
-                Transaction.objects.create(
-                    user=user, type='withdrawal', amount=amount, fee=fee,
-                    method=method, status='pending', account=account,
-                    description=f"Retrait de {amount:,.0f} CFA vers {dict(Transaction.METHOD_CHOICES).get(method, method)}"
-                )
-                messages.success(request, f'Demande de retrait de {amount:,.0f} CFA enregistrée. Traitement sous 24-48h.')
+                if method == 'test':
+                    wallet.balance -= amount
+                    wallet.save()
+                    Transaction.objects.create(
+                        user=user, type='withdrawal', amount=amount, fee=0,
+                        method='test', status='completed', account=account,
+                        description=f"Retrait TEST de {amount:,.0f} CFA — débité immédiatement"
+                    )
+                    messages.success(request, f'✅ Retrait TEST réussi ! {amount:,.0f} CFA débités de votre solde.')
+                else:
+                    Transaction.objects.create(
+                        user=user, type='withdrawal', amount=amount, fee=fee,
+                        method=method, status='pending', account=account,
+                        description=f"Retrait de {amount:,.0f} CFA vers {dict(Transaction.METHOD_CHOICES).get(method, method)}"
+                    )
+                    messages.success(request, f'Demande de retrait de {amount:,.0f} CFA enregistrée. Traitement sous 24-48h.')
             except (ValueError, TypeError):
                 messages.error(request, 'Montant invalide.')
             return redirect('accounts:transaction')
@@ -925,6 +967,63 @@ def admin_api_data(request):
             'active_missions': active_missions,
         })
 
+    if data_type == 'documents':
+        docs = Document.objects.select_related('sender', 'recipient').order_by('-created_at')
+        cvs = FreelanceProfile.objects.exclude(cv__isnull=True).exclude(cv='').select_related('user')
+
+        docs_data = []
+        for d in docs:
+            docs_data.append({
+                'id': d.id,
+                'type': 'document',
+                'title': d.subject or 'Sans titre',
+                'message': d.message[:100] if d.message else '',
+                'file_name': d.file.name.split('/')[-1] if d.file else '',
+                'file_url': d.file.url if d.file else '',
+                'sender': d.sender.username,
+                'recipient': d.recipient.username,
+                'created_at': d.created_at.strftime('%d/%m/%Y %H:%M'),
+            })
+
+        cvs_data = []
+        for f in cvs:
+            cvs_data.append({
+                'id': f.id,
+                'type': 'cv',
+                'title': f"CV — {f.user.get_full_name() or f.user.username}",
+                'file_name': f.cv.name.split('/')[-1] if f.cv else '',
+                'file_url': f.cv.url if f.cv else '',
+                'freelance': f.user.username,
+                'freelance_email': f.user.email,
+                'skills': f.skills[:80] if f.skills else '',
+                'created_at': f.create_at.strftime('%d/%m/%Y') if f.create_at else '',
+            })
+
+        return JsonResponse({'documents': docs_data, 'cvs': cvs_data})
+
+    if data_type == 'messages':
+        from chat.models import Thread, Message
+        admin_threads = request.user.client_threads.all()
+        messages_data = []
+        for t in admin_threads:
+            unread = t.messages.filter(is_read=False).exclude(sender=request.user).select_related('sender')
+            for m in unread:
+                role_map = {'ADMIN': 'Admin', 'FREELANCE': 'Freelance', 'CLIENT': 'Client'}
+                initials = (m.sender.first_name or m.sender.username)[:2].upper()
+                av_class = 'admin' if m.sender.role == 'ADMIN' else 'freelance' if m.sender.role == 'FREELANCE' else 'client'
+                messages_data.append({
+                    'id': m.id,
+                    'sender_name': m.sender.get_full_name() or m.sender.username,
+                    'sender_role': role_map.get(m.sender.role, ''),
+                    'text': m.text[:120],
+                    'created_at': m.created_at.strftime('%d/%m/%Y %H:%M'),
+                    'initials': initials,
+                    'avClass': av_class,
+                    'chat_url': f"/chat/freelance-messages/",
+                })
+        messages_data.sort(key=lambda x: x['created_at'], reverse=True)
+        return JsonResponse({'messages': messages_data})
+
     if data_type == 'settings':
         from .models import PlatformSettings
         s = PlatformSettings.get_instance()
@@ -977,12 +1076,32 @@ def admin_api_action(request):
             profile = FreelanceProfile.objects.get(user_id=user_id)
             profile.is_verified = True
             profile.save()
+
+            from chat.models import Thread, Message
+            recipient = profile.user
+            thread, _ = Thread.objects.get_or_create(client=request.user, freelance=recipient)
+            Message.objects.create(
+                thread=thread, sender=request.user,
+                text="🎉 Félicitations ! Votre inscription a été validée. Vous pouvez maintenant accéder à l'ensemble des fonctionnalités de la plateforme."
+            )
+
             return JsonResponse({'success': True, 'message': 'Freelance validé avec succès'})
         except FreelanceProfile.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Freelance introuvable'}, status=404)
 
     if action == 'validate_all_freelances':
-        count = FreelanceProfile.objects.filter(is_verified=False).update(is_verified=True)
+        pending = FreelanceProfile.objects.filter(is_verified=False).select_related('user')
+        count = pending.count()
+        from chat.models import Thread, Message
+        for profile in pending:
+            profile.is_verified = True
+            profile.save()
+            recipient = profile.user
+            thread, _ = Thread.objects.get_or_create(client=request.user, freelance=recipient)
+            Message.objects.create(
+                thread=thread, sender=request.user,
+                text="🎉 Félicitations ! Votre inscription a été validée. Vous pouvez maintenant accéder à l'ensemble des fonctionnalités de la plateforme."
+            )
         return JsonResponse({'success': True, 'message': f'{count} freelance(s) validé(s)'})
 
     if action == 'suspend_user':
@@ -1141,6 +1260,10 @@ def admin_api_action(request):
             cnt = t.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
             count += cnt
         return JsonResponse({'success': True, 'message': f'{count} notification(s) marquée(s) comme lue(s)'})
+
+    if action == 'mark_documents_read':
+        updated = Document.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+        return JsonResponse({'success': True, 'message': f'{updated} document(s) marqué(s) comme lu(s)'})
 
     if action == 'save_settings':
         from .models import PlatformSettings

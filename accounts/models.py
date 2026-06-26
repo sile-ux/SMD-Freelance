@@ -51,6 +51,8 @@ class FreelanceProfile(models.Model):
     preferred_categories = models.CharField(max_length=100, default='Toutes')
     min_budget = models.CharField(max_length=100, default='Aucun')
     auto_alerts = models.BooleanField(default=True)
+    cv = models.FileField(upload_to='cvs/', blank=True, null=True)
+    linkedin_url = models.URLField(max_length=500, blank=True, null=True)
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -156,6 +158,7 @@ class Transaction(models.Model):
         ('stripe', 'Carte bancaire'),
         ('bank', 'Virement bancaire'),
         ('wallet', 'Portefeuille SMD-Tech'),
+        ('test', 'TEST (simulation)'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
@@ -217,6 +220,7 @@ class Document(models.Model):
     message = models.TextField(blank=True)
     file = models.FileField(upload_to='documents/')
     created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Document de {self.sender.username} à {self.recipient.username} — {self.file.name}"
