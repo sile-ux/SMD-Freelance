@@ -161,7 +161,7 @@
                     <div class="budget-section">
                         <div class="budget">{{ mission.budget|fcfa:mission.currency }}</div>
                         <div class="payment-type">{{ mission.get_payment_type_display }}</div>
-                        <span class="status-badge {{ mission.status }}">{{ mission.get_status_display }}</span>
+                        <span class="status-badge {{ mission.status }}">{% if mission.status == 'in-progress' %}Déjà pris{% else %}{{ mission.get_status_display }}{% endif %}</span>
                     </div>
                 </div>
 
@@ -231,10 +231,16 @@
                     <a href="{% url 'contracts:contract_list' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour
                     </a>
-                    {% if user.is_authenticated and user.role == 'FREELANCE' and mission.status == 'open' %}
-                    <a href="{% url 'contracts:apply_to_mission' mission.id %}" class="btn btn-primary">
-                        <i class="fas fa-paper-plane"></i> Postuler
-                    </a>
+                    {% if user.is_authenticated and user.role == 'FREELANCE' %}
+                        {% if mission.status == 'open' %}
+                        <a href="{% url 'contracts:apply_to_mission' mission.id %}" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Postuler
+                        </a>
+                        {% elif mission.status == 'in-progress' %}
+                        <div style="padding:12px 20px;background:#fefcbf;border-radius:10px;border:1px solid #f6e05e;color:#975a16;font-weight:500;font-size:0.9rem;display:flex;align-items:center;gap:8px;width:100%;">
+                            <i class="fas fa-lock"></i> Cette mission est déjà prise.
+                        </div>
+                        {% endif %}
                     {% endif %}
                     {% if user.is_authenticated and mission.client %}
                     <a href="{% url 'chat:start_thread' mission.client.id %}" class="btn btn-secondary">

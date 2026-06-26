@@ -1001,6 +1001,28 @@ def admin_api_data(request):
 
         return JsonResponse({'documents': docs_data, 'cvs': cvs_data})
 
+    if data_type == 'pending_payments':
+        txns = Transaction.objects.filter(status='pending').select_related('user').order_by('-created_at')
+        data = []
+        for t in txns:
+            data.append({
+                'id': t.id,
+                'reference': t.reference,
+                'user': t.user.username,
+                'user_id': t.user.id,
+                'type': t.get_type_display(),
+                'type_raw': t.type,
+                'amount': float(t.amount),
+                'fee': float(t.fee),
+                'method': t.get_method_display(),
+                'method_raw': t.method,
+                'phone': t.phone,
+                'account': t.account,
+                'description': t.description,
+                'created_at': t.created_at.strftime('%d/%m/%Y %H:%M'),
+            })
+        return JsonResponse({'transactions': data})
+
     if data_type == 'messages':
         from chat.models import Thread, Message
         admin_threads = request.user.client_threads.all()
@@ -1065,7 +1087,7 @@ def admin_api_action(request):
     import json
     try:
         data = json.loads(request.body)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         data = request.POST
 
     action = data.get('action', '')
@@ -1264,6 +1286,77 @@ def admin_api_action(request):
     if action == 'mark_documents_read':
         updated = Document.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
         return JsonResponse({'success': True, 'message': f'{updated} document(s) marqué(s) comme lu(s)'})
+
+    if action == 'validate_payment':
+        transaction_id = data.get('transaction_id')
+        try:
+            txn = Transaction.objects.get(id=transaction_id, status='pending')
+            wallet, _ = Wallet.objects.get_or_create(user=txn.user)
+
+            if txn.type == 'deposit':
+                wallet.balance += txn.amount
+                wallet.save()
+            elif txn.type == 'mission_payment':
+                if float(wallet.balance) < float(txn.amount):
+                    return JsonResponse({'success': False, 'message': 'Solde insuffisant chez le client'}, status=400)
+                wallet.balance -= txn.amount
+                wallet.save()
+                admin_user = User.objects.filter(is_superuser=True).first()
+                if admin_user:
+                    admin_wallet, _ = Wallet.objects.get_or_create(user=admin_user)
+                    admin_wallet.balance += txn.amount
+                    admin_wallet.save()
+
+                if txn.contract and txn.contract.status == 'OPEN':
+                    txn.contract.status = 'IN_PROGRESS'
+                    txn.contract.save()
+
+                from contracts.models import Application, Mission
+                application = Application.objects.filter(
+                    mission__client=txn.user,
+                    freelance=txn.freelance,
+                    mission__status='open'
+                ).first()
+                if application:
+                    application.status = 'accepted'
+                    application.save()
+                    mission = application.mission
+                    mission.status = 'in-progress'
+                    mission.save()
+                    # Refuser les autres candidatures
+                    Application.objects.filter(mission=mission, status='pending').exclude(id=application.id).update(status='rejected')
+
+                from chat.models import Thread, Message
+                client = txn.user
+                freelance = txn.freelance
+                contract_title = txn.contract.title if txn.contract else 'N/A'
+                amount_str = f"{float(txn.amount):,.0f} CFA"
+
+                if freelance:
+                    thread_freelance, _ = Thread.objects.get_or_create(client=request.user, freelance=freelance)
+                    Message.objects.create(
+                        thread=thread_freelance, sender=request.user,
+                        text=f"✅ Paiement validé — {amount_str} pour la mission « {contract_title} ». Les fonds sont disponibles, vous pouvez commencer la mission. Bon courage !"
+                    )
+                if client:
+                    thread_client, _ = Thread.objects.get_or_create(client=client, freelance=request.user)
+                    Message.objects.create(
+                        thread=thread_client, sender=request.user,
+                        text=f"✅ Votre paiement de {amount_str} pour la mission « {contract_title} » a été validé. Les fonds sont disponibles et la mission peut commencer."
+                    )
+            elif txn.type == 'withdrawal':
+                if float(wallet.balance) < float(txn.amount):
+                    return JsonResponse({'success': False, 'message': 'Solde insuffisant'}, status=400)
+                wallet.balance -= txn.amount
+                wallet.save()
+            else:
+                return JsonResponse({'success': False, 'message': f'Type de transaction non pris en charge: {txn.type}'}, status=400)
+
+            txn.status = 'completed'
+            txn.save()
+            return JsonResponse({'success': True, 'message': f'Paiement {txn.reference} validé — {float(txn.amount):,.0f} CFA'})
+        except Transaction.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Transaction introuvable ou déjà traitée'}, status=404)
 
     if action == 'save_settings':
         from .models import PlatformSettings

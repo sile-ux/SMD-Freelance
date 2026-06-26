@@ -1558,9 +1558,10 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                         </div>
                     </div>
                     <div style="margin-top:18px;background:#fff;padding:22px;border-radius:12px;border:1px solid #dce7f5;">
-                        <p style="color:#718096;font-size:0.9rem;text-align:center;">
-                            Les paiements sont traités via Stripe. Consultez les transactions detaillees.
-                        </p>
+                        <h4 style="margin-bottom:14px;color:#1a365d;font-size:0.95rem;">Transactions en attente</h4>
+                        <div id="pendingPaymentsContainer">
+                            <p style="color:#718096;font-size:0.9rem;text-align:center;">Chargement...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -2060,6 +2061,7 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
             if (section === 'notifications') clearNotifications();
             if (section === 'messages') { clearNotifications(); fetchMessages(); }
             if (section === 'documents') { fetchDocuments(); markDocumentsRead(); }
+            if (section === 'payments') { fetchPendingPayments(); }
         }
 
         // ===== FETCH USERS (page Utilisateurs) =====
@@ -2199,6 +2201,63 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                     if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
                 }
             } catch (e) { console.error('Erreur marquage documents', e); }
+        }
+
+        // ===== FETCH PENDING PAYMENTS =====
+        async function fetchPendingPayments() {
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_data' %}?type=pending_payments");
+                const data = await resp.json();
+                const container = document.getElementById('pendingPaymentsContainer');
+                if (!container) return;
+                const txns = data.transactions || [];
+                if (txns.length === 0) {
+                    container.innerHTML = '<p style="color:#718096;font-size:0.9rem;text-align:center;">Aucune transaction en attente.</p>';
+                    return;
+                }
+                let html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.82rem;"><thead><tr style="background:#f7fafc;border-bottom:2px solid #e2e8f0;">';
+                html += '<th style="padding:10px 8px;text-align:left;color:#4a5568;">Réf.</th>';
+                html += '<th style="padding:10px 8px;text-align:left;color:#4a5568;">Utilisateur</th>';
+                html += '<th style="padding:10px 8px;text-align:left;color:#4a5568;">Type</th>';
+                html += '<th style="padding:10px 8px;text-align:right;color:#4a5568;">Montant</th>';
+                html += '<th style="padding:10px 8px;text-align:center;color:#4a5568;">Méthode</th>';
+                html += '<th style="padding:10px 8px;text-align:center;color:#4a5568;">Date</th>';
+                html += '<th style="padding:10px 8px;text-align:center;color:#4a5568;">Action</th>';
+                html += '</tr></thead><tbody>';
+                txns.forEach(t => {
+                    html += `<tr style="border-bottom:1px solid #edf2f7;">`;
+                    html += `<td style="padding:10px 8px;font-weight:600;color:#2d3748;">${t.reference}</td>`;
+                    html += `<td style="padding:10px 8px;color:#4a5568;">${t.user}</td>`;
+                    html += `<td style="padding:10px 8px;"><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:500;background:#ebf8ff;color:#2b6cb0;">${t.type}</span></td>`;
+                    html += `<td style="padding:10px 8px;text-align:right;font-weight:600;color:#2d3748;">${Number(t.amount).toLocaleString('fr-FR')} FCFA</td>`;
+                    html += `<td style="padding:10px 8px;text-align:center;color:#4a5568;font-size:0.78rem;">${t.method}</td>`;
+                    html += `<td style="padding:10px 8px;text-align:center;color:#718096;font-size:0.78rem;">${t.created_at}</td>`;
+                    html += `<td style="padding:10px 8px;text-align:center;">
+                        <button onclick="validatePayment(${t.id})" style="padding:6px 14px;border:none;border-radius:6px;background:#48bb78;color:#fff;font-size:0.78rem;font-weight:500;cursor:pointer;">Valider</button>
+                    </td>`;
+                    html += `</tr>`;
+                });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } catch (e) { console.error('Erreur chargement paiements', e); }
+        }
+
+        async function validatePayment(transactionId) {
+            if (!confirm('Valider cette transaction ? Le solde sera mis à jour.')) return;
+            try {
+                const resp = await fetch("{% url 'accounts:admin_api_action' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                    body: JSON.stringify({ action: 'validate_payment', transaction_id: transactionId })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    fetchPendingPayments();
+                } else {
+                    alert('❌ ' + (data.message || 'Erreur'));
+                }
+            } catch (e) { alert('❌ Erreur de connexion'); }
         }
 
         // ===== FETCH MESSAGES =====

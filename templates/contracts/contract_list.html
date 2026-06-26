@@ -389,8 +389,8 @@
         }
 
         .mission-card .right .status.in-progress {
-            background: #fefcbf;
-            color: #975a16;
+            background: #fed7d7;
+            color: #c53030;
         }
 
         .mission-card .right .status.closed {
@@ -757,7 +757,7 @@
             list.forEach((m, index) => {
                 const statusMap = {
                     open: '🟢 Ouverte',
-                    'in-progress': '🟡 En cours',
+                    'in-progress': '🔒 Déjà pris',
                     closed: '🔵 Terminée',
                     cancelled: '🔴 Annulée'
                 };
@@ -816,7 +816,7 @@
                         <button class="btn-apply ${m.status !== 'open' ? 'applied' : ''}" 
                                 onclick="${m.status === 'open' ? `applyMission(${m.id})` : 'event.stopPropagation();'}"
                                 ${m.status !== 'open' ? 'disabled' : ''}>
-                            ${m.status === 'open' ? '📩 Postuler' : m.status === 'in-progress' ? '⏳ En cours' : '✅ Fini'}
+                            ${m.status === 'open' ? '📩 Postuler' : m.status === 'in-progress' ? '🔒 Déjà pris' : '✅ Fini'}
                         </button>
                         `}
                     </div>
