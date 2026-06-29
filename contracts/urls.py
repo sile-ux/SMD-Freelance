@@ -14,4 +14,9 @@ urlpatterns = [
     path('postuler/<int:mission_id>/', views.apply_to_mission_view, name='apply_to_mission'),
     path('liste/', views.contract_list_view, name='contract_list'),
     path('<int:pk>/', views.mission_detail_view, name='mission_detail'),
+    path('factures/', views.invoice_view, name='invoices'),
+    path('factures/<int:invoice_id>/pdf/', views.invoice_pdf_view, name='invoice_pdf'),
+    path('devis/', views.devis_view, name='devis'),
+    path('devis/<int:devis_id>/pdf/', views.devis_pdf_view, name='devis_pdf'),
+    path('factures/clients/', views.client_invoices_view, name='client_invoices'),
 ]

@@ -1,0 +1,606 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factures - CMD-Freelance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Rubik', sans-serif; background: #f0f4f8; }
+        .facture-wrap { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #f0f4f8; overflow: hidden; }
+
+        .facture-header {
+            background: #ffffff; padding: 16px 40px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid #dce7f5; flex-shrink: 0;
+        }
+        .facture-header .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .facture-header .logo h1 { font-size: 1.3rem; font-weight: 800; color: #1a365d; }
+        .facture-header .logo h1 span { color: #4299e1; }
+        .facture-header .right { display: flex; align-items: center; gap: 16px; }
+        .facture-header .right .profile {
+            display: flex; align-items: center; gap: 10px; padding: 4px 12px 4px 4px;
+            border-radius: 30px; background: #f7fafc; border: 1px solid #dce7f5; cursor: pointer; transition: 0.15s;
+            text-decoration: none; color: inherit;
+        }
+        .facture-header .right .profile:hover { background: #ebf8ff; border-color: #bee3f8; }
+        .facture-header .right .profile .avatar {
+            width: 32px; height: 32px; border-radius: 50%; background: #4299e1;
+            display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 0.8rem;
+        }
+        .facture-header .right .profile .name { font-weight: 500; font-size: 0.85rem; color: #1a365d; }
+        .facture-header .right .btn-new {
+            display: flex; align-items: center; gap: 8px; padding: 8px 18px; border: none; border-radius: 10px;
+            background: #4299e1; color: #fff; font-family: 'Rubik', sans-serif; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: 0.15s;
+        }
+        .facture-header .right .btn-new:hover { background: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(66,153,225,0.3); }
+        .facture-header .right .btn-new i { font-size: 1.1rem; }
+        .facture-header .right .back-link {
+            display: flex; align-items: center; gap: 6px; color: #4a5568; text-decoration: none;
+            font-size: 0.85rem; font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: 0.15s;
+        }
+        .facture-header .right .back-link:hover { background: #f7fafc; color: #4299e1; }
+
+        .facture-content { flex: 1; overflow: hidden; padding: 24px 40px 30px 40px; display: flex; flex-direction: column; }
+
+        .facture-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; flex-shrink: 0; }
+        .stat-box {
+            background: #ffffff; padding: 16px 20px; border-radius: 12px; border: 1px solid #dce7f5;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .stat-box .icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.4rem; }
+        .stat-box .icon-box.blue { background: #ebf8ff; color: #4299e1; }
+        .stat-box .icon-box.green { background: #c6f6d5; color: #276749; }
+        .stat-box .icon-box.yellow { background: #fefcbf; color: #d4861a; }
+        .stat-box .icon-box.red { background: #fed7d7; color: #e53e3e; }
+        .stat-box .info .number { font-size: 1.3rem; font-weight: 700; color: #1a365d; }
+        .stat-box .info .label { font-size: 0.78rem; color: #718096; }
+
+        .facture-filters { display: flex; gap: 12px; flex-shrink: 0; margin-bottom: 16px; flex-wrap: wrap; }
+        .facture-filters select, .facture-filters input {
+            padding: 10px 16px; border: 1.5px solid #dce7f5; border-radius: 10px; font-family: 'Rubik', sans-serif;
+            font-size: 0.85rem; background: #fff; color: #4a5568; cursor: pointer; transition: 0.15s;
+            appearance: none; padding-right: 36px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center; min-width: 140px;
+        }
+        .facture-filters select:focus, .facture-filters input:focus { border-color: #4299e1; outline: none; box-shadow: 0 0 0 3px rgba(66,153,225,0.08); }
+        .facture-filters .search-wrap { position: relative; flex: 1; min-width: 200px; }
+        .facture-filters .search-wrap input { width: 100%; padding-left: 40px; appearance: none; background-image: none; padding-right: 16px; }
+        .facture-filters .search-wrap .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #a0aec0; font-size: 1rem; }
+
+        .facture-list { flex: 1; overflow-y: auto; padding-right: 4px; }
+        .facture-list::-webkit-scrollbar { width: 6px; }
+        .facture-list::-webkit-scrollbar-thumb { background: #bee3f8; border-radius: 8px; }
+
+        .facture-card {
+            background: #ffffff; border-radius: 14px; border: 1px solid #dce7f5; padding: 18px 24px;
+            margin-bottom: 12px; transition: all 0.15s; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
+        }
+        .facture-card:hover { border-color: #bee3f8; box-shadow: 0 4px 16px rgba(66,153,225,0.08); transform: translateY(-2px); }
+        .facture-card .info { display: flex; flex-direction: column; gap: 4px; }
+        .facture-card .info .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .facture-card .info .top .ref { font-weight: 700; font-size: 0.95rem; color: #1a365d; }
+        .facture-card .info .top .client { color: #718096; font-size: 0.85rem; }
+        .facture-card .info .top .client strong { color: #1a365d; }
+        .facture-card .info .details { display: flex; flex-wrap: wrap; gap: 16px 24px; font-size: 0.82rem; color: #718096; }
+        .facture-card .info .details .item { display: flex; align-items: center; gap: 6px; }
+        .facture-card .info .details .item i { font-size: 0.85rem; }
+        .facture-card .right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+        .facture-card .right .amount { font-size: 1.15rem; font-weight: 700; color: #4299e1; }
+        .facture-card .right .status {
+            padding: 3px 14px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px;
+        }
+        .facture-card .right .status.draft { background: #edf2f7; color: #718096; }
+        .facture-card .right .status.sent { background: #bee3f8; color: #2b6cb0; }
+        .facture-card .right .status.paid { background: #c6f6d5; color: #276749; }
+        .facture-card .right .status.overdue { background: #fed7d7; color: #e53e3e; }
+        .facture-card .right .status.cancelled { background: #fefcbf; color: #975a16; }
+        .facture-card .right .actions { display: flex; gap: 6px; margin-top: 4px; }
+        .facture-card .right .actions a, .facture-card .right .actions button {
+            background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: 0.15s; font-size: 1rem; color: #4a5568; text-decoration: none; display: inline-flex; align-items: center;
+        }
+        .facture-card .right .actions .edit:hover { background: #ebf8ff; color: #4299e1; }
+        .facture-card .right .actions .delete:hover { background: #fed7d7; color: #e53e3e; }
+        .facture-card .right .actions .pdf:hover { background: #e9d8fd; color: #805ad5; }
+
+        .empty-state {
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 60px 20px; background: #fff; border-radius: 14px; border: 1px solid #dce7f5; height: 100%;
+        }
+        .empty-state.show { display: flex; }
+        .empty-state .empty-icon { font-size: 4rem; color: #4299e1; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 1.1rem; font-weight: 600; color: #1a365d; }
+        .empty-state p { color: #718096; font-size: 0.9rem; margin-top: 4px; }
+        .empty-state .btn-create {
+            margin-top: 16px; padding: 12px 32px; border: none; border-radius: 10px; background: #4299e1;
+            color: #fff; font-family: 'Rubik', sans-serif; font-weight: 600; font-size: 0.95rem;
+            cursor: pointer; transition: 0.15s; display: flex; align-items: center; gap: 8px;
+        }
+        .empty-state .btn-create:hover { background: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(66,153,225,0.3); }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(26,54,93,0.5);
+            backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff; border-radius: 20px; padding: 32px 40px; max-width: 720px; width: 100%;
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(26,54,93,0.2); animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-box h3 { font-size: 1.2rem; font-weight: 700; color: #1a365d; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .modal-box h3 i { color: #4299e1; }
+        .modal-box .form-group { margin-bottom: 14px; }
+        .modal-box .form-group label { display: block; font-weight: 500; font-size: 0.82rem; color: #1a365d; margin-bottom: 4px; }
+        .modal-box .form-group label .required { color: #e53e3e; }
+        .modal-box .form-group input, .modal-box .form-group textarea, .modal-box .form-group select {
+            width: 100%; padding: 10px 14px; border: 1.5px solid #dce7f5; border-radius: 10px;
+            font-family: 'Rubik', sans-serif; font-size: 0.9rem; transition: 0.15s; background: #fafbfc;
+        }
+        .modal-box .form-group input:focus, .modal-box .form-group textarea:focus, .modal-box .form-group select:focus {
+            border-color: #4299e1; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(66,153,225,0.08);
+        }
+        .modal-box .form-group textarea { resize: vertical; min-height: 50px; }
+        .modal-box .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .modal-box .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .modal-box .section-label {
+            font-size: 0.85rem; font-weight: 700; color: #4299e1; margin: 16px 0 8px; padding-bottom: 4px;
+            border-bottom: 1px solid #edf2f7; display: flex; align-items: center; gap: 8px;
+        }
+        .modal-box .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid #edf2f7; }
+        .modal-box .modal-actions button {
+            padding: 10px 28px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Rubik', sans-serif;
+            font-weight: 600; font-size: 0.9rem; transition: 0.15s; display: flex; align-items: center; gap: 8px;
+        }
+        .modal-box .modal-actions .cancel { background: #edf2f7; color: #4a5568; }
+        .modal-box .modal-actions .cancel:hover { background: #e2e8f0; }
+        .modal-box .modal-actions .submit { background: #4299e1; color: #fff; }
+        .modal-box .modal-actions .submit:hover { background: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(66,153,225,0.3); }
+
+        @media (max-width: 1024px) {
+            .facture-header { padding: 14px 24px; }
+            .facture-content { padding: 20px 24px 24px; }
+            .facture-stats { grid-template-columns: repeat(2, 1fr); }
+            .modal-box .form-row-3 { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .facture-header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+            .facture-header .logo h1 { font-size: 1.1rem; }
+            .facture-header .right .profile .name { font-size: 0.75rem; }
+            .facture-header .right .btn-new span { display: none; }
+            .facture-content { padding: 14px 16px 20px; }
+            .facture-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-box { padding: 12px 16px; }
+            .stat-box .info .number { font-size: 1.1rem; }
+            .facture-filters { flex-direction: column; }
+            .facture-filters .search-wrap { min-width: 100%; }
+            .facture-filters select { min-width: 100%; }
+            .facture-card { grid-template-columns: 1fr; gap: 10px; padding: 16px 18px; }
+            .facture-card .right { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; }
+            .facture-card .right .actions { margin-top: 0; }
+            .modal-box { padding: 24px 20px; }
+            .modal-box .form-row, .modal-box .form-row-3 { grid-template-columns: 1fr; }
+            .modal-box .modal-actions { flex-direction: column; }
+            .modal-box .modal-actions button { width: 100%; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .facture-header .right .profile { padding: 3px 8px 3px 3px; }
+            .facture-header .right .profile .avatar { width: 28px; height: 28px; font-size: 0.7rem; }
+            .facture-header .right .profile .name { font-size: 0.7rem; }
+            .facture-stats { grid-template-columns: 1fr; }
+            .stat-box .info .number { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="facture-wrap">
+        <header class="facture-header">
+            <a href="{% url 'accounts:dashboard' %}" class="logo">
+                <lord-icon src="https://cdn.lordicon.com/ktheyllq.json" trigger="loop" colors="primary:#4299e1" style="width:32px;height:32px;"></lord-icon>
+                <h1>CMD-<span>Freelance</span></h1>
+            </a>
+            <div class="right">
+                <a href="{% url 'accounts:dashboard' %}" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <button class="btn-new" onclick="openCreateModal()">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nouvelle facture</span>
+                </button>
+                <a href="{% url 'accounts:dashboard' %}" class="profile">
+                    <div class="avatar">{{ user.username|first|upper }}</div>
+                    <span class="name">{{ user.username }}</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="facture-content">
+            {% if messages %}
+            {% for msg in messages %}
+            <div style="background:{% if msg.tags == 'success' %}#c6f6d5;color:#276749{% elif msg.tags == 'error' %}#fed7d7;color:#e53e3e{% else %}#bee3f8;color:#2b6cb0{% endif %};padding:12px 18px;border-radius:10px;margin-bottom:12px;font-size:0.85rem;font-weight:500;flex-shrink:0;display:flex;align-items:center;gap:8px;">
+                <i class="fas {% if msg.tags == 'success' %}fa-check-circle{% elif msg.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                {{ msg }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="facture-stats">
+                <div class="stat-box">
+                    <div class="icon-box blue"><i class="fas fa-file-invoice"></i></div>
+                    <div class="info">
+                        <div class="number" id="totalFactures">{{ total_count }}</div>
+                        <div class="label">Total factures</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="icon-box green"><i class="fas fa-check-circle"></i></div>
+                    <div class="info">
+                        <div class="number" id="paidFactures">{{ paid_count }}</div>
+                        <div class="label">Payées</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="icon-box yellow"><i class="fas fa-paper-plane"></i></div>
+                    <div class="info">
+                        <div class="number" id="sentFactures">{{ sent_count }}</div>
+                        <div class="label">Envoyées</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="icon-box red"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="info">
+                        <div class="number" id="overdueFactures">{{ overdue_count }}</div>
+                        <div class="label">En retard</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="facture-filters">
+                <div class="search-wrap">
+                    <i class="fas fa-search icon"></i>
+                    <input type="text" id="searchFacture" placeholder="Rechercher une facture..." oninput="filterFactures()">
+                </div>
+                <select id="filterStatus" onchange="filterFactures()">
+                    <option value="all">Tous les statuts</option>
+                    <option value="draft">Brouillon</option>
+                    <option value="sent">Envoyée</option>
+                    <option value="paid">Payée</option>
+                    <option value="overdue">En retard</option>
+                    <option value="cancelled">Annulée</option>
+                </select>
+                <select id="filterSort" onchange="filterFactures()">
+                    <option value="newest">Plus récent</option>
+                    <option value="oldest">Plus ancien</option>
+                    <option value="amount-asc">Prix croissant</option>
+                    <option value="amount-desc">Prix décroissant</option>
+                </select>
+            </div>
+
+            <div class="facture-list" id="factureList"></div>
+
+            <div class="empty-state" id="emptyState">
+                <lord-icon src="https://cdn.lordicon.com/hcifhzzs.json" trigger="loop" colors="primary:#4299e1" style="width:80px;height:80px;margin-bottom:16px;"></lord-icon>
+                <h3>Aucune facture trouvée</h3>
+                <p>Créez votre première facture pour commencer</p>
+                <button class="btn-create" onclick="openCreateModal()"><i class="fas fa-plus-circle"></i> Créer une facture</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h3 id="modalTitle"><i class="fas fa-file-invoice-dollar"></i> Nouvelle facture</h3>
+            <form id="factureForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="formAction" value="create">
+                <input type="hidden" name="invoice_id" id="editId" value="">
+
+                <div class="section-label"><i class="fas fa-user-tie"></i> Informations du client</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom du client <span class="required">*</span></label>
+                        <input type="text" id="clientName" name="client_name" placeholder="Nom complet" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email du client <span class="required">*</span></label>
+                        <input type="email" id="clientEmail" name="client_email" placeholder="client@email.com" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Entreprise du client</label>
+                        <input type="text" id="clientCompany" name="client_company" placeholder="Nom de l'entreprise">
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone du client</label>
+                        <input type="text" id="clientPhone" name="client_phone" placeholder="77 123 45 67">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Adresse du client</label>
+                    <textarea id="clientAddress" name="client_address" placeholder="Adresse complète du client..."></textarea>
+                </div>
+
+                <div class="section-label"><i class="fas fa-file-invoice"></i> Détails de la facture</div>
+                <div class="form-group">
+                    <label>Description de la prestation <span class="required">*</span></label>
+                    <textarea id="description" name="description" placeholder="Détaillez les services fournis..." required></textarea>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Montant HT (FCFA) <span class="required">*</span></label>
+                        <input type="number" id="amount" name="amount" placeholder="0" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>TVA (%)</label>
+                        <input type="number" id="tva" name="tva" placeholder="18" value="18" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="status" name="status">
+                            <option value="draft">Brouillon</option>
+                            <option value="sent">Envoyée</option>
+                            <option value="paid">Payée</option>
+                            <option value="overdue">En retard</option>
+                            <option value="cancelled">Annulée</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date d'émission</label>
+                        <input type="date" id="issueDate" name="issue_date">
+                    </div>
+                    <div class="form-group">
+                        <label>Date d'échéance</label>
+                        <input type="date" id="dueDate" name="due_date">
+                    </div>
+                </div>
+
+                <div class="section-label"><i class="fas fa-user-cog"></i> Vos informations professionnelles</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom de votre entreprise</label>
+                        <input type="text" id="freelanceCompany" name="freelance_company" placeholder="Votre entreprise" value="{{ profile.title|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Votre téléphone</label>
+                        <input type="text" id="freelancePhone" name="freelance_phone" placeholder="77 123 45 67">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Votre adresse</label>
+                        <textarea id="freelanceAddress" name="freelance_address" placeholder="Votre adresse complète..." style="min-height:40px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>N° SIRET / Registre de commerce</label>
+                        <input type="text" id="freelanceSiret" name="freelance_siret" placeholder="N° SIRET ou RC">
+                    </div>
+                </div>
+
+                <div class="section-label"><i class="fas fa-university"></i> Coordonnées bancaires</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Banque</label>
+                        <input type="text" id="bankName" name="bank_name" placeholder="Nom de la banque">
+                    </div>
+                    <div class="form-group">
+                        <label>IBAN</label>
+                        <input type="text" id="bankIban" name="bank_iban" placeholder="FR76 XXXX XXXX...">
+                    </div>
+                    <div class="form-group">
+                        <label>BIC/SWIFT</label>
+                        <input type="text" id="bankBic" name="bank_bic" placeholder="BIC">
+                    </div>
+                </div>
+
+                <div class="section-label"><i class="fas fa-sticky-note"></i> Informations supplémentaires</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Conditions de paiement</label>
+                        <textarea id="terms" name="terms" placeholder="Ex: Paiement à réception sous 30 jours">Paiement à réception sous 30 jours</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="notes" name="notes" placeholder="Informations complémentaires..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel" onclick="closeModal()"><i class="fas fa-times"></i> Annuler</button>
+                    <button type="submit" class="submit"><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const invoiceData = {{ invoices_json|safe }};
+        let invoices = invoiceData || [];
+
+        const statusMap = {
+            draft: { label: 'Brouillon', class: 'draft', icon: 'fa-pencil-alt' },
+            sent: { label: 'Envoyée', class: 'sent', icon: 'fa-paper-plane' },
+            paid: { label: 'Payée', class: 'paid', icon: 'fa-check-circle' },
+            overdue: { label: 'En retard', class: 'overdue', icon: 'fa-exclamation-triangle' },
+            cancelled: { label: 'Annulée', class: 'cancelled', icon: 'fa-times-circle' }
+        };
+
+        function renderFactures(list) {
+            const container = document.getElementById('factureList');
+            const empty = document.getElementById('emptyState');
+            document.getElementById('totalFactures').textContent = list.length;
+            document.getElementById('paidFactures').textContent = list.filter(f => f.status === 'paid').length;
+            document.getElementById('sentFactures').textContent = list.filter(f => f.status === 'sent').length;
+            document.getElementById('overdueFactures').textContent = list.filter(f => f.status === 'overdue').length;
+
+            if (list.length === 0) { container.innerHTML = ''; empty.classList.add('show'); return; }
+            empty.classList.remove('show');
+
+            container.innerHTML = '';
+            list.forEach(f => {
+                const st = statusMap[f.status] || statusMap.draft;
+                const totalTTC = f.total_ttc || (f.amount + (f.amount * (f.tva || 0) / 100));
+                const card = document.createElement('div');
+                card.className = 'facture-card';
+                card.innerHTML = `
+                    <div class="info">
+                        <div class="top">
+                            <span class="ref">${f.ref}</span>
+                            <span class="client"><i class="fas fa-user"></i> <strong>${f.client_name}</strong> • ${f.client_email}</span>
+                        </div>
+                        <div style="font-weight:500;color:#1a365d;font-size:0.92rem;">${f.description}</div>
+                        <div class="details">
+                            <span class="item"><i class="fas fa-calendar-alt"></i> Émis: ${f.issue_date || 'N/A'}</span>
+                            <span class="item"><i class="fas fa-calendar-check"></i> Échéance: ${f.due_date || 'N/A'}</span>
+                            ${f.tva ? `<span class="item"><i class="fas fa-percent"></i> TVA: ${f.tva}%</span>` : ''}
+                            ${f.freelance_company ? `<span class="item"><i class="fas fa-building"></i> ${f.freelance_company}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div class="amount">${Number(totalTTC).toLocaleString('fr-FR')} FCFA</div>
+                        <span class="status ${st.class}"><i class="fas ${st.icon}"></i> ${st.label}</span>
+                        <div class="actions">
+                            <button class="edit" onclick="editFacture(${f.id})" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="delete" onclick="deleteFacture(${f.id})" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+                            <a href="javascript:void(0)" class="pdf" onclick="generatePDF(${f.id})" title="Télécharger PDF"><i class="fas fa-file-pdf"></i></a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterFactures() {
+            const search = document.getElementById('searchFacture').value.toLowerCase().trim();
+            const status = document.getElementById('filterStatus').value;
+            const sort = document.getElementById('filterSort').value;
+
+            let filtered = invoices.filter(f => {
+                let match = true;
+                if (search) {
+                    match = (f.client_name || '').toLowerCase().includes(search) ||
+                            (f.client_email || '').toLowerCase().includes(search) ||
+                            (f.description || '').toLowerCase().includes(search) ||
+                            (f.ref || '').toLowerCase().includes(search);
+                }
+                if (match && status !== 'all') match = f.status === status;
+                return match;
+            });
+
+            if (sort === 'newest') filtered.sort((a, b) => new Date(b.issue_date || 0) - new Date(a.issue_date || 0));
+            else if (sort === 'oldest') filtered.sort((a, b) => new Date(a.issue_date || 0) - new Date(b.issue_date || 0));
+            else if (sort === 'amount-asc') filtered.sort((a, b) => a.amount - b.amount);
+            else if (sort === 'amount-desc') filtered.sort((a, b) => b.amount - a.amount);
+            renderFactures(filtered);
+        }
+
+        function getCSRFToken() {
+            const m = document.cookie.match(/csrftoken=([^;]+)/);
+            return m ? m[1] : '';
+        }
+
+        function openCreateModal() {
+            document.getElementById('formAction').value = 'create';
+            document.getElementById('editId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Nouvelle facture';
+            document.getElementById('factureForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            const due = new Date(); due.setMonth(due.getMonth() + 1);
+            document.getElementById('issueDate').value = today;
+            document.getElementById('dueDate').value = due.toISOString().split('T')[0];
+            document.getElementById('tva').value = 18;
+            document.getElementById('terms').value = 'Paiement à réception sous 30 jours';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+        function saveFacture(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const form = document.getElementById('factureForm');
+            const formData = new FormData(form);
+            formData.append('action', editId ? 'update' : 'create');
+            if (editId) formData.append('invoice_id', editId);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            fetch('{% url "contracts:invoices" %}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (d.status === 'success') { closeModal(); location.reload(); }
+                else alert('Erreur: ' + d.message);
+            })
+            .catch(() => alert('Erreur réseau'));
+        }
+
+        function editFacture(id) {
+            const data = invoices.find(f => f.id === id);
+            if (!data) return;
+
+            document.getElementById('formAction').value = 'update';
+            document.getElementById('editId').value = data.id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Modifier la facture';
+
+            document.getElementById('clientName').value = data.client_name || '';
+            document.getElementById('clientEmail').value = data.client_email || '';
+            document.getElementById('clientCompany').value = data.client_company || '';
+            document.getElementById('clientPhone').value = data.client_phone || '';
+            document.getElementById('clientAddress').value = data.client_address || '';
+            document.getElementById('description').value = data.description || '';
+            document.getElementById('amount').value = data.amount || '';
+            document.getElementById('tva').value = data.tva || 18;
+            document.getElementById('status').value = data.status || 'draft';
+            document.getElementById('issueDate').value = data.issue_date || '';
+            document.getElementById('dueDate').value = data.due_date || '';
+            document.getElementById('freelanceCompany').value = data.freelance_company || '';
+            document.getElementById('freelancePhone').value = data.freelance_phone || '';
+            document.getElementById('freelanceAddress').value = data.freelance_address || '';
+            document.getElementById('freelanceSiret').value = data.freelance_siret || '';
+            document.getElementById('bankName').value = data.bank_name || '';
+            document.getElementById('bankIban').value = data.bank_iban || '';
+            document.getElementById('bankBic').value = data.bank_bic || '';
+            document.getElementById('terms').value = data.terms || 'Paiement à réception sous 30 jours';
+            document.getElementById('notes').value = data.notes || '';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function deleteFacture(id) {
+            if (!confirm('Supprimer cette facture ?')) return;
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('invoice_id', id);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            fetch('{% url "contracts:invoices" %}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(d => { if (d.status === 'success') location.reload(); });
+        }
+
+        function generatePDF(id) {
+            window.open('{% url "contracts:invoice_pdf" 9999 %}'.replace('9999', id), '_blank');
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+        document.getElementById('factureForm').addEventListener('submit', saveFacture);
+
+        renderFactures(invoices);
+    </script>
+</body>
+</html>

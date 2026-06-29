@@ -1,5 +1,6 @@
 # accounts/views.py
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
@@ -93,6 +94,33 @@ def home_view(request):
     })
 
 
+def pricing_view(request):
+    if request.method == 'POST':
+        plan = request.POST.get('plan', 'Gratuit')
+        period = request.POST.get('period', 'monthly')
+        price = request.POST.get('price', '0')
+        request.session['selected_plan'] = {'plan': plan, 'period': period, 'price': price}
+        if plan.lower() != 'gratuit':
+            return redirect(f"{reverse('accounts:payment')}?plan={plan}&period={period}&price={price}")
+        messages.success(request, f"Plan {plan} sélectionné ! Créez votre compte pour continuer.")
+        return redirect('accounts:register_freelance')
+    return render(request, 'accounts/pricing.html')
+
+
+def payment_view(request):
+    plan = request.GET.get('plan', 'Gratuit')
+    period = request.GET.get('period', 'monthly')
+    price = request.GET.get('price', '0')
+    if request.method == 'POST':
+        plan = request.POST.get('plan', plan)
+        period = request.POST.get('period', period)
+        price = request.POST.get('price', price)
+        request.session['selected_plan'] = {'plan': plan, 'period': period, 'price': price}
+        messages.success(request, f"Paiement du plan {plan} effectué avec succès ! Créez votre compte pour continuer.")
+        return redirect('accounts:register_freelance')
+    return render(request, 'accounts/payment.html', {'plan': plan, 'period': period, 'price': price})
+
+
 @csrf_protect
 def freelance_register_view(request):
     if request.method == 'POST':
@@ -117,6 +145,9 @@ def freelance_register_view(request):
                         linkedin_url=request.POST.get('linkedin', ''),
                         cv=cv_file if cv_file else None
                     )
+                selected_plan = request.session.pop('selected_plan', None)
+                if selected_plan:
+                    request.session['plan_after_register'] = selected_plan
                 messages.success(request, "Compte Freelancer créé avec succès ! Votre CV a été reçu. En attente de validation admin.")
                 return redirect('accounts:login')
             except Exception as e:
@@ -128,7 +159,8 @@ def freelance_register_view(request):
                     messages.error(request, f"{field}: {error}")
     else:
         form = FreelanceRegisterForm()
-    return render(request, 'accounts/register_freelance.html', {'form': form})
+    selected_plan = request.session.get('selected_plan')
+    return render(request, 'accounts/register_freelance.html', {'form': form, 'selected_plan': selected_plan})
 
 
 @csrf_protect
@@ -498,7 +530,16 @@ def transaction_view(request):
         # ── ACCEPTATION CANDIDATURE AVEC PAIEMENT ──
         elif section == 'accept_application' and pending_application:
             try:
-                amount = float(pending_application.mission.budget)
+                if pending_application.mission.budget_type == 'negotiable' and pending_application.proposed_rate:
+                    amount = float(pending_application.proposed_rate)
+                elif pending_application.mission.budget:
+                    amount = float(pending_application.mission.budget)
+                else:
+                    # fallback: montant envoyé par le formulaire
+                    amount = float(request.POST.get('amount', 0))
+                if amount < 100:
+                    messages.error(request, 'Le montant minimum est de 100 CFA.')
+                    return redirect(f'{request.path}?accept_application={pending_application.id}')
                 if float(wallet.balance) < amount:
                     messages.error(
                         request,
@@ -693,6 +734,17 @@ def parametre_view(request):
             profile.auto_alerts = request.POST.get('auto_alerts') == 'on'
             profile.save()
             messages.success(request, 'Préférences missions enregistrées.')
+            return redirect('accounts:parametre')
+
+        # ── CV ──
+        elif section == 'cv':
+            cv_file = request.FILES.get('cv')
+            if cv_file:
+                profile.cv = cv_file
+                profile.save()
+                messages.success(request, 'CV mis à jour avec succès.')
+            else:
+                messages.error(request, 'Veuillez sélectionner un fichier.')
             return redirect('accounts:parametre')
 
         # ── Support ──

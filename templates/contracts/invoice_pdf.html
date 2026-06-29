@@ -1,0 +1,158 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ inv.ref }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11pt; color: #1a1a2e; line-height: 1.5; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px; padding-bottom: 20px; border-bottom: 3px solid #4299e1; }
+        .header .brand h1 { font-size: 22pt; font-weight: 800; color: #1a365d; letter-spacing: -0.5px; }
+        .header .brand h1 span { color: #4299e1; }
+        .header .brand .sub { font-size: 9pt; color: #718096; margin-top: 2px; }
+        .header .ref-box { text-align: right; }
+        .header .ref-box .ref { font-size: 18pt; font-weight: 800; color: #4299e1; }
+        .header .ref-box .status { display: inline-block; margin-top: 4px; padding: 3px 14px; border-radius: 12px; font-size: 9pt; font-weight: 600; }
+        .header .ref-box .status.draft { background: #edf2f7; color: #718096; }
+        .header .ref-box .status.sent { background: #bee3f8; color: #2b6cb0; }
+        .header .ref-box .status.paid { background: #c6f6d5; color: #276749; }
+        .header .ref-box .status.overdue { background: #fed7d7; color: #e53e3e; }
+        .header .ref-box .status.cancelled { background: #fefcbf; color: #975a16; }
+
+        .parties { display: flex; justify-content: space-between; margin-bottom: 32px; gap: 30px; }
+        .parties .box { flex: 1; }
+        .parties .box h3 { font-size: 10pt; color: #4299e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .parties .box .name { font-weight: 700; font-size: 12pt; color: #1a365d; }
+        .parties .box p { font-size: 10pt; color: #4a5568; margin-top: 2px; }
+
+        .info-row { display: flex; gap: 24px; margin-bottom: 24px; }
+        .info-row .item { }
+        .info-row .item .lbl { font-size: 8pt; text-transform: uppercase; color: #a0aec0; letter-spacing: 0.5px; }
+        .info-row .item .val { font-weight: 600; color: #1a365d; font-size: 11pt; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        table thead th { background: #f7fafc; color: #1a365d; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+        table tbody td { padding: 10px 14px; border-bottom: 1px solid #edf2f7; font-size: 10pt; color: #4a5568; }
+        table tbody td:last-child, table thead th:last-child { text-align: right; }
+        table tfoot td { padding: 8px 14px; font-size: 10pt; }
+        table tfoot .total-row td { font-weight: 700; color: #1a365d; font-size: 12pt; border-top: 2px solid #4299e1; padding-top: 10px; }
+
+        .terms { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+        .terms h4 { font-size: 9pt; color: #4299e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .terms p { font-size: 9pt; color: #718096; }
+
+        .bank { margin-top: 16px; }
+        .bank h4 { font-size: 9pt; color: #4299e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .bank p { font-size: 9pt; color: #4a5568; }
+
+        .notes { margin-top: 20px; padding: 12px 16px; background: #fffff0; border-left: 4px solid #ecc94b; font-size: 9pt; color: #744210; }
+
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 8pt; color: #a0aec0; padding: 10px 0; border-top: 1px solid #edf2f7; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">
+            <h1>CMD-<span>Freelance</span></h1>
+            <div class="sub">Facture de prestation de services</div>
+        </div>
+        <div class="ref-box">
+            <div class="ref">{{ inv.ref }}</div>
+            <div class="status {{ inv.status }}">{{ inv.get_status_display }}</div>
+        </div>
+    </div>
+
+    <div class="parties">
+        <div class="box">
+            <h3>De</h3>
+            <div class="name">{{ inv.freelance_company|default:user.username }}</div>
+            {% if inv.freelance_phone %}<p><i class="fas fa-phone"></i> {{ inv.freelance_phone }}</p>{% endif %}
+            {% if inv.freelance_address %}<p>{{ inv.freelance_address|linebreaksbr }}</p>{% endif %}
+            {% if inv.freelance_siret %}<p>SIRET: {{ inv.freelance_siret }}</p>{% endif %}
+        </div>
+        <div class="box">
+            <h3>Pour</h3>
+            <div class="name">{{ inv.client_name }}</div>
+            {% if inv.client_company %}<p>{{ inv.client_company }}</p>{% endif %}
+            {% if inv.client_phone %}<p>{{ inv.client_phone }}</p>{% endif %}
+            <p>{{ inv.client_email }}</p>
+            {% if inv.client_address %}<p>{{ inv.client_address|linebreaksbr }}</p>{% endif %}
+        </div>
+    </div>
+
+    <div class="info-row">
+        <div class="item">
+            <div class="lbl">Date d'émission</div>
+            <div class="val">{{ inv.issue_date|date:"d/m/Y" }}</div>
+        </div>
+        <div class="item">
+            <div class="lbl">Date d'échéance</div>
+            <div class="val">{{ inv.due_date|date:"d/m/Y" }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width:60%;">Description</th>
+                <th style="width:15%;">Qté</th>
+                <th style="width:25%;">Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ inv.description }}</td>
+                <td>1</td>
+                <td>{{ inv.amount|floatformat:0 }} FCFA</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            {% if inv.tva > 0 %}
+            <tr>
+                <td colspan="2">Montant HT</td>
+                <td>{{ inv.total_ht|floatformat:0 }} FCFA</td>
+            </tr>
+            <tr>
+                <td colspan="2">TVA ({{ inv.tva|floatformat:0 }}%)</td>
+                <td>{{ inv.tva_amount|floatformat:0 }} FCFA</td>
+            </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td colspan="2">Total TTC</td>
+                <td>{{ inv.total_ttc|floatformat:0 }} FCFA</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {% if inv.bank_name or inv.bank_iban %}
+    <div class="bank">
+        <h4>Coordonnées bancaires</h4>
+        {% if inv.bank_name %}<p>Banque : {{ inv.bank_name }}</p>{% endif %}
+        {% if inv.bank_iban %}<p>IBAN : {{ inv.bank_iban }}</p>{% endif %}
+        {% if inv.bank_bic %}<p>BIC : {{ inv.bank_bic }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if inv.terms %}
+    <div class="terms">
+        <h4>Conditions de paiement</h4>
+        <p>{{ inv.terms }}</p>
+    </div>
+    {% endif %}
+
+    {% if inv.notes %}
+    <div class="notes">
+        <p>{{ inv.notes }}</p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        CMD-Freelance — Facture {{ inv.ref }} — Générée le {% now "d/m/Y" %}
+    </div>
+</body>
+</html>

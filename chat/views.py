@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from types import SimpleNamespace
-from .models import Thread, Message
+from .models import Thread, Message, BlockedUser
 
 User = get_user_model()
 
@@ -150,6 +150,82 @@ def send_message_api(request, thread_id):
         }, status=201)
 
     return JsonResponse({"error": "Méthode non autorisée. Utilisez POST."}, status=405)
+
+
+@login_required
+def block_user_api(request, user_id):
+    if request.method == 'POST':
+        target = get_object_or_404(User, id=user_id)
+        if target == request.user:
+            return JsonResponse({'error': 'Vous ne pouvez pas vous bloquer vous-même.'}, status=400)
+        blocked, created = BlockedUser.objects.get_or_create(blocker=request.user, blocked=target)
+        if created:
+            return JsonResponse({'status': 'success', 'message': f'{target.username} a été bloqué.'})
+        return JsonResponse({'status': 'info', 'message': f'{target.username} est déjà bloqué.'})
+    return JsonResponse({'error': 'Méthode non autorisée.'}, status=405)
+
+
+@login_required
+def unblock_user_api(request, user_id):
+    if request.method == 'POST':
+        target = get_object_or_404(User, id=user_id)
+        deleted, _ = BlockedUser.objects.filter(blocker=request.user, blocked=target).delete()
+        if deleted:
+            return JsonResponse({'status': 'success', 'message': f'{target.username} a été débloqué.'})
+        return JsonResponse({'status': 'info', 'message': 'Ce contact n\'est pas bloqué.'})
+    return JsonResponse({'error': 'Méthode non autorisée.'}, status=405)
+
+
+@login_required
+def delete_thread_api(request, thread_id):
+    if request.method == 'POST':
+        thread = get_object_or_404(Thread, id=thread_id)
+        if request.user != thread.client and request.user != thread.freelance:
+            return JsonResponse({'error': 'Accès interdit.'}, status=403)
+        if request.user == thread.client:
+            thread.is_deleted_by_client = True
+        else:
+            thread.is_deleted_by_freelance = True
+        thread.save()
+        return JsonResponse({'status': 'success', 'message': 'Discussion supprimée.'})
+    return JsonResponse({'error': 'Méthode non autorisée.'}, status=405)
+
+
+@login_required
+def block_status_api(request, user_id):
+    target = get_object_or_404(User, id=user_id)
+    is_blocked = BlockedUser.objects.filter(blocker=request.user, blocked=target).exists()
+    return JsonResponse({'is_blocked': is_blocked})
+
+
+@login_required
+def report_user_api(request):
+    if request.method == 'POST':
+        import json
+        from django.utils import timezone
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            data = request.POST
+
+        user_id = data.get('user_id')
+        reason = data.get('reason', '').strip()
+
+        if not user_id or not reason or len(reason) < 3:
+            return JsonResponse({'error': 'Motif requis (min 3 caractères)'}, status=400)
+
+        target = get_object_or_404(User, id=user_id)
+
+        from accounts.models import ContactMessage
+        ContactMessage.objects.create(
+            name=request.user.username,
+            email=request.user.email,
+            subject=f"Signalement de {request.user.username} contre {target.username}",
+            message=f"Signalement de {request.user.username} (ID:{request.user.id}) contre {target.username} (ID:{target.id})\n\nMotif: {reason}\n\nDate: {timezone.now():%d/%m/%Y %H:%M}",
+        )
+
+        return JsonResponse({'status': 'success', 'message': 'Signalement envoyé à l\'administration.'})
+    return JsonResponse({'error': 'Méthode non autorisée.'}, status=405)
 
 
 @login_required

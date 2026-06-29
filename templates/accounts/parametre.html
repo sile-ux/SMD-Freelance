@@ -1024,6 +1024,29 @@
                 </div>
             </form>
 
+            <!-- Formulaire CV -->
+            <form id="form-cv" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" enctype="multipart/form-data" style="display:none;">
+                {% csrf_token %}
+                <input type="hidden" name="section" value="cv">
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label>Curriculum Vitae (PDF)</label>
+                        <p style="font-size:0.82rem;color:#718096;margin-bottom:12px;">Téléchargez votre CV au format PDF pour permettre aux clients de mieux vous connaître.</p>
+                        <input type="file" name="cv" accept=".pdf" style="padding:10px;border:1.5px solid #dce7f5;border-radius:10px;width:100%;font-family:'Rubik',sans-serif;">
+                        {% if profile.cv %}
+                        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f0fff4;border:1px solid #c6f6d5;border-radius:8px;">
+                            <i class="fas fa-check-circle" style="color:#276749;"></i>
+                            <span style="font-size:0.85rem;color:#276749;">CV actuel : <a href="{{ profile.cv.url }}" target="_blank" style="color:#4299e1;font-weight:500;">Voir le fichier</a></span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer le CV</button>
+                </div>
+            </form>
+
             <!-- Formulaire Apparence -->
             <form id="form-appearance" class="modal-form" method="post" action="{% url 'accounts:parametre' %}" style="display:none;">
                 {% csrf_token %}
@@ -1219,6 +1242,23 @@
                         <i class="fas fa-chevron-right item-arrow"></i>
                     </div>
                 </div>
+
+                {% if not is_client %}
+                <!-- CV -->
+                <div class="settings-item" data-search="cv curriculum vitae fichier document télécharger" data-section="cv">
+                    <div class="item-left">
+                        <i class="fas fa-file-pdf"></i>
+                        <div class="item-info">
+                            <div class="item-title">CV / Curriculum Vitae</div>
+                            <div class="item-description">Télécharger ou mettre à jour votre CV</div>
+                        </div>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-value" id="cvValue">{% if profile.cv %}CV présent{% else %}Aucun CV{% endif %}</span>
+                        <i class="fas fa-chevron-right item-arrow"></i>
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Confidentialité -->
                 <div class="settings-item" data-search="confidentialité vie privée données cookies" data-section="privacy">

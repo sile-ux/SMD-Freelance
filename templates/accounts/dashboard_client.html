@@ -763,6 +763,8 @@
                 {% if unread_count %}<span class="badge">{{ unread_count }}</span>{% endif %}
             </a>
             <a href="{% url 'accounts:transaction' %}" class="menu-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+            <a href="{% url 'contracts:devis' %}" class="menu-item"><i class="fas fa-file-signature"></i> Devis reçus</a>
+            <a href="{% url 'contracts:client_invoices' %}" class="menu-item"><i class="fas fa-file-invoice"></i> Factures reçues</a>
             <a href="{% url 'accounts:parametre' %}" class="menu-item"><i class="fas fa-cog"></i> Paramètres</a>
         </div>
         <div class="sidebar-bottom">

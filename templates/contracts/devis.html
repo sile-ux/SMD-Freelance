@@ -1,0 +1,502 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devis - CMD-Freelance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Rubik', sans-serif; background: #f0f4f8; }
+        .wrap { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #f0f4f8; overflow: hidden; }
+        .header { background: #fff; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dce7f5; flex-shrink: 0; }
+        .header .logo { display: flex; align-items: center; gap: 10px; }
+        .header .logo h1 { font-size: 1.3rem; font-weight: 800; color: #1a365d; }
+        .header .logo h1 span { color: #4299e1; }
+        .header .right { display: flex; align-items: center; gap: 16px; }
+        .header .right .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4299e1, #3182ce); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .header .right .user-name { font-weight: 600; font-size: 0.85rem; color: #1a365d; }
+        .header .right .btn-new { display: flex; align-items: center; gap: 8px; padding: 8px 18px; border: none; border-radius: 10px; background: #4299e1; color: #fff; font-family: 'Rubik', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.15s; }
+        .header .right .btn-new:hover { background: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(66,153,225,0.3); }
+        .header .right .back-link { display: flex; align-items: center; gap: 6px; color: #4a5568; text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: 0.15s; }
+        .header .right .back-link:hover { background: #f7fafc; color: #4299e1; }
+        .content { flex: 1; overflow: hidden; padding: 24px 40px 30px; display: flex; flex-direction: column; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; flex-shrink: 0; }
+        .stat-box { background: #fff; padding: 16px 20px; border-radius: 12px; border: 1px solid #dce7f5; display: flex; align-items: center; gap: 14px; }
+        .stat-box .icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.4rem; }
+        .stat-box .icon-box.blue { background: #ebf8ff; color: #4299e1; }
+        .stat-box .icon-box.green { background: #c6f6d5; color: #276749; }
+        .stat-box .icon-box.yellow { background: #fefcbf; color: #d4861a; }
+        .stat-box .icon-box.red { background: #fed7d7; color: #e53e3e; }
+        .stat-box .info .number { font-size: 1.3rem; font-weight: 700; color: #1a365d; }
+        .stat-box .info .label { font-size: 0.78rem; color: #718096; }
+        .filters { display: flex; gap: 12px; flex-shrink: 0; margin-bottom: 16px; flex-wrap: wrap; }
+        .filters select, .filters input { padding: 10px 16px; border: 1.5px solid #dce7f5; border-radius: 10px; font-family: 'Rubik', sans-serif; font-size: 0.85rem; background: #fff; color: #4a5568; cursor: pointer; transition: 0.15s; appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; min-width: 140px; }
+        .filters select:focus, .filters input:focus { border-color: #4299e1; outline: none; box-shadow: 0 0 0 3px rgba(66,153,225,0.08); }
+        .filters .search-wrap { position: relative; flex: 1; min-width: 200px; }
+        .filters .search-wrap input { width: 100%; padding-left: 40px; appearance: none; background-image: none; padding-right: 16px; }
+        .filters .search-wrap .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #a0aec0; font-size: 1rem; }
+        .list { flex: 1; overflow-y: auto; padding-right: 4px; }
+        .list::-webkit-scrollbar { width: 6px; }
+        .list::-webkit-scrollbar-thumb { background: #bee3f8; border-radius: 8px; }
+        .card { background: #fff; border-radius: 14px; border: 1px solid #dce7f5; padding: 18px 24px; margin-bottom: 12px; transition: all 0.15s; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+        .card:hover { border-color: #bee3f8; box-shadow: 0 4px 16px rgba(66,153,225,0.08); transform: translateY(-2px); }
+        .card .info { display: flex; flex-direction: column; gap: 4px; }
+        .card .info .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .card .info .top .ref { font-weight: 700; font-size: 0.95rem; color: #1a365d; }
+        .card .info .top .client { color: #718096; font-size: 0.85rem; }
+        .card .info .top .client strong { color: #1a365d; }
+        .card .info .details { display: flex; flex-wrap: wrap; gap: 16px 24px; font-size: 0.82rem; color: #718096; margin-top: 4px; }
+        .card .info .details .item { display: flex; align-items: center; gap: 6px; }
+        .card .right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+        .card .right .amount { font-size: 1.15rem; font-weight: 700; color: #4299e1; }
+        .card .right .status { padding: 3px 14px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .card .right .status.draft { background: #edf2f7; color: #718096; }
+        .card .right .status.sent { background: #bee3f8; color: #2b6cb0; }
+        .card .right .status.viewed { background: #c6f6d5; color: #276749; }
+        .card .right .status.accepted { background: #c6f6d5; color: #276749; }
+        .card .right .status.refused { background: #fed7d7; color: #e53e3e; }
+        .card .right .status.cancelled { background: #fefcbf; color: #975a16; }
+        .card .right .actions { display: flex; gap: 6px; margin-top: 4px; }
+        .card .right .actions button, .card .right .actions a { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: 0.15s; font-size: 1rem; color: #4a5568; text-decoration: none; display: inline-flex; align-items: center; }
+        .card .right .actions .edit:hover { background: #ebf8ff; color: #4299e1; }
+        .card .right .actions .delete:hover { background: #fed7d7; color: #e53e3e; }
+        .card .right .actions .send:hover { background: #e6fffa; color: #276749; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; background: #fff; border-radius: 14px; border: 1px solid #dce7f5; }
+        .empty-state i { font-size: 4rem; color: #4299e1; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 1.1rem; font-weight: 600; color: #1a365d; }
+        .empty-state p { color: #718096; font-size: 0.9rem; margin-top: 4px; }
+        .empty-state .btn-create { margin-top: 16px; padding: 12px 32px; border: none; border-radius: 10px; background: #4299e1; color: #fff; font-family: 'Rubik', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.15s; }
+        .empty-state .btn-create:hover { background: #3182ce; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,54,93,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #fff; border-radius: 20px; padding: 32px 40px; max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(26,54,93,0.2); animation: modalIn 0.25s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-box h3 { font-size: 1.2rem; font-weight: 700; color: #1a365d; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .modal-box .form-group { margin-bottom: 14px; }
+        .modal-box .form-group label { display: block; font-weight: 500; font-size: 0.82rem; color: #1a365d; margin-bottom: 4px; }
+        .modal-box .form-group label .required { color: #e53e3e; }
+        .modal-box .form-group input, .modal-box .form-group textarea, .modal-box .form-group select { width: 100%; padding: 10px 14px; border: 1.5px solid #dce7f5; border-radius: 10px; font-family: 'Rubik', sans-serif; font-size: 0.9rem; transition: 0.15s; background: #fafbfc; }
+        .modal-box .form-group input:focus, .modal-box .form-group textarea:focus, .modal-box .form-group select:focus { border-color: #4299e1; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(66,153,225,0.08); }
+        .modal-box .form-group textarea { resize: vertical; min-height: 50px; }
+        .modal-box .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .modal-box .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .modal-box .section-label { font-size: 0.85rem; font-weight: 700; color: #4299e1; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #edf2f7; display: flex; align-items: center; gap: 8px; }
+        .modal-box .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid #edf2f7; }
+        .modal-box .modal-actions button { padding: 10px 28px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Rubik', sans-serif; font-weight: 600; font-size: 0.9rem; transition: 0.15s; display: flex; align-items: center; gap: 8px; }
+        .modal-box .modal-actions .cancel { background: #edf2f7; color: #4a5568; }
+        .modal-box .modal-actions .cancel:hover { background: #e2e8f0; }
+        .modal-box .modal-actions .submit { background: #4299e1; color: #fff; }
+        .modal-box .modal-actions .submit:hover { background: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(66,153,225,0.3); }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 9999; transition: all 0.3s; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none; }
+        .toast.show { display: block; }
+        .toast.success { background: #22c55e; color: #fff; }
+        .toast.error { background: #ef4444; color: #fff; }
+        .toast.info { background: #1a1a2e; color: #fff; }
+        @media (max-width: 1024px) { .header { padding: 14px 24px; } .content { padding: 20px 24px 24px; } .stats { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .header { padding: 12px 16px; flex-wrap: wrap; } .content { padding: 14px 16px 20px; } .stats { grid-template-columns: 1fr 1fr; gap: 10px; } .filters { flex-direction: column; } .card { grid-template-columns: 1fr; } .card .right { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; } .modal-box { padding: 24px 20px; } .modal-box .form-row, .modal-box .form-row-3 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-file-signature" style="color:#4299e1;font-size:1.8rem;"></i>
+                <h1>CMD-<span>Freelance</span></h1>
+            </div>
+            <div class="right">
+                <a href="{% url 'accounts:dashboard' %}" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <div class="avatar">{{ user.username|first|upper }}</div>
+                <span class="user-name">{{ user.username }}</span>
+                {% if user.role == 'FREELANCE' %}
+                <button class="btn-new" onclick="openCreateModal()"><i class="fas fa-plus-circle"></i> <span>Nouveau devis</span></button>
+                {% endif %}
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="icon-box blue"><i class="fas fa-file-signature"></i></div>
+                    <div class="info">
+                        <div class="number" id="totalDevis">{{ total_count }}</div>
+                        <div class="label">Total devis</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="icon-box yellow"><i class="fas fa-paper-plane"></i></div>
+                    <div class="info">
+                        <div class="number" id="sentDevis">{{ sent_count }}</div>
+                        <div class="label">Envoyés</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="icon-box green"><i class="fas fa-check-circle"></i></div>
+                    <div class="info">
+                        <div class="number" id="acceptedDevis">{{ accepted_count }}</div>
+                        <div class="label">Acceptés</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="icon-box red"><i class="fas fa-times-circle"></i></div>
+                    <div class="info">
+                        <div class="number" id="refusedDevis">0</div>
+                        <div class="label">Refusés</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <div class="search-wrap">
+                    <i class="fas fa-search icon"></i>
+                    <input type="text" id="searchDevis" placeholder="Rechercher..." oninput="filterDevis()">
+                </div>
+                <select id="filterStatus" onchange="filterDevis()">
+                    <option value="all">Tous les statuts</option>
+                    <option value="draft">Brouillon</option>
+                    <option value="sent">Envoyé</option>
+                    <option value="viewed">Vu</option>
+                    <option value="accepted">Accepté</option>
+                    <option value="refused">Refusé</option>
+                    <option value="cancelled">Annulé</option>
+                </select>
+                <select id="filterSort" onchange="filterDevis()">
+                    <option value="newest">Plus récent</option>
+                    <option value="oldest">Plus ancien</option>
+                    <option value="amount-asc">Prix croissant</option>
+                    <option value="amount-desc">Prix décroissant</option>
+                </select>
+            </div>
+
+            <div class="list" id="devisList"></div>
+
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-file-signature"></i>
+                <h3>Aucun devis trouvé</h3>
+                <p>Créez votre premier devis pour commencer</p>
+                {% if user.role == 'FREELANCE' %}
+                <button class="btn-create" onclick="openCreateModal()"><i class="fas fa-plus-circle"></i> Créer un devis</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if user.role == 'FREELANCE' %}
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h3 id="modalTitle"><i class="fas fa-file-signature"></i> Nouveau devis</h3>
+            <form id="devisForm" onsubmit="saveDevis(event)">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="formAction" value="create">
+                <input type="hidden" name="devis_id" id="editId" value="">
+
+                <div class="section-label"><i class="fas fa-user-tie"></i> Client</div>
+                <div class="form-group">
+                    <label>Sélectionner un client existant</label>
+                    <select id="clientSelect" onchange="fillClientData()">
+                        <option value="">— Saisir manuellement —</option>
+                        {% for c in clients %}
+                        <option value="{{ c.id }}" data-email="{{ c.email }}" data-name="{{ c.username }}">{{ c.username }} — {{ c.email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nom du client <span class="required">*</span></label>
+                        <input type="text" id="clientName" name="client_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" id="clientEmail" name="client_email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Entreprise</label>
+                        <input type="text" id="clientCompany" name="client_company">
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="text" id="clientPhone" name="client_phone">
+                    </div>
+                </div>
+
+                <div class="section-label"><i class="fas fa-file-invoice"></i> Prestation</div>
+                <div class="form-group">
+                    <label>Description <span class="required">*</span></label>
+                    <textarea id="description" name="description" required placeholder="Détaillez la prestation..."></textarea>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Montant HT (FCFA) <span class="required">*</span></label>
+                        <input type="number" id="amount" name="amount" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>TVA (%)</label>
+                        <input type="number" id="tva" name="tva" value="18" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="status" name="status">
+                            <option value="draft">Brouillon</option>
+                            <option value="sent">Envoyé</option>
+                            <option value="accepted">Accepté</option>
+                            <option value="refused">Refusé</option>
+                            <option value="cancelled">Annulé</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date d'émission</label>
+                        <input type="date" id="issueDate" name="issue_date">
+                    </div>
+                    <div class="form-group">
+                        <label>Validité</label>
+                        <input type="date" id="validUntil" name="valid_until">
+                    </div>
+                </div>
+
+                <div class="section-label"><i class="fas fa-user-cog"></i> Vos informations</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Entreprise</label>
+                        <input type="text" id="freelanceCompany" name="freelance_company" value="{{ profile.title|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="text" id="freelancePhone" name="freelance_phone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Adresse</label>
+                        <textarea id="freelanceAddress" name="freelance_address" style="min-height:40px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>N° SIRET / RC</label>
+                        <input type="text" id="freelanceSiret" name="freelance_siret">
+                    </div>
+                </div>
+
+                <div class="section-label"><i class="fas fa-sticky-note"></i> Informations</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Conditions</label>
+                        <textarea id="terms" name="terms">Devis valable 30 jours</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="notes" name="notes"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel" onclick="closeModal()"><i class="fas fa-times"></i> Annuler</button>
+                    <button type="submit" class="submit"><i class="fas fa-save"></i> Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const devisData = {{ devis_json|safe }};
+        let devis = devisData || [];
+
+        const statusMap = {
+            draft: { label: 'Brouillon', class: 'draft', icon: 'fa-pencil-alt' },
+            sent: { label: 'Envoyé', class: 'sent', icon: 'fa-paper-plane' },
+            viewed: { label: 'Vu', class: 'viewed', icon: 'fa-eye' },
+            accepted: { label: 'Accepté', class: 'accepted', icon: 'fa-check-circle' },
+            refused: { label: 'Refusé', class: 'refused', icon: 'fa-times-circle' },
+            cancelled: { label: 'Annulé', class: 'cancelled', icon: 'fa-times-circle' }
+        };
+
+        function renderDevis(list) {
+            const container = document.getElementById('devisList');
+            const empty = document.getElementById('emptyState');
+            document.getElementById('totalDevis').textContent = devis.length;
+            document.getElementById('sentDevis').textContent = devis.filter(d => d.status === 'sent').length;
+            document.getElementById('acceptedDevis').textContent = devis.filter(d => d.status === 'accepted').length;
+            document.getElementById('refusedDevis').textContent = devis.filter(d => d.status === 'refused').length;
+
+            if (list.length === 0) { container.innerHTML = ''; empty.style.display = 'flex'; return; }
+            empty.style.display = 'none';
+
+            container.innerHTML = '';
+            list.forEach(d => {
+                const st = statusMap[d.status] || statusMap.draft;
+                const totalTTC = d.total_ttc || (d.amount + (d.amount * (d.tva || 0) / 100));
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="info">
+                        <div class="top">
+                            <span class="ref">${d.ref}</span>
+                            <span class="client"><i class="fas fa-user"></i> <strong>${d.client_name}</strong> • ${d.client_email}</span>
+                        </div>
+                        <div style="font-weight:500;color:#1a365d;font-size:0.92rem;">${d.description}</div>
+                        <div class="details">
+                            <span class="item"><i class="fas fa-calendar-alt"></i> Émis: ${d.issue_date || 'N/A'}</span>
+                            ${d.valid_until ? `<span class="item"><i class="fas fa-hourglass-end"></i> Valable jusqu'au: ${d.valid_until}</span>` : ''}
+                            ${d.freelance_company ? `<span class="item"><i class="fas fa-building"></i> ${d.freelance_company}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div class="amount">${Number(totalTTC).toLocaleString('fr-FR')} FCFA</div>
+                        <span class="status ${st.class}"><i class="fas ${st.icon}"></i> ${st.label}</span>
+                        <div class="actions">
+                            <a href="/missions/devis/${d.id}/pdf/" class="edit" title="Télécharger PDF"><i class="fas fa-file-pdf"></i></a>
+                            {% if user.role == 'FREELANCE' %}
+                            ${d.status === 'draft' ? `<button class="send" onclick="sendDevis(${d.id})" title="Envoyer"><i class="fas fa-paper-plane"></i></button>` : ''}
+                            <button class="edit" onclick="editDevis(${d.id})" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="delete" onclick="deleteDevis(${d.id})" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+                            {% endif %}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterDevis() {
+            const search = document.getElementById('searchDevis').value.toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+            const sort = document.getElementById('filterSort').value;
+            let filtered = devis.filter(d => {
+                let match = true;
+                if (search) match = (d.client_name||'').toLowerCase().includes(search) || (d.client_email||'').toLowerCase().includes(search) || (d.description||'').toLowerCase().includes(search) || (d.ref||'').toLowerCase().includes(search);
+                if (match && status !== 'all') match = d.status === status;
+                return match;
+            });
+            if (sort === 'newest') filtered.sort((a,b) => new Date(b.issue_date||0) - new Date(a.issue_date||0));
+            else if (sort === 'oldest') filtered.sort((a,b) => new Date(a.issue_date||0) - new Date(b.issue_date||0));
+            else if (sort === 'amount-asc') filtered.sort((a,b) => a.amount - b.amount);
+            else if (sort === 'amount-desc') filtered.sort((a,b) => b.amount - a.amount);
+            renderDevis(filtered);
+        }
+
+        function getCSRF() { const m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
+        function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type||'info') + ' show'; setTimeout(() => t.classList.remove('show'), 3500); }
+
+        function openCreateModal() {
+            document.getElementById('formAction').value = 'create';
+            document.getElementById('editId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-file-signature"></i> Nouveau devis';
+            document.getElementById('devisForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            const valid = new Date(); valid.setDate(valid.getDate() + 30);
+            document.getElementById('issueDate').value = today;
+            document.getElementById('validUntil').value = valid.toISOString().split('T')[0];
+            document.getElementById('tva').value = 18;
+            document.getElementById('terms').value = 'Devis valable 30 jours';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+        function fillClientData() {
+            const sel = document.getElementById('clientSelect');
+            const opt = sel.options[sel.selectedIndex];
+            if (opt && opt.value) {
+                document.getElementById('clientName').value = opt.dataset.name;
+                document.getElementById('clientEmail').value = opt.dataset.email;
+            }
+        }
+
+        function saveDevis(e) {
+            e.preventDefault();
+            const form = document.getElementById('devisForm');
+            const fd = new FormData(form);
+            const action = document.getElementById('formAction').value;
+            const sel = document.getElementById('clientSelect');
+            if (sel.value) fd.append('client_id', sel.value);
+            if (!fd.get('client_name') || fd.get('client_name').length < 2) { showToast('Nom client invalide', 'error'); return; }
+            if (!parseFloat(fd.get('amount')) || parseFloat(fd.get('amount')) < 1) { showToast('Montant invalide', 'error'); return; }
+            if (!fd.get('description') || fd.get('description').length < 5) { showToast('Description trop courte', 'error'); return; }
+
+            fetch('{% url "contracts:devis" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRF(), 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd,
+            }).then(r => r.json().then(d => ({status: r.status, data: d}))).then(({status, data}) => {
+                if (data.status === 'success') { showToast(data.message, 'success'); closeModal(); setTimeout(() => location.reload(), 800); }
+                else { showToast(data.message || 'Erreur', 'error'); }
+            }).catch(() => showToast('Erreur réseau', 'error'));
+        }
+
+        function editDevis(id) {
+            const data = devis.find(d => d.id === id);
+            if (!data) return;
+            document.getElementById('formAction').value = 'update';
+            document.getElementById('editId').value = data.id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Modifier le devis';
+            document.getElementById('clientName').value = data.client_name || '';
+            document.getElementById('clientEmail').value = data.client_email || '';
+            document.getElementById('clientCompany').value = data.client_company || '';
+            document.getElementById('clientPhone').value = data.client_phone || '';
+            document.getElementById('description').value = data.description || '';
+            document.getElementById('amount').value = data.amount || '';
+            document.getElementById('tva').value = data.tva || 18;
+            document.getElementById('status').value = data.status || 'draft';
+            document.getElementById('issueDate').value = data.issue_date || '';
+            document.getElementById('validUntil').value = data.valid_until || '';
+            document.getElementById('freelanceCompany').value = data.freelance_company || '';
+            document.getElementById('freelancePhone').value = data.freelance_phone || '';
+            document.getElementById('freelanceAddress').value = data.freelance_address || '';
+            document.getElementById('freelanceSiret').value = data.freelance_siret || '';
+            document.getElementById('terms').value = data.terms || 'Devis valable 30 jours';
+            document.getElementById('notes').value = data.notes || '';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function deleteDevis(id) {
+            const data = devis.find(d => d.id === id);
+            if (!data || !confirm('Supprimer le devis ' + data.ref + ' ?')) return;
+            const fd = new FormData();
+            fd.append('action', 'delete');
+            fd.append('devis_id', id);
+            fd.append('csrfmiddlewaretoken', getCSRF());
+            fetch('{% url "contracts:devis" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRF(), 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd,
+            }).then(r => r.json()).then(d => { showToast(d.message||'Supprimé', 'success'); setTimeout(() => location.reload(), 800); })
+            .catch(() => showToast('Erreur', 'error'));
+        }
+
+        function sendDevis(id) {
+            const data = devis.find(d => d.id === id);
+            if (!data || !confirm('Envoyer le devis ' + data.ref + ' à ' + data.client_name + ' ?')) return;
+            const fd = new FormData();
+            fd.append('action', 'update');
+            fd.append('devis_id', id);
+            fd.append('status', 'sent');
+            fd.append('csrfmiddlewaretoken', getCSRF());
+            fd.append('client_name', data.client_name);
+            fd.append('client_email', data.client_email);
+            fd.append('description', data.description);
+            fd.append('amount', data.amount);
+            fd.append('notes', data.notes || '');
+            fetch('{% url "contracts:devis" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRF(), 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd,
+            }).then(r => r.json()).then(d => { if (d.status === 'success') { showToast('Devis envoyé !', 'success'); setTimeout(() => location.reload(), 800); } }).catch(() => showToast('Erreur réseau', 'error'));
+        }
+
+        document.getElementById('modalOverlay')?.addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+        renderDevis(devis);
+    </script>
+</body>
+</html>

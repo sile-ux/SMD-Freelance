@@ -1,0 +1,88 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes factures reçues - CMD-Freelance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Rubik', sans-serif; background: #f0f4f8; }
+        .wrap { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #f0f4f8; overflow: hidden; }
+        .header { background: #fff; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dce7f5; flex-shrink: 0; }
+        .header .logo { display: flex; align-items: center; gap: 10px; }
+        .header .logo h1 { font-size: 1.3rem; font-weight: 800; color: #1a365d; }
+        .header .logo h1 span { color: #4299e1; }
+        .header .right { display: flex; align-items: center; gap: 16px; }
+        .header .right .back-link { display: flex; align-items: center; gap: 6px; color: #4a5568; text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: 0.15s; }
+        .header .right .back-link:hover { background: #f7fafc; color: #4299e1; }
+        .content { flex: 1; overflow: hidden; padding: 24px 40px 30px; display: flex; flex-direction: column; }
+        .list { flex: 1; overflow-y: auto; padding-right: 4px; }
+        .list::-webkit-scrollbar { width: 6px; }
+        .list::-webkit-scrollbar-thumb { background: #bee3f8; border-radius: 8px; }
+        .card { background: #fff; border-radius: 14px; border: 1px solid #dce7f5; padding: 18px 24px; margin-bottom: 12px; transition: all 0.15s; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+        .card:hover { border-color: #bee3f8; box-shadow: 0 4px 16px rgba(66,153,225,0.08); }
+        .card .info .ref { font-weight: 700; font-size: 1rem; color: #1a365d; }
+        .card .info .freelance { color: #718096; font-size: 0.85rem; }
+        .card .info .desc { margin-top: 6px; font-size: 0.9rem; color: #4a5568; }
+        .card .right { text-align: right; }
+        .card .right .amount { font-size: 1.2rem; font-weight: 700; color: #4299e1; }
+        .card .right .status { padding: 3px 14px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+        .card .right .status.draft { background: #edf2f7; color: #718096; }
+        .card .right .status.sent { background: #bee3f8; color: #2b6cb0; }
+        .card .right .status.paid { background: #c6f6d5; color: #276749; }
+        .card .right .status.overdue { background: #fed7d7; color: #e53e3e; }
+        .card .right .status.cancelled { background: #fefcbf; color: #975a16; }
+        .card .right .btn-pdf { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 6px 14px; background: #ebf8ff; color: #2b6cb0; border-radius: 8px; text-decoration: none; font-size: 0.78rem; font-weight: 500; transition: 0.15s; }
+        .card .right .btn-pdf:hover { background: #4299e1; color: #fff; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; background: #fff; border-radius: 14px; border: 1px solid #dce7f5; }
+        .empty-state i { font-size: 4rem; color: #bee3f8; margin-bottom: 12px; }
+        .empty-state h3 { font-size: 1rem; font-weight: 600; color: #1a365d; }
+        .empty-state p { font-size: 0.85rem; color: #718096; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-file-invoice-dollar" style="color:#4299e1;font-size:1.8rem;"></i>
+                <h1>CMD-<span>Freelance</span></h1>
+            </div>
+            <div class="right">
+                <a href="{% url 'accounts:dashboard' %}" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </header>
+        <div class="content">
+            <h2 style="font-size:1.2rem;font-weight:700;color:#1a365d;margin-bottom:16px;flex-shrink:0;">
+                <i class="fas fa-file-invoice" style="color:#4299e1;"></i> Mes factures reçues
+            </h2>
+            <div class="list">
+                {% for inv in invoices %}
+                <div class="card">
+                    <div class="info">
+                        <div class="ref">{{ inv.ref }}</div>
+                        <div class="freelance">De: <strong>{{ inv.freelance.username }}</strong> — {{ inv.client_company|default:inv.client_name }}</div>
+                        <div class="desc">{{ inv.description }}</div>
+                    </div>
+                    <div class="right">
+                        <div class="amount">{{ inv.total_ttc|floatformat:0 }} FCFA</div>
+                        <span class="status {{ inv.status }}">{{ inv.get_status_display }}</span>
+                        <a href="{% url 'contracts:invoice_pdf' inv.id %}" class="btn-pdf"><i class="fas fa-file-pdf"></i> Télécharger</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>Aucune facture reçue</h3>
+                    <p>Les factures que les freelances vous enverront apparaîtront ici.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

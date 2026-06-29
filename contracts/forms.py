@@ -8,7 +8,7 @@ class QuickMissionForm(forms.ModelForm):
         model = Mission
         fields = [
             'title', 'description', 'category', 'location', 'duration',
-            'budget', 'payment_type', 'currency', 'skills_required',
+            'budget_type', 'budget', 'payment_type', 'currency', 'skills_required',
             'deadline', 'urgency', 'extra_info',
         ]
         widgets = {
@@ -16,6 +16,16 @@ class QuickMissionForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 5}),
             'extra_info': forms.Textarea(attrs={'rows': 3}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        budget_type = cleaned_data.get('budget_type')
+        budget = cleaned_data.get('budget')
+        if budget_type == 'negotiable':
+            cleaned_data['budget'] = None
+        elif not budget:
+            self.add_error('budget', 'Veuillez entrer un budget ou sélectionner "À discuter".')
+        return cleaned_data
 
 # Classe parente de sécurité pour nettoyer les failles XSS (balises HTML)
 class BaseSecureForm(forms.ModelForm):

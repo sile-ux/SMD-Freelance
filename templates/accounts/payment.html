@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement - Abonnement Freelance</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Rubik', sans-serif; background: #f0f4f8; }
+
+        .payment-wrap { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: #f0f4f8; overflow: hidden; }
+
+        .payment-header { background: #ffffff; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dce7f5; flex-shrink: 0; }
+        .payment-header .logo { display: flex; align-items: center; gap: 10px; }
+        .payment-header .logo h1 { font-size: 1.3rem; font-weight: 800; color: #1a365d; }
+        .payment-header .logo h1 span { color: #4299e1; }
+        .payment-header .back { display: flex; align-items: center; gap: 6px; color: #4a5568; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: 0.15s; cursor: pointer; padding: 6px 14px; border-radius: 8px; background: #f7fafc; border: 1px solid #dce7f5; font-family: 'Rubik', sans-serif; }
+        .payment-header .back:hover { background: #ebf8ff; border-color: #4299e1; color: #2b6cb0; }
+
+        .payment-content { flex: 1; overflow-y: auto; padding: 30px 40px 40px; display: flex; justify-content: center; align-items: flex-start; }
+        .payment-content::-webkit-scrollbar { width: 6px; }
+        .payment-content::-webkit-scrollbar-thumb { background: #bee3f8; border-radius: 8px; }
+
+        .payment-card { background: #ffffff; border-radius: 20px; border: 1px solid #dce7f5; padding: 40px 50px; max-width: 720px; width: 100%; box-shadow: 0 4px 20px rgba(66, 153, 225, 0.08); }
+
+        .payment-card .step-indicator { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; }
+        .payment-card .step-indicator::before { content: ''; position: absolute; top: 50%; left: 30px; right: 30px; height: 2px; background: #dce7f5; transform: translateY(-50%); z-index: 1; }
+        .payment-card .step { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2; background: #fff; padding: 0 10px; }
+        .payment-card .step .num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; background: #dce7f5; color: #718096; transition: 0.3s; }
+        .payment-card .step.active .num { background: #4299e1; color: #fff; box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3); }
+        .payment-card .step .label { font-size: 0.7rem; color: #718096; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .payment-card .step.active .label { color: #2b6cb0; }
+
+        .recap-box { background: #f7fafc; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px; border: 1px solid #dce7f5; }
+        .recap-box .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.95rem; }
+        .recap-box .row:not(:last-child) { border-bottom: 1px solid #edf2f7; }
+        .recap-box .row .label { color: #718096; }
+        .recap-box .row .value { font-weight: 600; color: #1a365d; }
+        .recap-box .row.total { padding-top: 12px; margin-top: 4px; border-top: 2px solid #dce7f5; font-size: 1.1rem; }
+        .recap-box .row.total .value { font-size: 1.3rem; color: #4299e1; }
+
+        .payment-card h2 { font-size: 1.3rem; font-weight: 700; color: #1a365d; margin-bottom: 6px; }
+        .payment-card .subtitle { color: #718096; font-size: 0.9rem; margin-bottom: 24px; }
+
+        .payment-methods { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+        .payment-method { padding: 16px 12px; border: 2px solid #dce7f5; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; }
+        .payment-method:hover { border-color: #bee3f8; background: #f7fafc; }
+        .payment-method.active { border-color: #4299e1; background: #ebf8ff; box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.12); }
+        .payment-method .icon { font-size: 2rem; margin-bottom: 6px; display: flex; justify-content: center; }
+        .payment-method .icon lord-icon { width: 40px; height: 40px; }
+        .payment-method .name { font-weight: 600; font-size: 0.85rem; color: #1a365d; }
+        .payment-method .desc { font-size: 0.7rem; color: #718096; margin-top: 2px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; font-size: 0.85rem; color: #4a5568; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 12px 16px; border: 1.5px solid #dce7f5; border-radius: 10px; font-family: 'Rubik', sans-serif; font-size: 0.95rem; transition: 0.15s; background: #fafbfc; }
+        .form-group input:focus { border-color: #4299e1; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.08); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .btn-pay { width: 100%; padding: 16px; border: none; border-radius: 12px; background: #4299e1; color: #fff; font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; }
+        .btn-pay:hover { background: #3182ce; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(66, 153, 225, 0.35); }
+        .btn-pay:active { transform: translateY(0); }
+        .btn-pay.loading { opacity: 0.7; cursor: not-allowed; }
+
+        .security-badges { display: flex; justify-content: center; gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #edf2f7; }
+        .security-badges .badge { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #718096; }
+        .security-badges .badge lord-icon { width: 20px; height: 20px; }
+
+        .payment-form-section { display: none; animation: fadeIn 0.3s ease; }
+        .payment-form-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .payment-header { padding: 12px 20px; }
+            .payment-header .logo h1 { font-size: 1.1rem; }
+            .payment-header .back span { display: none; }
+            .payment-content { padding: 16px; align-items: center; }
+            .payment-card { padding: 24px 20px; border-radius: 16px; }
+            .payment-card .step-indicator { margin-bottom: 20px; }
+            .payment-card .step .label { font-size: 0.6rem; display: none; }
+            .payment-card .step .num { width: 28px; height: 28px; font-size: 0.75rem; }
+            .payment-card h2 { font-size: 1.1rem; }
+            .payment-methods { grid-template-columns: 1fr; gap: 10px; }
+            .payment-method { padding: 14px 12px; display: flex; align-items: center; gap: 12px; text-align: left; }
+            .payment-method .icon { font-size: 1.5rem; margin-bottom: 0; }
+            .payment-method .icon lord-icon { width: 32px; height: 32px; }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .recap-box { padding: 16px 18px; }
+            .recap-box .row { font-size: 0.85rem; padding: 6px 0; }
+            .recap-box .row.total .value { font-size: 1.1rem; }
+            .security-badges { flex-wrap: wrap; gap: 12px; }
+            .security-badges .badge { font-size: 0.7rem; }
+            .btn-pay { font-size: 0.95rem; padding: 14px; }
+        }
+
+        @media (max-width: 480px) {
+            .payment-card { padding: 18px 14px; }
+            .payment-header .back { padding: 4px 10px; font-size: 0.8rem; }
+            .payment-card .step-indicator::before { left: 15px; right: 15px; }
+        }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #1a365d; color: #fff; padding: 16px 32px; border-radius: 12px;
+            font-family: 'Rubik', sans-serif; font-weight: 500; font-size: 0.95rem;
+            z-index: 1000; opacity: 0; transition: all 0.4s ease; pointer-events: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #276749; }
+        .toast.error { background: #c53030; }
+    </style>
+</head>
+<body>
+    <div class="payment-wrap">
+
+        <header class="payment-header">
+            <div class="logo">
+                <lord-icon src="https://cdn.lordicon.com/ktheyllq.json" trigger="loop" colors="primary:#4299e1" style="width:32px;height:32px;"></lord-icon>
+                <h1>CMD-<span>Freelance</span></h1>
+            </div>
+            <button class="back" onclick="goBack()">
+                <lord-icon src="https://cdn.lordicon.com/npwmqdcn.json" trigger="hover" colors="primary:#4a5568" style="width:20px;height:20px;"></lord-icon>
+                <span>Retour aux tarifs</span>
+            </button>
+        </header>
+
+        <div class="payment-content">
+            <div class="payment-card">
+
+                <div class="step-indicator">
+                    <div class="step active">
+                        <div class="num">1</div>
+                        <div class="label">Plan</div>
+                    </div>
+                    <div class="step active">
+                        <div class="num">2</div>
+                        <div class="label">Paiement</div>
+                    </div>
+                    <div class="step">
+                        <div class="num">3</div>
+                        <div class="label">Inscription</div>
+                    </div>
+                </div>
+
+                <div class="recap-box" id="recapBox">
+                    <div class="row">
+                        <span class="label">Plan choisi</span>
+                        <span class="value" id="planName">{{ plan }}</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">Période</span>
+                        <span class="value" id="planPeriod">
+                            {% if period == 'monthly' %}Mensuel
+                            {% elif period == 'quarterly' %}Trimestriel
+                            {% else %}Annuel{% endif %}
+                        </span>
+                    </div>
+                    <div class="row">
+                        <span class="label">Prix</span>
+                        <span class="value" id="planPrice">{{ price }} FCFA</span>
+                    </div>
+                    <div class="row total">
+                        <span class="label">Total à payer</span>
+                        <span class="value" id="totalPrice">{{ price }} FCFA</span>
+                    </div>
+                </div>
+
+                <h2>Choisissez votre moyen de paiement</h2>
+                <p class="subtitle">Sélectionnez la méthode qui vous convient le mieux</p>
+
+                <div class="payment-methods" id="paymentMethods">
+                    <div class="payment-method active" data-method="orange">
+                        <div class="icon">
+                            <lord-icon src="https://cdn.lordicon.com/hfiwfwiw.json" trigger="hover" colors="primary:#f97316" style="width:40px;height:40px;"></lord-icon>
+                        </div>
+                        <div class="name">Orange Money</div>
+                        <div class="desc">Paiement mobile</div>
+                    </div>
+                    <div class="payment-method" data-method="mtn">
+                        <div class="icon">
+                            <lord-icon src="https://cdn.lordicon.com/lwbrxuol.json" trigger="hover" colors="primary:#fbbf24" style="width:40px;height:40px;"></lord-icon>
+                        </div>
+                        <div class="name">MTN Mobile Money</div>
+                        <div class="desc">Paiement mobile</div>
+                    </div>
+                    <div class="payment-method" data-method="stripe">
+                        <div class="icon">
+                            <lord-icon src="https://cdn.lordicon.com/mkqfazpn.json" trigger="hover" colors="primary:#635bff" style="width:40px;height:40px;"></lord-icon>
+                        </div>
+                        <div class="name">Stripe</div>
+                        <div class="desc">Carte bancaire</div>
+                    </div>
+                </div>
+
+                <div class="payment-form-section active" id="form-orange">
+                    <div class="form-group">
+                        <label>Numéro Orange Money</label>
+                        <input type="tel" id="orangePhone" placeholder="Ex: 77 123 45 67" maxlength="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom du titulaire</label>
+                        <input type="text" id="orangeName" placeholder="Nom complet">
+                    </div>
+                </div>
+
+                <div class="payment-form-section" id="form-mtn">
+                    <div class="form-group">
+                        <label>Numéro MTN Mobile Money</label>
+                        <input type="tel" id="mtnPhone" placeholder="Ex: 77 123 45 67" maxlength="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom du titulaire</label>
+                        <input type="text" id="mtnName" placeholder="Nom complet">
+                    </div>
+                </div>
+
+                <div class="payment-form-section" id="form-stripe">
+                    <div class="form-group">
+                        <label>Numéro de carte</label>
+                        <input type="text" id="cardNumber" placeholder="4242 4242 4242 4242" maxlength="19">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date d'expiration</label>
+                            <input type="text" id="cardExpiry" placeholder="MM/AA" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVC</label>
+                            <input type="text" id="cardCvc" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Titulaire de la carte</label>
+                        <input type="text" id="cardName" placeholder="Nom complet">
+                    </div>
+                </div>
+
+                <form method="post" action="{% url 'accounts:payment' %}" id="paymentForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan" value="{{ plan }}">
+                    <input type="hidden" name="period" value="{{ period }}">
+                    <input type="hidden" name="price" value="{{ price }}">
+                    <input type="hidden" name="payment_method" id="paymentMethodInput">
+                    <button type="submit" class="btn-pay" id="payButton">
+                        <lord-icon src="https://cdn.lordicon.com/iltqorsz.json" trigger="hover" colors="primary:#ffffff" style="width:24px;height:24px;"></lord-icon>
+                        Payer {{ price }} FCFA
+                    </button>
+                </form>
+
+                <div class="security-badges">
+                    <div class="badge">
+                        <lord-icon src="https://cdn.lordicon.com/uwlzqzys.json" trigger="loop" colors="primary:#4299e1" style="width:20px;height:20px;"></lord-icon>
+                        Paiement sécurisé
+                    </div>
+                    <div class="badge">
+                        <lord-icon src="https://cdn.lordicon.com/uxhkeisw.json" trigger="loop" colors="primary:#4299e1" style="width:20px;height:20px;"></lord-icon>
+                        Chiffrement SSL
+                    </div>
+                    <div class="badge">
+                        <lord-icon src="https://cdn.lordicon.com/dcimjilq.json" trigger="loop" colors="primary:#4299e1" style="width:20px;height:20px;"></lord-icon>
+                        Satisfaction garantie
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+                    this.classList.add('active');
+                    const method = this.dataset.method;
+                    document.querySelectorAll('.payment-form-section').forEach(f => f.classList.remove('active'));
+                    const formSection = document.getElementById('form-' + method);
+                    if (formSection) formSection.classList.add('active');
+                });
+            });
+
+            document.getElementById('cardNumber').addEventListener('input', function(e) {
+                let value = this.value.replace(/\D/g, '');
+                value = value.replace(/(.{4})/g, '$1 ').trim();
+                this.value = value;
+            });
+
+            document.getElementById('cardExpiry').addEventListener('input', function(e) {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                this.value = value;
+            });
+
+            document.getElementById('cardCvc').addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '');
+            });
+
+            document.querySelectorAll('input[type="tel"]').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/\D/g, '');
+                    if (this.value.length > 3) {
+                        this.value = this.value.substring(0, 2) + ' ' + this.value.substring(2);
+                    }
+                    if (this.value.length > 6) {
+                        this.value = this.value.substring(0, 6) + ' ' + this.value.substring(6);
+                    }
+                });
+            });
+
+            const form = document.getElementById('paymentForm');
+            form.addEventListener('submit', function(e) {
+                const method = document.querySelector('.payment-method.active');
+                if (!method) {
+                    e.preventDefault();
+                    showToast('Veuillez sélectionner un moyen de paiement', 'error');
+                    return;
+                }
+                document.getElementById('paymentMethodInput').value = method.dataset.method;
+
+                let isValid = true;
+                let errorMsg = '';
+                const m = method.dataset.method;
+
+                if (m === 'orange') {
+                    const phone = document.getElementById('orangePhone').value.replace(/\s/g, '');
+                    const name = document.getElementById('orangeName').value.trim();
+                    if (phone.length < 8) { isValid = false; errorMsg = 'Numéro Orange Money invalide'; }
+                    else if (name.length < 2) { isValid = false; errorMsg = 'Nom du titulaire requis'; }
+                } else if (m === 'mtn') {
+                    const phone = document.getElementById('mtnPhone').value.replace(/\s/g, '');
+                    const name = document.getElementById('mtnName').value.trim();
+                    if (phone.length < 8) { isValid = false; errorMsg = 'Numéro MTN Mobile Money invalide'; }
+                    else if (name.length < 2) { isValid = false; errorMsg = 'Nom du titulaire requis'; }
+                } else if (m === 'stripe') {
+                    const card = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                    const expiry = document.getElementById('cardExpiry').value;
+                    const cvc = document.getElementById('cardCvc').value;
+                    const name = document.getElementById('cardName').value.trim();
+                    if (card.length < 16) { isValid = false; errorMsg = 'Numéro de carte invalide (16 chiffres)'; }
+                    else if (expiry.length < 5) { isValid = false; errorMsg = 'Date d\'expiration invalide (MM/AA)'; }
+                    else if (cvc.length < 3) { isValid = false; errorMsg = 'CVC invalide (3 chiffres)'; }
+                    else if (name.length < 2) { isValid = false; errorMsg = 'Nom du titulaire requis'; }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showToast(errorMsg, 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('payButton');
+                btn.classList.add('loading');
+                btn.innerHTML = 'Traitement en cours...';
+            });
+        });
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + (type || '');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        }
+
+        function goBack() {
+            if (confirm('Êtes-vous sûr de vouloir revenir en arrière ?')) {
+                window.location.href = '{% url "accounts:pricing" %}';
+            }
+        }
+    </script>
+</body>
+</html>
