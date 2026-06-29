@@ -915,8 +915,13 @@
                         <span style="font-size:11px;padding:3px 10px;border-radius:10px;
                             {% if m.status == 'open' %}background:#d1fae5;color:#065f46;
                             {% elif m.status == 'in-progress' %}background:#fef3c7;color:#92400e;
+                            {% elif m.status == 'awaiting_approval' %}background:#fefcbf;color:#975a16;
+                            {% elif m.status == 'completed' %}background:#d1fae5;color:#065f46;
                             {% else %}background:#e5e7eb;color:#374151;{% endif %}">
-                            {{ m.get_status_display }}
+                            {% if m.status == 'awaiting_approval' %}📦 Livrée - En validation
+                            {% elif m.status == 'completed' %}✅ Terminée
+                            {% elif m.status == 'in-progress' %}🔧 En cours
+                            {% else %}{{ m.get_status_display }}{% endif %}
                         </span>
                     </div>
 
@@ -967,6 +972,25 @@
                     </div>
                     {% endif %}
                     {% endwith %}
+
+                    {% if m.status == 'awaiting_approval' %}
+                    <div style="border-top:1px solid #eef2f7;padding-top:10px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;">
+                        <div style="font-size:12px;color:#6b7280;">
+                            <i class="fas fa-box" style="color:#d69e2e;"></i>
+                            Livraison en attente de validation
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <a href="{% url 'contracts:approve_completion' m.id %}"
+                               style="background:#276749;color:#fff;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">
+                                <i class="fas fa-check"></i> Valider
+                            </a>
+                            <a href="{% url 'contracts:reject_delivery' m.id %}"
+                               style="background:#fff;color:#e53e3e;border:1px solid #e53e3e;padding:5px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">
+                                <i class="fas fa-times"></i> Refuser
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     {% if m.status == 'closed' %}
                         {% with apps=m.applications.all %}

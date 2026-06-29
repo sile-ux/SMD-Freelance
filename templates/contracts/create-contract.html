@@ -942,6 +942,7 @@
             formData.append('urgency', urgency);
             formData.append('deadline', date || '');
             formData.append('skills_required', skills.join(', '));
+            formData.append('budget_type', 'fixed');
             formData.append('budget', budget);
             formData.append('payment_type', paymentType);
             formData.append('currency', currency);
@@ -980,7 +981,7 @@
                 }
             })
             .catch(() => {
-                showToast('Erreur lors de la publication', 'error');
+                showToast('❌ Erreur lors de la publication', 'error');
                 submitBtn.innerHTML = 'Publier la mission';
                 submitBtn.disabled = false;
             });

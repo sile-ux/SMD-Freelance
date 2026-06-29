@@ -77,6 +77,8 @@
         }
         .status-badge.open { background: #c6f6d5; color: #276749; }
         .status-badge.in-progress { background: #fefcbf; color: #975a16; }
+        .status-badge.awaiting_approval { background: #fefcbf; color: #975a16; }
+        .status-badge.completed { background: #c6f6d5; color: #276749; }
         .status-badge.closed { background: #dce7f5; color: #4a5568; }
         .status-badge.cancelled { background: #fed7d7; color: #e53e3e; }
 
@@ -161,7 +163,7 @@
                     <div class="budget-section">
                         <div class="budget">{{ mission.budget|fcfa:mission.currency }}</div>
                         <div class="payment-type">{{ mission.get_payment_type_display }}</div>
-                        <span class="status-badge {{ mission.status }}">{% if mission.status == 'in-progress' %}Déjà pris{% else %}{{ mission.get_status_display }}{% endif %}</span>
+                        <span class="status-badge {{ mission.status }}">{% if mission.status == 'in-progress' %}En cours{% elif mission.status == 'awaiting_approval' %}Livrée - En validation{% elif mission.status == 'completed' %}Terminée{% else %}{{ mission.get_status_display }}{% endif %}</span>
                     </div>
                 </div>
 
@@ -231,23 +233,80 @@
                     <a href="{% url 'contracts:contract_list' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour
                     </a>
+
                     {% if user.is_authenticated and user.role == 'FREELANCE' %}
                         {% if mission.status == 'open' %}
                         <a href="{% url 'contracts:apply_to_mission' mission.id %}" class="btn btn-primary">
                             <i class="fas fa-paper-plane"></i> Postuler
                         </a>
-                        {% elif mission.status == 'in-progress' %}
-                        <div style="padding:12px 20px;background:#fefcbf;border-radius:10px;border:1px solid #f6e05e;color:#975a16;font-weight:500;font-size:0.9rem;display:flex;align-items:center;gap:8px;width:100%;">
+                        {% elif mission.status == 'in-progress' and is_assigned_freelance %}
+                        <a href="{% url 'contracts:mark_delivered' mission.id %}" class="btn btn-primary" style="background:#276749;">
+                            <i class="fas fa-check-circle"></i> Marquer comme livrée
+                        </a>
+                        {% elif mission.status == 'awaiting_approval' and is_assigned_freelance %}
+                        <div style="padding:12px 20px;background:#fefcbf;border-radius:10px;border:1px solid #f6e05e;color:#975a16;font-weight:500;font-size:0.9rem;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-clock"></i> En attente de validation du client
+                        </div>
+                        {% elif mission.status == 'completed' and is_assigned_freelance %}
+                        <div style="padding:12px 20px;background:#c6f6d5;border-radius:10px;border:1px solid #9ae6b4;color:#276749;font-weight:500;font-size:0.9rem;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-check-circle"></i> Mission terminée
+                        </div>
+                        {% elif mission.status == 'in-progress' and not is_assigned_freelance %}
+                        <div style="padding:12px 20px;background:#fefcbf;border-radius:10px;border:1px solid #f6e05e;color:#975a16;font-weight:500;font-size:0.9rem;display:flex;align-items:center;gap:8px;">
                             <i class="fas fa-lock"></i> Cette mission est déjà prise.
                         </div>
                         {% endif %}
                     {% endif %}
+
+                    {% if user.is_authenticated and user == mission.client %}
+                        {% if mission.status == 'awaiting_approval' %}
+                        <a href="{% url 'contracts:approve_completion' mission.id %}" class="btn btn-primary" style="background:#276749;">
+                            <i class="fas fa-check"></i> Valider la livraison
+                        </a>
+                        <a href="{% url 'contracts:reject_delivery' mission.id %}" class="btn btn-secondary" style="border-color:#e53e3e;color:#e53e3e;">
+                            <i class="fas fa-times"></i> Refuser
+                        </a>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if user.is_authenticated and user.role == 'ADMIN' or user.is_superuser %}
+                        {% if mission.status == 'completed' %}
+                        <a href="{% url 'contracts:release_funds' mission.id %}" class="btn btn-primary" style="background:#d69e2e;">
+                            <i class="fas fa-coins"></i> Débloquer les fonds
+                        </a>
+                        {% endif %}
+                    {% endif %}
+
                     {% if user.is_authenticated and mission.client %}
-                    <a href="{% url 'chat:start_thread' mission.client.id %}" class="btn btn-secondary">
-                        <i class="fas fa-comment"></i> Contacter le client
+                        {% if mission.status == 'in-progress' or mission.status == 'awaiting_approval' %}
+                        <a href="{% url 'contracts:create_dispute' mission.id %}" class="btn btn-secondary" style="border-color:#d69e2e;color:#d69e2e;">
+                            <i class="fas fa-gavel"></i> Litige
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'chat:start_thread' mission.client.id %}" class="btn btn-secondary">
+                            <i class="fas fa-comment"></i> Contacter le client
+                        </a>
+                    {% endif %}
+
+                    {% if accepted_app and user.is_authenticated and user != mission.client and not is_assigned_freelance %}
+                    <a href="{% url 'chat:start_thread' accepted_app.freelance.id %}" class="btn btn-secondary">
+                        <i class="fas fa-comment"></i> Contacter le freelance
                     </a>
                     {% endif %}
                 </div>
+
+                {% if mission.delivery_note and mission.status == 'awaiting_approval' or mission.status == 'completed' %}
+                <div style="margin-top:20px;padding:16px;background:#f7fafc;border-radius:10px;border:1px solid #dce7f5;">
+                    <div style="font-size:0.75rem;font-weight:600;color:#a0aec0;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Note de livraison</div>
+                    <p style="font-size:0.9rem;color:#4a5568;line-height:1.6;">{{ mission.delivery_note|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+
+                {% if mission.completed_at %}
+                <div style="margin-top:12px;font-size:0.8rem;color:#718096;">
+                    <i class="fas fa-calendar-check"></i> Terminée le {{ mission.completed_at|date:"d/m/Y à H:i" }}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

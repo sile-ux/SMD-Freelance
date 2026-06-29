@@ -384,6 +384,7 @@
 
                 <div class="tab-bar">
                     <button class="tab active" onclick="switchTab('missions')">Missions disponibles</button>
+                    <button class="tab" onclick="switchTab('active')">Mes missions en cours {% if active_missions %}<span style="background:#c6f6d5;color:#276749;padding:1px 8px;border-radius:10px;font-size:0.7rem;margin-left:4px;">{{ active_missions|length }}</span>{% endif %}</button>
                     <button class="tab" onclick="switchTab('applications')">Mes candidatures {% if application_count %}<span style="background:#fed7d7;color:#e53e3e;padding:1px 8px;border-radius:10px;font-size:0.7rem;margin-left:4px;">{{ application_count }}</span>{% endif %}</button>
                 </div>
 
@@ -429,6 +430,53 @@
                     </div>
                 </div>
 
+                <div class="tab-content" id="tabActive">
+                    <div class="scroll-area">
+                        {% for mission in active_missions %}
+                        <div class="mission-card" style="border-left:4px solid {% if mission.status == 'in-progress' %}#4299e1{% elif mission.status == 'awaiting_approval' %}#d69e2e{% elif mission.status == 'completed' %}#48bb78{% endif %};">
+                            <div class="left">
+                                <div class="title">
+                                    <a href="{% url 'contracts:mission_detail' mission.id %}" style="color:#1a365d;text-decoration:none;">{{ mission.title }}</a>
+                                </div>
+                                <div class="meta">
+                                    <span><i class="fas fa-user"></i>{{ mission.client.username|default:"Anonyme" }}</span>
+                                    <span><i class="fas fa-tag"></i>{{ mission.category|default:"Général" }}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i>{{ mission.location|default:"Non spécifié" }}</span>
+                                </div>
+                                <div style="margin-top:8px;">
+                                    <span style="font-size:0.75rem;padding:3px 12px;border-radius:10px;font-weight:600;
+                                        {% if mission.status == 'in-progress' %}background:#ebf8ff;color:#2b6cb0;
+                                        {% elif mission.status == 'awaiting_approval' %}background:#fefcbf;color:#975a16;
+                                        {% elif mission.status == 'completed' %}background:#c6f6d5;color:#276749;
+                                        {% endif %}">
+                                        {% if mission.status == 'in-progress' %}🔧 En cours
+                                        {% elif mission.status == 'awaiting_approval' %}📦 En attente de validation
+                                        {% elif mission.status == 'completed' %}✅ Terminée
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="right">
+                                <div class="budget">{{ mission.budget|floatformat:0 }} <small>{{ mission.currency|default:"EUR" }}</small></div>
+                                {% if mission.status == 'in-progress' %}
+                                <a href="{% url 'contracts:mark_delivered' mission.id %}" class="btn btn-apply" style="text-decoration:none;text-align:center;">📦 Livrer</a>
+                                {% elif mission.status == 'awaiting_approval' %}
+                                <a href="{% url 'contracts:mission_detail' mission.id %}" class="btn btn-detail" style="text-decoration:none;text-align:center;">👀 Voir</a>
+                                {% elif mission.status == 'completed' %}
+                                <span style="font-size:0.75rem;color:#48bb78;font-weight:600;"><i class="fas fa-check-circle"></i> Terminée</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <h3>Aucune mission en cours</h3>
+                            <p>Une fois qu'un client aura accepté votre candidature, elle apparaîtra ici.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <div class="tab-content" id="tabApplications">
                     <div class="scroll-area">
                         {% for app in applications %}
@@ -438,7 +486,12 @@
                                 <div class="sub">Postulée le {{ app.created_at|date:"d/m/Y" }} — Budget: {{ app.mission.budget|floatformat:0 }} {{ app.mission.currency|default:"EUR" }}</div>
                             </div>
                             <div class="actions">
-                                <span class="status-badge pending">En attente</span>
+                                <span class="status-badge {{ app.status }}">
+                                    {% if app.status == 'pending' %}⏳ En attente
+                                    {% elif app.status == 'accepted' %}✅ Acceptée
+                                    {% elif app.status == 'rejected' %}❌ Refusée
+                                    {% endif %}
+                                </span>
                                 <a href="{% url 'chat:start_thread' app.mission.client.id %}" class="btn-sm"><i class="fas fa-comment"></i> Contacter</a>
                             </div>
                         </div>

@@ -254,10 +254,14 @@ def dashboard(request):
         applications = Application.objects.filter(freelance=user).select_related('mission').order_by('-created_at')
         application_count = applications.count()
         urgent_count = missions.filter(urgency='high').count()
+        accepted_apps = Application.objects.filter(freelance=user, status='accepted').select_related('mission')
+        accepted_mission_ids = accepted_apps.values_list('mission_id', flat=True)
+        active_missions = Mission.objects.filter(id__in=accepted_mission_ids).exclude(status='closed').exclude(status='cancelled').order_by('-created_at')
         return render(request, 'accounts/dashboard_freelance.html', {
             'profile': user.freelance_profile,
             'missions': missions,
             'applications': applications,
+            'active_missions': active_missions,
             'mission_count': mission_count,
             'application_count': application_count,
             'urgent_count': urgent_count,
@@ -311,6 +315,7 @@ def admin_dashboard(request):
     active_missions = Mission.objects.filter(status='open').count()
     pending_missions = Mission.objects.filter(status='pending').count()
     completed_missions = Mission.objects.filter(status='completed').count()
+    completed_missions_list = Mission.objects.filter(status='completed').select_related('client').order_by('-completed_at')[:20]
     total_missions = Mission.objects.count()
 
     # Revenus
@@ -413,6 +418,7 @@ def admin_dashboard(request):
         'pending_payments_amount': pending_payments_amount,
         'processing_payments': processing_payments,
         'mission_counts': mission_counts,
+        'completed_missions_list': completed_missions_list,
         'sidebar_badges': sidebar_badges,
         'user_change': abs(user_change),
         'user_trend': user_trend,

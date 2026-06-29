@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ouvrir un litige - SMD-Freelance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: 'Rubik', sans-serif; background: #f0f4f8; }
+        .wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card { background: #fff; border-radius: 20px; border: 1px solid #dce7f5; padding: 40px; max-width: 560px; width: 100%; box-shadow: 0 4px 20px rgba(66,153,225,0.06); }
+        .card h2 { font-size: 1.4rem; font-weight: 800; color: #d69e2e; margin-bottom: 6px; }
+        .card p { color: #718096; font-size: 0.9rem; margin-bottom: 24px; }
+        .alert { background: #fffff0; border: 1px solid #f6e05e; border-radius: 10px; padding: 14px 16px; margin-bottom: 24px; font-size: 0.85rem; color: #975a16; display: flex; align-items: center; gap: 10px; }
+        .alert i { font-size: 1.2rem; }
+        .mission-info { background: #f7fafc; border-radius: 10px; padding: 16px; margin-bottom: 24px; border: 1px solid #dce7f5; }
+        .mission-info strong { display: block; font-size: 1rem; color: #1a365d; margin-bottom: 4px; }
+        .mission-info span { font-size: 0.85rem; color: #718096; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.88rem; color: #1a365d; margin-bottom: 6px; }
+        .form-group textarea { width: 100%; padding: 14px 16px; border: 1.5px solid #dce7f5; border-radius: 12px; font-family: 'Rubik', sans-serif; font-size: 0.95rem; resize: vertical; min-height: 120px; transition: 0.15s; background: #fafbfc; }
+        .form-group textarea:focus { border-color: #d69e2e; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(214,158,46,0.08); }
+        .form-group input { width: 100%; padding: 12px 16px; border: 1.5px solid #dce7f5; border-radius: 10px; font-family: 'Rubik', sans-serif; font-size: 0.95rem; transition: 0.15s; background: #fafbfc; }
+        .form-group input:focus { border-color: #d69e2e; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(214,158,46,0.08); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .actions { display: flex; gap: 12px; margin-top: 28px; }
+        .btn-warning { flex: 1; padding: 14px; border: none; border-radius: 12px; background: #d69e2e; color: #fff; font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.15s; text-decoration: none; text-align: center; }
+        .btn-warning:hover { background: #b7791f; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(214,158,46,0.3); }
+        .btn-secondary { padding: 14px 24px; border: 1.5px solid #dce7f5; border-radius: 12px; background: #fff; color: #4a5568; font-family: 'Rubik', sans-serif; font-weight: 500; font-size: 1rem; cursor: pointer; transition: 0.15s; text-decoration: none; text-align: center; }
+        .btn-secondary:hover { background: #f7fafc; border-color: #bee3f8; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h2>⚖️ Ouvrir un litige</h2>
+            <p>En dernier recours, signalez un problème à l'administrateur.</p>
+
+            <div class="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                Le litige sera examiné par l'administrateur qui prendra une décision. Utilisez cette option uniquement si vous ne parvenez pas à résoudre le problème à l'amiable.
+            </div>
+
+            <div class="mission-info">
+                <strong>{{ mission.title }}</strong>
+                <span>Client : {{ mission.client.username }} · Freelance : {{ accepted_app.freelance.username }} · Budget : {{ mission.budget|default:"Non spécifié" }} CFA</span>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Motif du litige <span style="color:#e53e3e;">*</span></label>
+                    <textarea name="reason" placeholder="Décrivez le problème en détail (travail non conforme, retard, non-paiement, etc.)" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Montant concerné (CFA)</label>
+                        <input type="number" name="amount" placeholder="0" min="0" value="{{ mission.budget|default:'0' }}">
+                    </div>
+                </div>
+                <div class="actions">
+                    <a href="{% url 'contracts:mission_detail' mission.id %}" class="btn-secondary"><i class="fas fa-times"></i> Annuler</a>
+                    <button type="submit" class="btn-warning"><i class="fas fa-gavel"></i> Ouvrir le litige</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

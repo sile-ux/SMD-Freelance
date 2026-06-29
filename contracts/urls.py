@@ -20,4 +20,9 @@ urlpatterns = [
     path('devis/<int:devis_id>/pdf/', views.devis_pdf_view, name='devis_pdf'),
     path('factures/clients/', views.client_invoices_view, name='client_invoices'),
     path('noter/', views.submit_review_view, name='submit_review'),
+    path('<int:mission_id>/livrer/', views.mark_delivered_view, name='mark_delivered'),
+    path('<int:mission_id>/approuver/', views.approve_completion_view, name='approve_completion'),
+    path('<int:mission_id>/refuser/', views.reject_delivery_view, name='reject_delivery'),
+    path('<int:mission_id>/debloquer-fonds/', views.release_funds_view, name='release_funds'),
+    path('<int:mission_id>/litige/', views.create_dispute_view, name='create_dispute'),
 ]

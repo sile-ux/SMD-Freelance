@@ -14,13 +14,51 @@
 
         html, body {
             width: 100%; height: 100%; overflow: hidden;
-            font-family: 'Rubik', sans-serif; background: #f0f4f8;
+            font-family: 'Rubik', sans-serif; background: #0b0e1a;
+        }
+
+        .galaxy-bg {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh; overflow: hidden; z-index: 0;
+        }
+        .galaxy-bg .nebula {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25;
+            animation: nebulaDrift 20s ease-in-out infinite alternate;
+        }
+        .galaxy-bg .nebula:nth-child(1) {
+            width: 550px; height: 550px;
+            background: radial-gradient(circle, #a855f7, transparent);
+            top: -8%; right: -8%;
+        }
+        .galaxy-bg .nebula:nth-child(2) {
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, #d946ef, transparent);
+            bottom: -10%; left: -5%;
+            animation-duration: 25s; animation-delay: -6s;
+        }
+        .galaxy-bg .nebula:nth-child(3) {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, #7c3aed, transparent);
+            top: 30%; left: 40%;
+            animation-duration: 22s; animation-delay: -12s;
+        }
+        @keyframes nebulaDrift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, -30px) scale(1.15); }
+        }
+        .galaxy-bg .star {
+            position: absolute; border-radius: 50%; background: #fff;
+            animation: twinkle var(--d) ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: var(--o1, 0.2); transform: scale(0.8); }
+            100% { opacity: var(--o2, 0.9); transform: scale(1.1); }
         }
 
         .register-wrap {
+            position: relative; z-index: 1;
             width: 100vw; height: 100vh; display: flex;
             align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #ebf8ff 0%, #f0f4f8 100%);
             padding: 20px;
         }
 
@@ -469,5 +507,31 @@
         });
     </script>
 
+    <!-- Galaxie de fond -->
+    <div class="galaxy-bg" id="galaxyBg">
+        <div class="nebula"></div>
+        <div class="nebula"></div>
+        <div class="nebula"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('galaxyBg');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = 1 + Math.random() * 2.5;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--d', (2 + Math.random() * 4) + 's');
+                star.style.setProperty('--o1', (0.1 + Math.random() * 0.3));
+                star.style.setProperty('--o2', (0.5 + Math.random() * 0.5));
+                star.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(star);
+            }
+        });
+    </script>
 </body>
 </html>

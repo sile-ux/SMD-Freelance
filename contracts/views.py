@@ -9,6 +9,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 
 from .models import Mission, Application, Contract, Invoice, Devis, Review
+from accounts.models import Dispute, Wallet, Transaction
 from .forms import QuickMissionForm
 from .templatetags.contracts_extras import to_fcfa
 User = get_user_model()
@@ -96,7 +97,16 @@ def create_contract_view(request):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'status': 'success', 'message': 'Mission publiée avec succès !'})
             messages.success(request, "Mission publiée avec succès !")
-    return redirect('contracts:contract_list')
+            return redirect('contracts:contract_list')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            errors = {}
+            for field, err_list in form.errors.items():
+                errors[field] = [str(e) for e in err_list]
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+        return render(request, 'contracts/create-contract.html', {'form': form})
+
+    form = QuickMissionForm()
+    return render(request, 'contracts/create-contract.html', {'form': form})
 
 
 @login_required
@@ -472,6 +482,10 @@ def mission_detail_view(request, pk):
 
     user = request.user
     unread_count = 0
+    accepted_app = None
+    is_assigned_freelance = False
+    existing_dispute = None
+
     if user.is_authenticated:
         from chat.models import Thread, Message
         if user.role == User.Role.FREELANCE.value:
@@ -483,9 +497,21 @@ def mission_detail_view(request, pk):
             for t in user_threads
         )
 
+        accepted_app = mission.applications.filter(status='accepted').first()
+        if accepted_app:
+            is_assigned_freelance = (user == accepted_app.freelance)
+            existing_dispute = Dispute.objects.filter(
+                mission=mission,
+                freelance=accepted_app.freelance,
+                client=mission.client,
+            ).first()
+
     return render(request, 'contracts/mission_detail.html', {
         'mission': mission,
         'unread_count': unread_count,
+        'accepted_app': accepted_app,
+        'is_assigned_freelance': is_assigned_freelance,
+        'existing_dispute': existing_dispute,
     })
 
 
@@ -665,4 +691,257 @@ def submit_review_view(request):
             'comment': review.comment,
         },
     })
+
+
+@login_required
+def mark_delivered_view(request, mission_id):
+    mission = get_object_or_404(Mission, id=mission_id)
+    accepted_app = mission.applications.filter(status='accepted').first()
+
+    if not accepted_app or request.user != accepted_app.freelance:
+        return JsonResponse({'status': 'error', 'message': 'Seul le freelance assigné peut marquer la mission comme livrée.'}, status=403)
+
+    if mission.status != 'in-progress':
+        return JsonResponse({'status': 'error', 'message': 'La mission doit être en cours.'}, status=400)
+
+    if request.method == 'POST':
+        note = request.POST.get('delivery_note', '').strip()
+        mission.delivery_note = note
+        mission.status = 'awaiting_approval'
+        mission.save()
+
+        from chat.models import Thread, Message
+        thread, _ = Thread.objects.get_or_create(
+            client=mission.client,
+            freelance=accepted_app.freelance,
+        )
+        Message.objects.create(
+            thread=thread, sender=accepted_app.freelance,
+            text=f"📦 Mission livrée ! Le freelance a marqué la mission « {mission.title} » comme terminée. Veuillez vérifier le travail et valider la livraison."
+        )
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'Mission marquée comme livrée en attente de validation.'})
+        messages.success(request, 'Mission marquée comme livrée en attente de validation.')
+        return redirect('contracts:mission_detail', pk=mission.id)
+
+    return render(request, 'contracts/mark_delivered.html', {'mission': mission})
+
+
+@login_required
+def approve_completion_view(request, mission_id):
+    mission = get_object_or_404(Mission, id=mission_id)
+
+    if request.user != mission.client:
+        return JsonResponse({'status': 'error', 'message': 'Seul le client peut valider la livraison.'}, status=403)
+
+    if mission.status != 'awaiting_approval':
+        return JsonResponse({'status': 'error', 'message': 'La mission doit être en attente de validation.'}, status=400)
+
+    from django.utils import timezone
+    mission.status = 'completed'
+    mission.completed_at = timezone.now()
+    mission.save()
+
+    accepted_app = mission.applications.filter(status='accepted').first()
+    if accepted_app:
+        from chat.models import Thread, Message
+        thread, _ = Thread.objects.get_or_create(
+            client=mission.client,
+            freelance=accepted_app.freelance,
+        )
+        Message.objects.create(
+            thread=thread, sender=mission.client,
+            text=f"✅ Livraison validée ! La mission « {mission.title} » a été approuvée par le client. En attente du déblocage des fonds par l'administrateur."
+        )
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'message': 'Livraison validée avec succès ! En attente du déblocage des fonds.'})
+    messages.success(request, 'Livraison validée ! En attente du déblocage des fonds.')
+    return redirect('contracts:mission_detail', pk=mission.id)
+
+
+@login_required
+def reject_delivery_view(request, mission_id):
+    mission = get_object_or_404(Mission, id=mission_id)
+
+    if request.user != mission.client:
+        return JsonResponse({'status': 'error', 'message': 'Seul le client peut rejeter la livraison.'}, status=403)
+
+    if mission.status != 'awaiting_approval':
+        return JsonResponse({'status': 'error', 'message': 'La mission doit être en attente de validation.'}, status=400)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '').strip()
+        mission.status = 'in-progress'
+        mission.save()
+
+        accepted_app = mission.applications.filter(status='accepted').first()
+        if accepted_app:
+            from chat.models import Thread, Message
+            thread, _ = Thread.objects.get_or_create(
+                client=mission.client,
+                freelance=accepted_app.freelance,
+            )
+            msg = f"⚠️ Livraison refusée pour la mission « {mission.title} »."
+            if reason:
+                msg += f" Motif : {reason}"
+            Message.objects.create(thread=thread, sender=mission.client, text=msg)
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'Livraison refusée. La mission reprend son cours.'})
+        messages.success(request, 'Livraison refusée.')
+        return redirect('contracts:mission_detail', pk=mission.id)
+
+    return render(request, 'contracts/reject_delivery.html', {'mission': mission})
+
+
+@login_required
+def release_funds_view(request, mission_id):
+    if not (request.user.is_superuser or request.user.role == User.Role.ADMIN.value):
+        return JsonResponse({'status': 'error', 'message': 'Seul l\'administrateur peut débloquer les fonds.'}, status=403)
+
+    from django.utils import timezone
+    from accounts.models import PlatformSettings
+
+    mission = get_object_or_404(Mission, id=mission_id)
+
+    if mission.status != 'completed':
+        return JsonResponse({'status': 'error', 'message': 'La mission doit être terminée.'}, status=400)
+
+    accepted_app = mission.applications.filter(status='accepted').first()
+    if not accepted_app:
+        return JsonResponse({'status': 'error', 'message': 'Aucun freelance assigné à cette mission.'}, status=400)
+
+    freelance = accepted_app.freelance
+    amount = float(mission.budget) if mission.budget else 0
+
+    if amount <= 0:
+        return JsonResponse({'status': 'error', 'message': 'Budget invalide.'}, status=400)
+
+    settings = PlatformSettings.get_instance()
+    commission_rate = float(settings.commission_rate)
+    commission_amount = round(amount * commission_rate / 100, 2)
+    net_amount = round(amount - commission_amount, 2)
+
+    admin_user = User.objects.filter(is_superuser=True).first()
+    if not admin_user:
+        return JsonResponse({'status': 'error', 'message': 'Aucun administrateur trouvé.'}, status=400)
+
+    admin_wallet = Wallet.objects.get_or_create(user=admin_user)[0]
+    if float(admin_wallet.balance) < amount:
+        return JsonResponse({'status': 'error', 'message': 'Fonds insuffisants sur le compte plateforme.'}, status=400)
+
+    admin_wallet.balance -= net_amount
+    admin_wallet.save()
+
+    freelance_wallet = Wallet.objects.get_or_create(user=freelance)[0]
+    freelance_wallet.balance += net_amount
+    freelance_wallet.save()
+
+    Transaction.objects.create(
+        user=freelance,
+        type='transfer',
+        amount=net_amount,
+        fee=commission_amount,
+        method='wallet',
+        status='completed',
+        freelance=freelance,
+        description=f"Libération des fonds (net) pour la mission « {mission.title} » — commission {commission_rate}% déduite",
+    )
+
+    from chat.models import Thread, Message
+    thread, _ = Thread.objects.get_or_create(client=mission.client, freelance=freelance)
+    Message.objects.create(
+        thread=thread, sender=admin_user,
+        text=f"💰 Fonds libérés ! {float(net_amount):,.0f} CFA transférés à {freelance.username} pour « {mission.title} » (commission plateforme de {commission_rate}% : {float(commission_amount):,.0f} CFA)."
+    )
+
+    client_profile = getattr(mission.client, 'client_profile', None)
+    client_email = mission.client.email or ''
+    client_company = client_profile.compagny_name if client_profile and client_profile.compagny_name else ''
+    freelance_profile = getattr(freelance, 'freelance_profile', None)
+
+    Invoice.objects.create(
+        freelance=freelance,
+        mission=mission,
+        application=accepted_app,
+        status='paid',
+        client_name=mission.client.username,
+        client_email=client_email,
+        client_company=client_company,
+        description=f"Prestation de services — {mission.title}",
+        amount=net_amount,
+        tva=0,
+        issue_date=timezone.now().date(),
+        due_date=timezone.now().date(),
+        terms="Paiement effectué via la plateforme SMD-Tech",
+        notes=f"Commission plateforme ({commission_rate}%) : {float(commission_amount):,.0f} CFA. Mission #{mission.id}",
+        freelance_company=freelance_profile.title if freelance_profile else '',
+    )
+
+    try:
+        thread_client, _ = Thread.objects.get_or_create(client=mission.client, freelance=admin_user)
+        Message.objects.create(
+            thread=thread_client, sender=admin_user,
+            text=f"📄 Facture générée automatiquement pour la mission « {mission.title} ». Montant net : {float(net_amount):,.0f} CFA. Commission plateforme ({commission_rate}%) : {float(commission_amount):,.0f} CFA. Merci de votre confiance !"
+        )
+    except Exception:
+        pass
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Fonds libérés : {float(net_amount):,.0f} CFA vers {freelance.username} (commission {commission_rate}% : {float(commission_amount):,.0f} CFA). Facture générée.'
+        })
+    messages.success(request, f'Fonds libérés ! {float(net_amount):,.0f} CFA versés à {freelance.username} — commission de {float(commission_amount):,.0f} CFA prélevée.')
+    return redirect('contracts:mission_detail', pk=mission.id)
+
+
+@login_required
+def create_dispute_view(request, mission_id):
+    mission = get_object_or_404(Mission, id=mission_id)
+    accepted_app = mission.applications.filter(status='accepted').first()
+
+    if not accepted_app:
+        return JsonResponse({'status': 'error', 'message': 'Aucun freelance assigné à cette mission.'}, status=400)
+
+    if request.user != mission.client and request.user != accepted_app.freelance:
+        return JsonResponse({'status': 'error', 'message': 'Seul le client ou le freelance concerné peut ouvrir un litige.'}, status=403)
+
+    existing = Dispute.objects.filter(mission=mission, freelance=accepted_app.freelance, client=mission.client).first()
+    if existing and existing.status != 'resolved':
+        return JsonResponse({'status': 'error', 'message': 'Un litige est déjà ouvert pour cette mission.'}, status=400)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '').strip()
+        amount_str = request.POST.get('amount', '0').strip()
+        amount = float(amount_str) if amount_str else 0
+
+        if not reason or len(reason) < 10:
+            return JsonResponse({'status': 'error', 'message': 'Veuillez décrire le motif du litige (min. 10 caractères).'}, status=400)
+
+        Dispute.objects.create(
+            freelance=accepted_app.freelance,
+            client=mission.client,
+            mission=mission,
+            reason=reason,
+            amount=amount,
+        )
+
+        from chat.models import Thread, Message
+        admin_user = User.objects.filter(is_superuser=True).first()
+        if admin_user:
+            thread, _ = Thread.objects.get_or_create(client=admin_user, freelance=accepted_app.freelance)
+            Message.objects.create(
+                thread=thread, sender=request.user,
+                text=f"⚡ Nouveau litige pour la mission « {mission.title} ». Raison : {reason}"
+            )
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'Litige ouvert avec succès. L\'administrateur va traiter votre demande.'})
+        messages.success(request, 'Litige ouvert avec succès.')
+        return redirect('contracts:mission_detail', pk=mission.id)
+
+    return render(request, 'contracts/create_dispute.html', {'mission': mission, 'accepted_app': accepted_app})
 

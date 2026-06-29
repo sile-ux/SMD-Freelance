@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refuser la livraison - SMD-Freelance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: 'Rubik', sans-serif; background: #f0f4f8; }
+        .wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card { background: #fff; border-radius: 20px; border: 1px solid #dce7f5; padding: 40px; max-width: 560px; width: 100%; box-shadow: 0 4px 20px rgba(66,153,225,0.06); }
+        .card h2 { font-size: 1.4rem; font-weight: 800; color: #c53030; margin-bottom: 6px; }
+        .card p { color: #718096; font-size: 0.9rem; margin-bottom: 24px; }
+        .card .mission-info { background: #fff5f5; border-radius: 10px; padding: 16px; margin-bottom: 24px; border: 1px solid #feb2b2; }
+        .card .mission-info strong { display: block; font-size: 1rem; color: #c53030; margin-bottom: 4px; }
+        .card .mission-info span { font-size: 0.85rem; color: #718096; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.88rem; color: #1a365d; margin-bottom: 6px; }
+        .form-group textarea { width: 100%; padding: 14px 16px; border: 1.5px solid #feb2b2; border-radius: 12px; font-family: 'Rubik', sans-serif; font-size: 0.95rem; resize: vertical; min-height: 120px; transition: 0.15s; background: #fff5f5; }
+        .form-group textarea:focus { border-color: #e53e3e; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(229,62,62,0.08); }
+        .actions { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-danger { flex: 1; padding: 14px; border: none; border-radius: 12px; background: #e53e3e; color: #fff; font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.15s; text-decoration: none; text-align: center; }
+        .btn-danger:hover { background: #c53030; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(229,62,62,0.3); }
+        .btn-secondary { padding: 14px 24px; border: 1.5px solid #dce7f5; border-radius: 12px; background: #fff; color: #4a5568; font-family: 'Rubik', sans-serif; font-weight: 500; font-size: 1rem; cursor: pointer; transition: 0.15s; text-decoration: none; text-align: center; }
+        .btn-secondary:hover { background: #f7fafc; border-color: #bee3f8; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h2>⚠️ Refuser la livraison</h2>
+            <p>Si le travail n'est pas conforme, indiquez les modifications à apporter.</p>
+
+            <div class="mission-info">
+                <strong>{{ mission.title }}</strong>
+                <span>Client : {{ mission.client.username }}</span>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Motif du refus <span style="color:#e53e3e;">*</span></label>
+                    <textarea name="reason" placeholder="Expliquez ce qui ne va pas, ce qui doit être corrigé..." required></textarea>
+                </div>
+                <div class="actions">
+                    <a href="{% url 'contracts:mission_detail' mission.id %}" class="btn-secondary"><i class="fas fa-times"></i> Annuler</a>
+                    <button type="submit" class="btn-danger"><i class="fas fa-undo"></i> Refuser et demander des modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

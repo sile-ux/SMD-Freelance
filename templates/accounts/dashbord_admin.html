@@ -1584,7 +1584,7 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                 <!-- ===== MISSIONS ===== -->
                 <div class="section-page" id="page-missions">
                     <div class="section-head">
-                        <h3>Missions en cours</h3>
+                        <h3>Gestion des missions</h3>
                         <div class="actions">
                             <button class="btn-primary" onclick="openModal('mission')">
                                 <lord-icon src="https://cdn.lordicon.com/yejvhpzw.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px;vertical-align:middle;display:inline-block;"></lord-icon>
@@ -1592,10 +1592,45 @@ window.UNREAD_COUNT = {{ unread_count|default:0 }};
                             </button>
                         </div>
                     </div>
-                    <div style="background:#fff;padding:24px;border-radius:12px;border:1px solid #dce7f5;">
-                        <p style="color:#718096;text-align:center;font-size:0.95rem;">
-                            {{ mission_counts.active }} missions actives · {{ mission_counts.pending }} en attente · {{ mission_counts.completed }} terminées
-                        </p>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;">
+                        <div class="payment-card"><div class="amount">{{ mission_counts.active }}</div><div class="label">Actives</div></div>
+                        <div class="payment-card"><div class="amount">{{ mission_counts.pending }}</div><div class="label">En attente</div></div>
+                        <div class="payment-card"><div class="amount">{{ mission_counts.completed }}</div><div class="label">Terminées</div></div>
+                    </div>
+
+                    <h4 style="margin:18px 0 12px;color:#1a365d;font-size:0.95rem;">Missions terminées — Déblocage des fonds</h4>
+                    <div style="background:#fff;border-radius:12px;border:1px solid #dce7f5;overflow:hidden;">
+                        {% if completed_missions_list %}
+                        <table style="width:100%;border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f7fafc;font-size:0.8rem;color:#718096;text-transform:uppercase;letter-spacing:0.5px;">
+                                    <th style="padding:12px 16px;text-align:left;">Mission</th>
+                                    <th style="padding:12px 16px;text-align:left;">Client</th>
+                                    <th style="padding:12px 16px;text-align:left;">Budget</th>
+                                    <th style="padding:12px 16px;text-align:left;">Terminée le</th>
+                                    <th style="padding:12px 16px;text-align:center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mission in completed_missions_list %}
+                                <tr style="border-top:1px solid #dce7f5;font-size:0.9rem;">
+                                    <td style="padding:12px 16px;color:#1a365d;font-weight:500;">{{ mission.title|truncatechars:40 }}</td>
+                                    <td style="padding:12px 16px;color:#4a5568;">{{ mission.client.username }}</td>
+                                    <td style="padding:12px 16px;color:#4299e1;font-weight:600;">{{ mission.budget|floatformat:0 }} CFA</td>
+                                    <td style="padding:12px 16px;color:#718096;">{{ mission.completed_at|date:"d/m/Y"|default:"-" }}</td>
+                                    <td style="padding:12px 16px;text-align:center;">
+                                        <a href="{% url 'contracts:release_funds' mission.id %}"
+                                           style="background:#d69e2e;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                                            <i class="fas fa-coins"></i> Débloquer
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p style="padding:24px;text-align:center;color:#718096;">Aucune mission terminée en attente de déblocage de fonds.</p>
+                        {% endif %}
                     </div>
                 </div>
 

@@ -75,7 +75,9 @@ class Mission(models.Model):
     STATUS_CHOICES = (
         ('open', 'Ouverte'),
         ('in-progress', 'En cours'),
-        ('closed', 'Terminée'),
+        ('awaiting_approval', 'Livrée - En attente de validation'),
+        ('completed', 'Terminée'),
+        ('closed', 'Fermée'),
         ('cancelled', 'Annulée'),
     )
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='missions_posted', null=True, blank=True)
@@ -93,6 +95,8 @@ class Mission(models.Model):
     urgency = models.CharField(max_length=20, choices=URGENCY_CHOICES, default='low')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     extra_info = models.TextField(verbose_name="Infos supplémentaires", blank=True)
+    delivery_note = models.TextField(verbose_name="Note de livraison", blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
