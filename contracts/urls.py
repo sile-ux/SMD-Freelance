@@ -19,4 +19,5 @@ urlpatterns = [
     path('devis/', views.devis_view, name='devis'),
     path('devis/<int:devis_id>/pdf/', views.devis_pdf_view, name='devis_pdf'),
     path('factures/clients/', views.client_invoices_view, name='client_invoices'),
+    path('noter/', views.submit_review_view, name='submit_review'),
 ]

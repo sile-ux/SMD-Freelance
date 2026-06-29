@@ -967,6 +967,25 @@
                     </div>
                     {% endif %}
                     {% endwith %}
+
+                    {% if m.status == 'closed' %}
+                        {% with apps=m.applications.all %}
+                            {% for app in apps %}
+                                {% if app.status == 'accepted' %}
+                                <div style="border-top:1px solid #eef2f7;padding-top:10px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;">
+                                    <div style="font-size:12px;color:#6b7280;">
+                                        <i class="fas fa-star" style="color:#f59e0b;"></i>
+                                        Noter <strong>{{ app.freelance.username }}</strong>
+                                    </div>
+                                    <button onclick="openRatingModal({{ app.freelance.id }}, {{ m.id }}, '{{ app.freelance.username }}')"
+                                            style="background:#f59e0b;color:#fff;border:none;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
+                                        <i class="fas fa-star"></i> Noter
+                                    </button>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -1327,6 +1346,135 @@
             clearTimeout(t._t);
             t._t = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 3500);
         }
+    </script>
+
+    <!-- Modal de notation -->
+    <div id="ratingModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:20px;padding:30px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:fadeIn 0.3s ease;position:relative;">
+            <button onclick="closeRatingModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;">&times;</button>
+            <div style="text-align:center;">
+                <div style="font-size:40px;margin-bottom:8px;">⭐</div>
+                <div style="font-size:18px;font-weight:700;color:#1a1a2e;">Noter <span id="ratingFreelanceName"></span></div>
+                <div style="font-size:13px;color:#6b7280;margin:4px 0 16px;">Votre avis aide la communauté</div>
+            </div>
+            <form id="ratingForm">
+                {% csrf_token %}
+                <input type="hidden" name="freelance_id" id="ratingFreelanceId">
+                <input type="hidden" name="mission_id" id="ratingMissionId">
+                <input type="hidden" name="rating" id="ratingValue" value="5">
+
+                <div style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:500;color:#374151;margin-bottom:6px;">Note</div>
+                    <div id="starContainer" style="display:flex;gap:6px;justify-content:center;font-size:32px;cursor:pointer;">
+                        <span data-star="1" style="color:#d1d5db;transition:color 0.2s;">★</span>
+                        <span data-star="2" style="color:#d1d5db;transition:color 0.2s;">★</span>
+                        <span data-star="3" style="color:#d1d5db;transition:color 0.2s;">★</span>
+                        <span data-star="4" style="color:#d1d5db;transition:color 0.2s;">★</span>
+                        <span data-star="5" style="color:#f59e0b;transition:color 0.2s;">★</span>
+                    </div>
+                    <div id="ratingLabel" style="font-size:12px;color:#6b7280;margin-top:4px;">Excellent</div>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="font-size:13px;font-weight:500;color:#374151;">Commentaire <span style="font-weight:400;color:#9ca3af;">(optionnel)</span></label>
+                    <textarea name="comment" id="ratingComment" rows="3" placeholder="Partagez votre expérience..."
+                              style="width:100%;margin-top:4px;padding:10px 14px;border:1px solid #e8e8ef;border-radius:12px;font-size:13px;font-family:'Rubik',sans-serif;resize:none;outline:none;"></textarea>
+                </div>
+
+                <button type="submit"
+                        style="width:100%;padding:12px;background:#f59e0b;color:#fff;border:none;border-radius:30px;font-size:15px;font-weight:600;cursor:pointer;">
+                    <i class="fas fa-star"></i> Envoyer la note
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============= NOTATION =============
+        function openRatingModal(freelanceId, missionId, freelanceName) {
+            document.getElementById('ratingFreelanceId').value = freelanceId;
+            document.getElementById('ratingMissionId').value = missionId;
+            document.getElementById('ratingFreelanceName').textContent = freelanceName;
+            document.getElementById('ratingValue').value = 5;
+            document.getElementById('ratingComment').value = '';
+            setStars(5);
+            document.getElementById('ratingModal').style.display = 'flex';
+        }
+
+        function closeRatingModal() {
+            document.getElementById('ratingModal').style.display = 'none';
+        }
+
+        const starLabels = ['', 'Très insuffisant', 'Insuffisant', 'Moyen', 'Bien', 'Excellent'];
+
+        function setStars(n) {
+            const stars = document.querySelectorAll('#starContainer span');
+            stars.forEach((s, i) => {
+                s.style.color = i < n ? '#f59e0b' : '#d1d5db';
+            });
+            document.getElementById('ratingValue').value = n;
+            document.getElementById('ratingLabel').textContent = starLabels[n];
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('#starContainer span');
+            stars.forEach(s => {
+                s.addEventListener('click', function() {
+                    setStars(parseInt(this.dataset.star));
+                });
+                s.addEventListener('mouseenter', function() {
+                    const n = parseInt(this.dataset.star);
+                    stars.forEach((ss, i) => {
+                        ss.style.color = i < n ? '#f59e0b' : '#d1d5db';
+                    });
+                });
+                s.addEventListener('mouseleave', function() {
+                    const current = parseInt(document.getElementById('ratingValue').value);
+                    stars.forEach((ss, i) => {
+                        ss.style.color = i < current ? '#f59e0b' : '#d1d5db';
+                    });
+                });
+            });
+
+            document.getElementById('ratingForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = this;
+                const formData = new FormData(form);
+                formData.append('action', 'rate');
+
+                const btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.textContent = 'Envoi en cours...';
+
+                fetch('{% url "contracts:submit_review" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message, 'success');
+                        closeRatingModal();
+                    } else {
+                        showToast(data.message || 'Erreur', 'error');
+                    }
+                })
+                .catch(err => {
+                    showToast('Erreur réseau', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-star"></i> Envoyer la note';
+                });
+            });
+        });
+
+        // Fermer le modal en cliquant sur l'overlay
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('ratingModal');
+            if (e.target === modal) closeRatingModal();
+        });
     </script>
 
 </body>

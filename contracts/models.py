@@ -134,6 +134,23 @@ class Mission(models.Model):
         return self.title
 
 
+class Review(models.Model):
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews_given')
+    freelance = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews_received')
+    mission = models.ForeignKey(Mission, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
+    rating = models.PositiveSmallIntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')], verbose_name="Note")
+    comment = models.TextField(blank=True, verbose_name="Commentaire")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('client', 'freelance', 'mission')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Note {self.rating}/5 de {self.client.username} pour {self.freelance.username}"
+
+
 # contracts/models.py
 
 class Application(models.Model):

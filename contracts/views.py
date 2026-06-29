@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 
-from .models import Mission, Application, Contract, Invoice, Devis
+from .models import Mission, Application, Contract, Invoice, Devis, Review
 from .forms import QuickMissionForm
 from .templatetags.contracts_extras import to_fcfa
 User = get_user_model()
@@ -597,4 +597,72 @@ def apply_to_mission_view(request, mission_id):
         messages.success(request, f"Candidature envoyée pour '{mission.title}' !")
 
     return redirect('contracts:contract_list')
+
+
+def _update_freelance_rating(freelance_user):
+    """Recalcule la note moyenne du freelance à partir de ses Review."""
+    from django.db.models import Avg
+    from accounts.models import FreelanceProfile
+    avg = Review.objects.filter(freelance=freelance_user).aggregate(Avg('rating'))['rating__avg']
+    profile = getattr(freelance_user, 'freelance_profile', None)
+    if profile:
+        profile.rating = round(avg, 1) if avg else 0.0
+        profile.save(update_fields=['rating'])
+
+
+@login_required
+def submit_review_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée.'}, status=405)
+
+    if request.user.role != 'CLIENT':
+        return JsonResponse({'status': 'error', 'message': 'Seuls les clients peuvent noter.'}, status=403)
+
+    freelance_id = request.POST.get('freelance_id')
+    mission_id = request.POST.get('mission_id')
+    rating = request.POST.get('rating')
+    comment = request.POST.get('comment', '').strip()
+
+    if not all([freelance_id, mission_id, rating]):
+        return JsonResponse({'status': 'error', 'message': 'Champs requis manquants.'}, status=400)
+
+    try:
+        freelance = User.objects.get(id=freelance_id, role='FREELANCE')
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Freelance introuvable.'}, status=404)
+
+    try:
+        rating_val = int(rating)
+        if rating_val < 1 or rating_val > 5:
+            raise ValueError
+    except (ValueError, TypeError):
+        return JsonResponse({'status': 'error', 'message': 'La note doit être entre 1 et 5.'}, status=400)
+
+    mission = get_object_or_404(Mission, id=mission_id, client=request.user)
+
+    if mission.status != 'closed':
+        return JsonResponse({'status': 'error', 'message': 'La mission doit être terminée pour pouvoir noter.'}, status=400)
+
+    has_accepted = mission.applications.filter(freelance=freelance, status='accepted').exists()
+    if not has_accepted:
+        return JsonResponse({'status': 'error', 'message': 'Ce freelance n\'a pas travaillé sur cette mission.'}, status=400)
+
+    review, created = Review.objects.update_or_create(
+        client=request.user,
+        freelance=freelance,
+        mission=mission,
+        defaults={'rating': rating_val, 'comment': comment},
+    )
+
+    _update_freelance_rating(freelance)
+
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Note enregistrée !' if created else 'Note mise à jour !',
+        'review': {
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+        },
+    })
 
